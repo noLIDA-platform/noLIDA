@@ -1,0 +1,22 @@
+.gradient-brand {
+  background: var(--brand-gradient);
+}
+
+.gradient-hero {
+  background: var(--hero-gradient);
+}
+
+.gradient-brand-text {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}

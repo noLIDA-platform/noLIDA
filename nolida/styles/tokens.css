@@ -1,0 +1,32 @@
+:root {
+  /* Brand colors */
+  --brand-primary: #6366f1;
+  --brand-accent-cyan: #22d3ee;
+  --brand-accent-magenta: #d946ef;
+  --brand-gradient: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #d946ef 100%);
+  --hero-gradient: linear-gradient(135deg, #0e7490 0%, #4338ca 50%, #a21caf 100%);
+
+  /* Status colors */
+  --color-error: #dc2626;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
+
+  /* Neutrals */
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #121217;
+  --bg-tertiary: #1b1b22;
+  --border-subtle: #272732;
+  --text-primary: #f3f4f6;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}
