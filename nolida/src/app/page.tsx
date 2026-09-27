@@ -41,6 +41,7 @@ export default function HomePage() {
             lineHeight: 1.1,
             background: "var(--brand-gradient)",
             WebkitBackgroundClip: "text",
+            backgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
         >
