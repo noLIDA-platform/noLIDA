@@ -1,0 +1,21 @@
+.ui-link {
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-standard);
+  cursor: pointer;
+}
+
+.ui-link:hover {
+  text-decoration: underline;
+}
+
+.ui-link--default {
+  color: var(--color-primary);
+}
+
+.ui-link--muted {
+  color: var(--color-text-muted);
+}
+
+.ui-link--muted:hover {
+  color: var(--color-text);
+}

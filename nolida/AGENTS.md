@@ -60,6 +60,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## 5. Scope Constraints
 - In Phase 0: Do NOT create business tables, user tables, or wallet tables.
+- Phase 1 (Complete): Design System, Tokens, UI Primitives, and Icon Library.
 - Do NOT build authentication routes or signup flows until authorized in Phase 3+.
 - Do NOT fabricate environment secrets. Always read from validated environment configurations.
+
 

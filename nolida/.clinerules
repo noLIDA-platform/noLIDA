@@ -1,0 +1,14 @@
+# noLIDA — Coding & Architecture Rules
+
+## 1. System Invariants
+- **Locked Stack**: Next.js 16 (App Router), React 19 Compiler enabled, strict TypeScript, raw `pg` database driver (Supabase pooler).
+- **Styling Architecture**: Plain CSS with CSS variables only. Zero CSS-in-JS, zero Tailwind.
+- **Import Rules**: Use root-relative module paths matching `tsconfig.json` (`"paths": { "*": ["./src/*"] }`), e.g., `import { Button } from "components/ui/Button/Button";`.
+- **CSS Namespacing**: All reusable UI primitives must use `.ui-*` class names with their own `.css` file imported directly.
+- **Zero Runtime Dependencies for Primitives**: UI components and icons must rely strictly on standard CSS, HTML, and React primitives.
+- **Component Directives**: Keep components as Server Components by default. Use `"use client"` ONLY when client hooks (`useState`, `useEffect`), interactive event handlers (`onClick`, `onChange`), or DOM APIs are strictly necessary.
+
+## 2. Token Architecture
+- `styles/tokens.css` is immutable/locked.
+- Extended tokens live in `styles/tokens-ui.css` (imported into `src/app/globals.css`).
+- Never hardcode raw hex values in component CSS; always use CSS variables (`var(--color-primary)`, `var(--space-4)`, `var(--radius-md)`, etc.).
