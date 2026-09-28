@@ -66,3 +66,7 @@ for the `Production` (and `Preview`) environments, then redeploy. Verify with
 `<deployment-url>/api/health` — it must return `{ ok: true, ... }`. If it returns
 `{ ok: false, error: { code: "DB_UNREACHABLE" } }`, the `DATABASE_URL` is missing, wrong,
 or the password is not URL-encoded.
+
+Note: the git repository root is `C:\dev` and the app lives in the `nolida/` subfolder, so the
+Vercel project's **Root Directory** must be set to `nolida` — the repository root has no
+`package.json`.

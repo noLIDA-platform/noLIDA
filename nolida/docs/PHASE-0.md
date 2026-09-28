@@ -1,6 +1,7 @@
 # Phase 0 — Foundation
 
-Status: in progress (code complete locally; pending credentials, build, push, Vercel verification)
+Status: code complete and build-verified locally; pushed to `main` (`cc6f8e8`). Pending: real
+credentials in `.env.local` / Vercel, and the Vercel deployment check.
 
 ## Goal
 
@@ -15,7 +16,8 @@ and no database tables.
 - Next.js 16.3.6 (App Router) scaffolded directly into `C:\dev\nolida` (no nested folder)
 - React 19.2.8 with React Compiler enabled (`reactCompiler: true` in `next.config.ts`,
   `babel-plugin-react-compiler` installed as a dev dependency)
-- TypeScript strict mode, `allowJs: false`, `jsx: preserve`, target ES2022
+- TypeScript strict mode, `allowJs: false`, target ES2022
+- `jsx: react-jsx` — Next.js rewrites the template's `preserve` during `next build`
 - Import alias `@/*` -> `./src/*` (used by all new code)
 - Turbopack is the default bundler in Next.js 16
 
@@ -26,8 +28,9 @@ and no database tables.
 - `.npmrc` — pins the registry to `https://registry.npmjs.org/`
 
 ### Database layer
-- `src/lib/db/client.ts` — singleton `pg` `Pool` (global-scoped outside production),
-  `query<T>()` helper, and `withTransaction()` which wraps work in
+- `src/lib/db/client.ts` — lazily created `pg` `Pool` (`getPool()`, cached on `globalThis` so
+  dev HMR never leaks pools and `next build` never fails on a missing `DATABASE_URL`), plus a
+  `query<T>()` helper and `withTransaction()`, which wraps work in
   BEGIN / COMMIT / ROLLBACK with guaranteed client release
 - SSL enabled with `rejectUnauthorized: false` (required by Supabase poolers)
 - Pool limits: `max: 10`, `idleTimeoutMillis: 30s`, `connectionTimeoutMillis: 10s`
@@ -100,10 +103,24 @@ Every future phase has a home. Empty folders carry `.gitkeep` so git tracks them
 
 ## Verification
 
-- `npm run build` — must succeed with zero errors
-- `npm run dev -- -p 3001` + `curl http://localhost:3001/api/health` — must return `{ ok: true }`
-- `git push` to `https://github.com/noLIDA-platform/noLIDA.git` (`main`)
+- `npm run build` — passes: Next.js 16.3.6 (Turbopack), TypeScript OK, routes `/`,
+  `/_not-found`, `/api/health` (dynamic)
+- `npx tsc --noEmit` and `npm run lint` — both exit 0
+- `npm run dev -- -p 3001` + `curl http://localhost:3001/api/health` — must return `{ ok: true }`.
+  With an empty `DATABASE_URL` it currently returns HTTP 500 and the handled payload
+  `{ ok: false, error: { code: "DB_UNREACHABLE" } }`, which is the expected pre-credential result.
+- `git push` to `https://github.com/noLIDA-platform/noLIDA.git` (`main`) — done (`cc6f8e8`)
 - Vercel production deploy — `<vercel-url>/api/health` must return `{ ok: true }`
+
+## Vercel project settings
+
+The git repository root is `C:\dev` and the app lives in the `nolida/` subfolder, so:
+
+- **Root Directory** must be set to `nolida`; otherwise the build fails because there is no
+  `package.json` at the repository root.
+- Framework preset: Next.js. Leave the build/output commands at their defaults.
+- Add `DATABASE_URL`, `SESSION_SECRET`, `JWT_SECRET`, `NEXT_PUBLIC_APP_URL` and
+  `NEXT_PUBLIC_APP_NAME` to Production (and Preview), then redeploy and request `/api/health`.
 
 ## Out of scope (by instruction)
 
