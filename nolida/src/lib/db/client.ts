@@ -1,41 +1,48 @@
-import { Pool, type PoolClient, type QueryResult, type QueryResultRow } from "pg";
+import { Pool, type QueryResult, type QueryResultRow } from "pg";
 
-let pool: Pool | null = null;
+const globalForPool = globalThis as unknown as {
+  pgPool: Pool | undefined;
+};
 
-export function getPool(): Pool {
-  if (!pool) {
-    const connectionString = process.env.DATABASE_URL;
-    if (!connectionString) {
-      throw new Error("DATABASE_URL environment variable is not defined");
-    }
+function createPool(): Pool {
+  const connectionString = process.env.DATABASE_URL;
 
-    pool = new Pool({
-      connectionString,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-      max: 10,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
-    });
+  if (!connectionString) {
+    throw new Error(
+      "DATABASE_URL is not set. Add it to .env.local (local) and to the Vercel project's environment variables."
+    );
   }
 
-  return pool;
+  return new Pool({
+    connectionString,
+    // Supabase pooler requires TLS; its chain is not in Node's default store.
+    ssl: { rejectUnauthorized: false },
+    max: 10,
+    idleTimeoutMillis: 30_000,
+    connectionTimeoutMillis: 10_000,
+  });
 }
 
-export async function query<R extends QueryResultRow = QueryResultRow>(
+/**
+ * Lazily created so importing this module never throws during `next build`.
+ * The instance is cached on `globalThis` so dev HMR does not leak pools.
+ */
+export function getPool(): Pool {
+  globalForPool.pgPool ??= createPool();
+  return globalForPool.pgPool;
+}
+
+export async function query<T extends QueryResultRow = QueryResultRow>(
   text: string,
   params?: unknown[]
-): Promise<QueryResult<R>> {
-  const p = getPool();
-  return p.query<R>(text, params);
+): Promise<QueryResult<T>> {
+  return getPool().query<T>(text, params as unknown[] | undefined);
 }
 
 export async function withTransaction<T>(
-  fn: (client: PoolClient) => Promise<T>
+  fn: (client: import("pg").PoolClient) => Promise<T>
 ): Promise<T> {
-  const p = getPool();
-  const client = await p.connect();
+  const client = await getPool().connect();
 
   try {
     await client.query("BEGIN");
@@ -46,7 +53,7 @@ export async function withTransaction<T>(
     try {
       await client.query("ROLLBACK");
     } catch (rollbackError) {
-      console.error("Failed to rollback transaction:", rollbackError);
+      console.error("Failed to roll back transaction:", rollbackError);
     }
     throw error;
   } finally {

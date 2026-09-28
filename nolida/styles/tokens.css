@@ -1,32 +1,70 @@
 :root {
-  /* Brand colors */
-  --brand-primary: #6366f1;
-  --brand-accent-cyan: #22d3ee;
-  --brand-accent-magenta: #d946ef;
-  --brand-gradient: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #d946ef 100%);
-  --hero-gradient: linear-gradient(135deg, #0e7490 0%, #4338ca 50%, #a21caf 100%);
+  --color-primary: #6366f1;
+  --color-accent-cyan: #22d3ee;
+  --color-accent-magenta: #d946ef;
+  --color-gradient: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #d946ef 100%);
+  --color-gradient-hero: linear-gradient(135deg, #0e7490 0%, #4338ca 50%, #a21caf 100%);
 
-  /* Status colors */
-  --color-error: #dc2626;
   --color-success: #16a34a;
   --color-warning: #f59e0b;
+  --color-error: #dc2626;
 
-  /* Neutrals */
-  --bg-primary: #0a0a0c;
-  --bg-secondary: #121217;
-  --bg-tertiary: #1b1b22;
-  --border-subtle: #272732;
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --color-text: #0a0a0b;
+  --color-text-muted: #6b7280;
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f9fafb;
+  --color-border: #e5e7eb;
 
-  /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
 
-  /* Radii */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: #fafafa;
+    --color-text-muted: #9ca3af;
+    --color-bg: #0a0a0b;
+    --color-bg-subtle: #18181b;
+    --color-border: #27272a;
+  }
 }
