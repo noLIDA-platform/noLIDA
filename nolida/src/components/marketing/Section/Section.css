@@ -1,0 +1,29 @@
+.mk-section {
+  width: 100%;
+}
+
+.mk-section--default {
+  background-color: transparent;
+}
+
+.mk-section--subtle {
+  background-color: var(--color-bg-subtle);
+}
+
+/* Deep surface taken straight from the app icon's background. */
+.mk-section--navy {
+  background-color: var(--color-navy);
+  color: var(--text-inverse);
+}
+
+.mk-section--sm {
+  padding-block: var(--space-6);
+}
+
+.mk-section--md {
+  padding-block: var(--space-7);
+}
+
+.mk-section--lg {
+  padding-block: var(--space-8);
+}

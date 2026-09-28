@@ -1,15 +1,37 @@
 :root {
-  --color-primary: #6366f1;
-  --color-accent-cyan: #22d3ee;
-  --color-accent-magenta: #d946ef;
-  --color-gradient: linear-gradient(135deg, #22d3ee 0%, #6366f1 50%, #d946ef 100%);
-  --color-gradient-hero: linear-gradient(135deg, #0e7490 0%, #4338ca 50%, #a21caf 100%);
+  /* Brand — derived from the app icon */
+  --color-primary: #6366f1;          /* indigo — center of N gradient */
+  --color-accent-cyan: #22d3ee;      /* bright cyan — top-left of N */
+  --color-accent-violet: #8b5cf6;    /* violet — midpoint of gradient */
+  --color-accent-magenta: #d946ef;   /* bright magenta — bottom-right of N */
+
+  /* Brand gradient — matches the icon's N gradient flow */
+  --color-gradient: linear-gradient(
+    135deg,
+    #22d3ee 0%,
+    #6366f1 40%,
+    #8b5cf6 70%,
+    #d946ef 100%
+  );
+
+  /* Hero gradient — darker version for full-bleed backgrounds */
+  --color-gradient-hero: linear-gradient(
+    135deg,
+    #0e7490 0%,
+    #3730a3 35%,
+    #6d28d9 65%,
+    #a21caf 100%
+  );
+
+  /* Icon background navy — used as the deep surface for dark mode */
+  --color-navy: #0a0e27;             /* matches the icon's square bg */
+  --color-navy-subtle: #0f1535;      /* slightly lighter for cards in dark */
 
   --color-success: #16a34a;
   --color-warning: #f59e0b;
   --color-error: #dc2626;
 
-  --color-text: #0a0a0b;
+  --color-text: #0a0e27;              /* deep navy reads better than pure black */
   --color-text-muted: #6b7280;
   --color-bg: #ffffff;
   --color-bg-subtle: #f9fafb;
@@ -49,12 +71,16 @@
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
+  /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.35);
 
+  /* Motion */
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
 }
@@ -63,8 +89,8 @@
   :root {
     --color-text: #fafafa;
     --color-text-muted: #9ca3af;
-    --color-bg: #0a0a0b;
-    --color-bg-subtle: #18181b;
-    --color-border: #27272a;
+    --color-bg: #0a0e27;             /* matches the icon's navy */
+    --color-bg-subtle: #0f1535;
+    --color-border: #1e2a52;
   }
 }

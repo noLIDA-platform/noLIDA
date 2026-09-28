@@ -96,3 +96,31 @@
 .ui-button--loading {
   cursor: wait;
 }
+
+/* INVERSE VARIANTS — for use on hero/navy surfaces only.
+   Colors derive from --text-inverse so they invert cleanly with the theme. */
+.ui-button--inverse {
+  background-color: var(--text-inverse);
+  color: var(--color-primary);
+  border-color: transparent;
+}
+
+.ui-button--inverse:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.ui-button--outline-inverse {
+  background-color: transparent;
+  color: var(--text-inverse);
+  border-color: color-mix(in srgb, var(--text-inverse) 45%, transparent);
+}
+
+.ui-button--outline-inverse:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--text-inverse) 14%, transparent);
+}
+
+.ui-button--inverse:focus-visible,
+.ui-button--outline-inverse:focus-visible {
+  outline-color: var(--text-inverse);
+}
+

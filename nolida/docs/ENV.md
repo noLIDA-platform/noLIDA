@@ -71,7 +71,7 @@ Run it from a shell where `DATABASE_URL` is exported (or paste the pooler string
 
 | Key | Phase | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SUPPORT_WHATSAPP` | 1+ | Support contact / deep links. |
+| `NEXT_PUBLIC_SUPPORT_WHATSAPP` | 2 | Support contact / deep links. Read by `buildWhatsAppHref()` in `src/lib/support/whatsapp.ts` and rendered by `/for-business` and `/help`. Unset → disabled button. Accepts a full URL or a bare phone number. |
 | `RESEND_API_KEY`, `EMAIL_FROM` | 1+ | Transactional email. |
 | `TERMII_API_KEY`, `TERMII_SENDER_ID` | 1+ | SMS / OTP delivery. |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | 6 | Google sign-in. |

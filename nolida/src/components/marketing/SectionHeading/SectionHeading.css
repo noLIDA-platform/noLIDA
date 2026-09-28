@@ -1,0 +1,30 @@
+.mk-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.mk-heading--center {
+  align-items: center;
+  text-align: center;
+}
+
+.mk-heading--left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.mk-heading__title {
+  max-width: 26ch;
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+}
+
+.mk-heading__subtitle {
+  max-width: 62ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+}

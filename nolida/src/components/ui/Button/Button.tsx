@@ -1,11 +1,18 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { Spinner } from "@/components/ui/Spinner/Spinner";
 import "./Button.css";
 
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "danger"
+  | "inverse"
+  | "outline-inverse";
 export type ButtonSize = "sm" | "md" | "lg";
 
 export interface ButtonProps {
@@ -15,7 +22,11 @@ export interface ButtonProps {
   loading?: boolean;
   fullWidth?: boolean;
   type?: "button" | "submit" | "reset";
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  as?: "button" | "link";
+  href?: string;
+  onClick?: (
+    event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
+  ) => void;
   children: React.ReactNode;
   className?: string;
 }
@@ -27,6 +38,8 @@ export function Button({
   loading = false,
   fullWidth = false,
   type = "button",
+  as = "button",
+  href,
   onClick,
   children,
   className,
@@ -45,12 +58,53 @@ export function Button({
     .filter(Boolean)
     .join(" ");
 
+  if (as === "link") {
+    if (!href) {
+      throw new Error('Button: href is required when as="link".');
+    }
+
+    const handleLinkClick = (
+      event: React.MouseEvent<HTMLAnchorElement>
+    ): void => {
+      if (isDisabled) {
+        event.preventDefault();
+        return;
+      }
+      onClick?.(event);
+    };
+
+    return (
+      <Link
+        href={href}
+        className={classes}
+        aria-disabled={isDisabled ? "true" : undefined}
+        aria-busy={loading ? "true" : undefined}
+        onClick={handleLinkClick}
+      >
+        {loading ? (
+          <>
+            <Spinner size="sm" />
+            <span>{children}</span>
+          </>
+        ) : (
+          children
+        )}
+      </Link>
+    );
+  }
+
+  const handleButtonClick = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ): void => {
+    onClick?.(event);
+  };
+
   return (
     <button
       type={type}
       disabled={isDisabled}
       aria-busy={loading ? "true" : undefined}
-      onClick={onClick}
+      onClick={handleButtonClick}
       className={classes}
     >
       {loading ? (

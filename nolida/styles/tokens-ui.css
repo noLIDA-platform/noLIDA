@@ -36,8 +36,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --tint-default-bg: #18181b;
-    --tint-default-text: #9ca3af;
+    --tint-default-bg: var(--color-bg-subtle); /* navy card surface (#0f1535) */
+    --tint-default-text: var(--color-text-muted);
 
     --tint-success-bg: rgba(22, 163, 74, 0.2);
     --tint-warning-bg: rgba(245, 158, 11, 0.2);

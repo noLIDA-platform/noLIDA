@@ -48,7 +48,8 @@
 
 ## Phase status
 - Phase 0: complete
-- Phase 1: code complete, UI primitives implemented, showcase verified, build/lint/type-check passing
+- Phase 1: complete (UI primitives, design tokens, `/design` showcase)
+- Phase 2: complete (brand tokens, generated brand assets, logo, marketing site)
 
 ## Design System (Phase 1)
 - All colors come from CSS variables in `styles/tokens.css` or `styles/tokens-ui.css`. Never hardcode.
@@ -66,3 +67,24 @@
 - Never run `git init` inside `nolida/` — always commit and push from `C:\dev`
 - Vercel **Root Directory** must be `nolida` (the repo root has no `package.json`)
 - Local port 3000 is taken by Postgres — run dev with `npm run dev -- -p 3001`
+
+## Brand (Phase 2)
+- Brand colors are derived from the app icon (`public/branding/logo-source.jpg`). Never invent new colors.
+- Brand assets are GENERATED, never hand-edited: run `npm run generate:brand` after replacing the source icon.
+- Logo component lives at `src/components/brand/Logo/`. It renders no anchor — wrap it in a `Link` to make it navigable.
+- Wordmark is "noLIDA" (lowercase "no", uppercase "LIDA"), set at `--weight-extrabold` with `-0.03em` tracking.
+- The full gradient (cyan → indigo → violet → magenta) is reserved for the logo, hero backgrounds, step numerals, stat values, and special brand moments.
+- Buttons and daily UI use SOLID `--color-primary`, never the gradient.
+- The `inverse` and `outline-inverse` button variants are the only approved controls on navy/gradient surfaces.
+- Dark mode background is `var(--color-navy)` — matches the icon.
+- Gradient text (StatsRow) must keep a solid `--color-primary` fallback behind `@supports (background-clip: text)`.
+
+## Marketing Site (Phase 2)
+- Public pages live in `src/app/(marketing)/` and inherit its layout.
+- Marketing layout wraps pages with `SiteHeader` + `SiteFooter`.
+- Marketing pages never require authentication.
+- CTA buttons link to `/signup` and `/login`. Those routes are built in Phase 4 — until then they 404 (expected).
+- Compose pages from `src/components/marketing/` section components; do not hand-roll page layouts.
+- Shared page primitives live in `src/app/(marketing)/pages.css` (`.pg-*`); landing-only blocks in `page.css`.
+- WhatsApp support link reads `process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP` via `buildWhatsAppHref()` in `src/lib/support/whatsapp.ts`. If not set, render a disabled button plus an explanation — never a broken link.
+- `/terms` and `/privacy` are placeholders. Never write plausible-sounding legal copy.

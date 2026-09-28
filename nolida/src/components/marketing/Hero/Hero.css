@@ -1,0 +1,66 @@
+.mk-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-block: var(--space-8);
+  background-image: var(--color-gradient-hero);
+  color: var(--text-inverse);
+}
+
+/* Radial vignette: keeps the gradient visible at the edges while darkening
+   the centre band behind the headline for legibility. */
+.mk-hero__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(
+    ellipse 90% 70% at 50% 40%,
+    color-mix(in srgb, var(--color-navy) 55%, transparent) 0%,
+    color-mix(in srgb, var(--color-navy) 20%, transparent) 55%,
+    transparent 100%
+  );
+}
+
+.mk-hero__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+}
+
+.mk-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  border: 1px solid color-mix(in srgb, var(--text-inverse) 30%, transparent);
+  background-color: color-mix(in srgb, var(--text-inverse) 14%, transparent);
+  color: var(--text-inverse);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mk-hero__title {
+  max-width: 22ch;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.03em;
+  color: var(--text-inverse);
+}
+
+.mk-hero__subtitle {
+  max-width: 56ch;
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: color-mix(in srgb, var(--text-inverse) 82%, transparent);
+}
+
+.mk-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-top: var(--space-2);
+}

@@ -32,6 +32,7 @@ import {
   LogoutIcon,
 } from "@/components/ui/Icons";
 import { InteractiveDemo } from "./InteractiveDemo";
+import { Logo } from "@/components/brand/Logo/Logo";
 import "./page.css";
 
 export const metadata: Metadata = {
@@ -368,10 +369,90 @@ export default function DesignPage(): React.JSX.Element {
           </div>
         </section>
 
+        {/* 13. Brand Logo */}
+        <section className="design-section" id="logo">
+          <h2 className="design-section__title">13. Brand Logo</h2>
+          <p className="design-section__desc">
+            <code>&lt;Logo /&gt;</code> from <code>@/components/brand/Logo/</code>. Sizes
+            sm/md/lg, variants default/mono-light/mono-dark.
+          </p>
 
+          <h3 style={{ fontSize: "var(--text-lg)", marginBottom: "var(--space-3)" }}>Sizes</h3>
+          <div className="design-row" style={{ alignItems: "flex-end" }}>
+            <Logo size="sm" />
+            <Logo size="md" />
+            <Logo size="lg" />
+          </div>
 
+          <h3 style={{ fontSize: "var(--text-lg)", margin: "var(--space-6) 0 var(--space-3)" }}>Variants</h3>
+          <div className="design-row">
+            <Logo size="md" variant="default" />
+            <Logo size="md" variant="mono-dark" />
+          </div>
+          <div className="design-swatch-band" style={{ marginTop: "var(--space-4)" }}>
+            <Logo size="md" variant="mono-light" />
+            <Logo size="sm" variant="mono-light" />
+          </div>
 
+          <h3 style={{ fontSize: "var(--text-lg)", margin: "var(--space-6) 0 var(--space-3)" }}>Icon only</h3>
+          <div className="design-row">
+            <Logo size="sm" showWordmark={false} />
+            <Logo size="md" showWordmark={false} />
+            <Logo size="lg" showWordmark={false} />
+          </div>
+        </section>
 
+        {/* 14. Gradients */}
+        <section className="design-section" id="gradients">
+          <h2 className="design-section__title">14. Gradients</h2>
+          <p className="design-section__desc">
+            <code>--color-gradient</code> (brand flow) and{" "}
+            <code>--color-gradient-hero</code> (darkened). Gradients are reserved
+            for brand moments — never for buttons, inputs, or daily UI.
+          </p>
+
+          <h3 style={{ fontSize: "var(--text-lg)", marginBottom: "var(--space-3)" }}>Brand gradient</h3>
+          <div className="design-gradient-band">cyan → indigo → violet → magenta</div>
+
+          <h3 style={{ fontSize: "var(--text-lg)", margin: "var(--space-6) 0 var(--space-3)" }}>Hero gradient</h3>
+          <div className="design-gradient-band design-gradient-band--hero">deep teal → indigo → violet → magenta</div>
+
+          <h3 style={{ fontSize: "var(--text-lg)", margin: "var(--space-6) 0 var(--space-3)" }}>Gradient glow</h3>
+          <div className="design-row">
+            <div className="design-gradient-chip">--shadow-glow</div>
+            <div className="design-gradient-chip design-gradient-chip--radial">radial glow</div>
+          </div>
+        </section>
+
+        {/* 15. Navy surfaces */}
+        <section className="design-section" id="navy">
+          <h2 className="design-section__title">15. Navy Surfaces & Inverse Buttons</h2>
+          <p className="design-section__desc">
+            <code>--color-navy</code> is the icon background and the dark-mode page
+            surface. <code>inverse</code> and <code>outline-inverse</code> button
+            variants are the only approved controls on top of it.
+          </p>
+
+          <div className="design-navy-panel">
+            <p className="design-navy-panel__label" style={{ color: "var(--text-inverse)" }}>
+              --color-navy · #0a0e27
+            </p>
+            <div className="design-row" style={{ marginTop: "var(--space-4)" }}>
+              <Button variant="inverse">Inverse</Button>
+              <Button variant="outline-inverse">Outline inverse</Button>
+              <Button as="link" href="#navy" variant="inverse" size="sm">
+                Inverse link
+              </Button>
+            </div>
+          </div>
+
+          <h3 style={{ fontSize: "var(--text-lg)", margin: "var(--space-6) 0 var(--space-3)" }}>
+            Navy subtle
+          </h3>
+          <div className="design-navy-panel design-navy-panel--subtle">
+            <p className="design-navy-panel__label">--color-navy-subtle · #0f1535</p>
+          </div>
+        </section>
       </Container>
     </main>
   );

@@ -1,0 +1,209 @@
+/* Shared layout primitives for the supporting marketing pages
+   (/about, /how-it-works, /for-business, /pricing, /terms, /privacy, /help).
+   The landing page uses its own page.css. */
+
+.pg-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.pg-prose {
+  max-width: 68ch;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  color: var(--color-text-muted);
+  line-height: var(--leading-relaxed);
+}
+
+.pg-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+.pg-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+.pg-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pg-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background-color: var(--tint-brand-bg);
+  color: var(--color-primary);
+}
+
+.pg-card__title {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+}
+
+.pg-card__text {
+  color: var(--color-text-muted);
+  line-height: var(--leading-relaxed);
+}
+
+.pg-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pg-list__item {
+  position: relative;
+  padding-left: var(--space-5);
+  color: var(--color-text-muted);
+  line-height: var(--leading-relaxed);
+}
+
+.pg-list__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65em;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+}
+
+.pg-list__item--inverse {
+  color: color-mix(in srgb, var(--text-inverse) 80%, transparent);
+}
+
+.pg-list__item--inverse::before {
+  background-color: var(--color-accent-cyan);
+}
+
+/* Worked pricing example */
+.pg-example {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-5);
+}
+
+.pg-example__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-sm);
+}
+
+.pg-example__row:last-child {
+  border-bottom: 0;
+}
+
+.pg-example__label {
+  color: var(--color-text-muted);
+}
+
+.pg-example__value {
+  font-weight: var(--weight-semibold);
+  white-space: nowrap;
+}
+
+.pg-example__row--total .pg-example__label,
+.pg-example__row--total .pg-example__value {
+  color: var(--color-text);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-base);
+}
+
+/* Callout for placeholder / not-yet-final content */
+.pg-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  background-color: var(--tint-warning-bg);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.pg-notice__icon {
+  flex-shrink: 0;
+  color: var(--color-warning);
+}
+
+.pg-faq-group {
+  max-width: 52rem;
+  margin: 0 auto;
+  margin-top: var(--space-6);
+}
+
+.pg-faq-group__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.pg-faq-group + .pg-faq-group {
+  margin-top: var(--space-7);
+}
+
+.pg-faq-accordion {
+  margin-top: var(--space-6);
+}
+
+/* Contact block at the bottom of /help */
+.pg-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.pg-contact__hint {
+  color: var(--color-text-muted);
+}
+
+/* Inverse text helpers used inside navy sections */
+.mk-section--navy .pg-prose,
+.mk-section--navy .pg-card__text,
+.mk-section--navy .pg-faq-group__title {
+  color: color-mix(in srgb, var(--text-inverse) 80%, transparent);
+}
+
+.mk-section--navy .pg-card__title {
+  color: var(--text-inverse);
+}
+
+@media (min-width: 768px) {
+  .pg-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pg-split {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+@media (min-width: 1024px) {
+  .pg-grid--three {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

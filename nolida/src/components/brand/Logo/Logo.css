@@ -1,0 +1,45 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  line-height: var(--leading-none);
+}
+
+.logo__icon {
+  display: block;
+  border-radius: var(--radius-md);
+}
+
+.logo__wordmark {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  line-height: var(--leading-none);
+  white-space: nowrap;
+}
+
+/* Sizes — wordmark scales with the icon */
+.logo--sm .logo__wordmark {
+  font-size: var(--text-base);
+}
+
+.logo--md .logo__wordmark {
+  font-size: var(--text-xl);
+}
+
+.logo--lg .logo__wordmark {
+  font-size: var(--text-3xl);
+}
+
+/* Variants */
+.logo--default .logo__wordmark {
+  color: var(--color-text);
+}
+
+.logo--mono-light .logo__wordmark {
+  color: var(--text-inverse);
+}
+
+.logo--mono-dark .logo__wordmark {
+  color: var(--color-navy);
+}
