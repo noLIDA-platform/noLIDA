@@ -34,6 +34,27 @@ postgresql://postgres.<project-ref>:<password>@aws-1-<region>.pooler.supabase.co
   Supabase pooler requires.
 - Connection limit is `max: 10` per instance. Keep it low on serverless.
 
+### Diagnosing a bad `DATABASE_URL`
+
+`/api/health` collapses every connection problem into `DB_UNREACHABLE`, so read the driver
+error code before touching application code:
+
+| Error code | What it means | What to do |
+| --- | --- | --- |
+| `28P01` `password authentication failed for user "postgres"` | Host, port, project ref and the network path are all correct — only the password is wrong (typo, stale after a rotation, or unencoded special characters). | Rotate/confirm the database password in Supabase (**Project Settings → Database**), then update `.env.local` *and* the Vercel env vars. |
+| `ENOTFOUND` / `getaddrinfo` | Pooler host or region does not match the project. | Copy the string from the dashboard's **Connect** panel instead of typing it. |
+| `ETIMEDOUT` / `ECONNREFUSED` | Outbound network blocked, or the project is paused. | Allow outbound `6543`/`5432`, unpause the project, or fall back to the session pooler on `5432`. |
+
+A quick local probe that prints the real driver error instead of the generic health code:
+
+```powershell
+cd C:\dev\nolida
+node -e "const{Client}=require('pg');const u=new URL(process.env.DATABASE_URL);console.log(u.hostname,u.port,u.username);new Client({connectionString:process.env.DATABASE_URL,ssl:{rejectUnauthorized:false},connectionTimeoutMillis:15000}).query('select 1').then(()=>console.log('CONNECT_OK')).catch(e=>console.log('FAIL',e.code,e.message))"
+```
+
+Run it from a shell where `DATABASE_URL` is exported (or paste the pooler string in place of
+`process.env.DATABASE_URL`).
+
 ## Secrets handling
 
 - Never commit `.env.local`, `.env`, or any `.env*.local` file — `.gitignore` blocks them.
