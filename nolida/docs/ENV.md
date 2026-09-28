@@ -91,3 +91,18 @@ or the password is not URL-encoded.
 Note: the git repository root is `C:\dev` and the app lives in the `nolida/` subfolder, so the
 Vercel project's **Root Directory** must be set to `nolida` — the repository root has no
 `package.json`.
+
+## Editor setup (`tsconfig.json`)
+
+`tsconfig.json` sets `"$schema": "./.vscode/tsconfig.schema.json"`. VS Code resolves a
+relative `$schema` against the document itself, so validation works without network access -
+this machine cannot reach `json.schemastore.org`, which otherwise adds an *"Unable to load
+schema"* entry to the Problems panel. `.vscode/tsconfig.schema.json` is a hand-written subset
+of the schemastore schema, and `.vscode/settings.json` disables schema downloads and pins the
+editor to the workspace TypeScript (`node_modules/typescript/lib`) so that editor diagnostics
+match `npx tsc`.
+
+Do not re-add `"baseUrl"` to `tsconfig.json`: it is deprecated in TypeScript 6/7 (newer editor
+versions report it as an error) and `paths` already resolve relative to the tsconfig file.
+
+`npx tsc --noEmit` is the source of truth for type errors.

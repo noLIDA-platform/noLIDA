@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TypeScript project configuration (local subset)",
+  "description": "Offline stand-in for https://json.schemastore.org/tsconfig. It is referenced from tsconfig.json via its $schema property so that editor validation works without network access; it checks the top-level shape only. Option-level hints come from the TypeScript extension, and the real check is `npx tsc --noEmit`.",
+  "type": "object",
+  "allowComments": true,
+  "allowTrailingCommas": true,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path or URL of the schema used to validate this file."
+    },
+    "extends": {
+      "description": "Path(s) of base tsconfig files to inherit from.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "compilerOptions": {
+      "type": "object",
+      "description": "Compiler options; see https://www.typescriptlang.org/tsconfig for the full list."
+    },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Explicit list of files to include."
+    },
+    "include": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Glob patterns of files to include."
+    },
+    "exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Glob patterns of files to exclude."
+    },
+    "references": {
+      "type": "array",
+      "description": "Project references.",
+      "items": {
+        "type": "object"
+      }
+    },
+    "compileOnSave": {
+      "type": "boolean",
+      "description": "Ask the IDE to compile the project on save."
+    }
+  }
+}
