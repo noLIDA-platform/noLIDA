@@ -12,8 +12,9 @@ Copy-Item .env.example .env.local
 | Key | Purpose |
 | --- | --- |
 | `DATABASE_URL` | Postgres connection string used by `src/lib/db/client.ts`. |
-| `SESSION_SECRET` | Signing key for server-side sessions (used from Phase 1). |
-| `JWT_SECRET` | Signing key for access/refresh tokens (used from Phase 1). |
+| `SESSION_SECRET` | Signing key for server-side sessions (used from persistence/auth phase). |
+| `JWT_SECRET` | Signing key for access/refresh tokens (used from persistence/auth phase). |
+
 | `NEXT_PUBLIC_APP_URL` | Absolute base URL of the deployment. |
 | `NEXT_PUBLIC_APP_NAME` | Public product name. |
 

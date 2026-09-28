@@ -47,10 +47,21 @@
 - Ask before proceeding if anything is unclear. Never guess.
 
 ## Phase status
-- Phase 0: code complete, build/lint/type-check passing, pushed to `main` (`cc6f8e8`) —
-  remaining: real credentials in `.env.local` + Vercel deployment check
+- Phase 0: complete
+- Phase 1: code complete, UI primitives implemented, showcase verified, build/lint/type-check passing
+
+## Design System (Phase 1)
+- All colors come from CSS variables in `styles/tokens.css` or `styles/tokens-ui.css`. Never hardcode.
+- Component primitives live in `src/components/ui/` with their own `.css` file using the `.ui-*` namespace.
+- Zero runtime dependencies for primitives: use standard React and CSS.
+- Keep components as Server Components by default; `"use client"` ONLY when state/interactivity is required.
+- The `/design` route is dev-only and must not be linked from the main application.
+- Brand color is FIXED (#6366F1). Users can only toggle light/dark theme.
+- Gradients are reserved for brand/hero moments, never for standard buttons or form controls.
+- Every component accepts a `className` prop.
 
 ## Repo layout (important)
+
 - Git root is `C:\dev` (repo `noLIDA-platform/noLIDA.git`); the Next.js app lives in `nolida/`
 - Never run `git init` inside `nolida/` — always commit and push from `C:\dev`
 - Vercel **Root Directory** must be `nolida` (the repo root has no `package.json`)

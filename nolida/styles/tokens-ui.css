@@ -1,0 +1,48 @@
+/* styles/tokens-ui.css
+ * Phase 1 — UI Primitive design token extensions.
+ * Extends styles/tokens.css with motion, line-height, text-inverse, and semantic tint tokens.
+ * Does NOT override or shadow tokens already defined in styles/tokens.css.
+ */
+
+:root {
+  /* Motion Tokens */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Typography additions */
+  --leading-none: 1;
+
+  /* Contrast / inverse text */
+  --text-inverse: #ffffff;
+
+  /* Semantic Tints (Badge backgrounds & status fills) */
+  --tint-default-bg: var(--color-bg-subtle);
+  --tint-default-text: var(--color-text-muted);
+
+  --tint-success-bg: rgba(22, 163, 74, 0.1);
+  --tint-success-text: var(--color-success);
+
+  --tint-warning-bg: rgba(245, 158, 11, 0.1);
+  --tint-warning-text: var(--color-warning);
+
+  --tint-error-bg: rgba(220, 38, 38, 0.1);
+  --tint-error-text: var(--color-error);
+
+  --tint-brand-bg: rgba(99, 102, 241, 0.1);
+  --tint-brand-text: var(--color-primary);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tint-default-bg: #18181b;
+    --tint-default-text: #9ca3af;
+
+    --tint-success-bg: rgba(22, 163, 74, 0.2);
+    --tint-warning-bg: rgba(245, 158, 11, 0.2);
+    --tint-error-bg: rgba(220, 38, 38, 0.2);
+    --tint-brand-bg: rgba(99, 102, 241, 0.2);
+  }
+}
+

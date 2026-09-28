@@ -108,5 +108,6 @@ Phase 0 fixes the stack so later phases don't relitigate it.
 - More SQL is written by hand than with an ORM; that is the accepted trade for control.
 - Every API response follows `{ ok: true, data }` / `{ ok: false, error }`, so clients have
   exactly one response shape to handle.
-- No database tables exist yet — Phase 1 owns schema and migrations.
+- No database tables exist yet — database schema and migrations are established in the persistence phase.
+
 
