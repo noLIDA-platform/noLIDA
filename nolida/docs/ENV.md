@@ -99,8 +99,11 @@ relative `$schema` against the document itself, so validation works without netw
 this machine cannot reach `json.schemastore.org`, which otherwise adds an *"Unable to load
 schema"* entry to the Problems panel. `.vscode/tsconfig.schema.json` is a hand-written subset
 of the schemastore schema, and `.vscode/settings.json` disables schema downloads and pins the
-editor to the workspace TypeScript (`node_modules/typescript/lib`) so that editor diagnostics
-match `npx tsc`.
+editor to the workspace TypeScript (`node_modules/typescript/lib` via `js/ts.tsdk.path`) so that
+editor diagnostics match `npx tsc`. The `js/ts.tsdk.*` ids are the current spelling — the
+TypeScript extension deprecates the old `typescript.tsdk` and
+`typescript.enablePromptUseWorkspaceTsdk` names, which now show up as deprecation hints in
+`settings.json`.
 
 Do not re-add `"baseUrl"` to `tsconfig.json`: it is deprecated in TypeScript 6/7 (newer editor
 versions report it as an error) and `paths` already resolve relative to the tsconfig file.
