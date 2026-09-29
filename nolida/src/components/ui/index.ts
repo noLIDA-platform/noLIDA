@@ -9,5 +9,5 @@ export * from "./EmptyState/EmptyState";
 export * from "./Container/Container";
 export * from "./Link/Link";
 
-// Icons
-export * from "./Icons";
+// Icon primitive (Lucide-backed)
+export * from "./Icon/Icon";

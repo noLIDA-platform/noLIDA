@@ -1,7 +1,7 @@
 # Phase 1: Design System & UI Primitives
 
 ## Objective
-Establish the design system foundation, token scale extensions, reusable UI primitive components, SVG icon library, and internal showcase verification route without altering locked Phase 0 assets.
+Establish the design system foundation, token scale extensions, reusable UI primitive components, Lucide-backed icon primitive, and internal showcase verification route without altering locked Phase 0 assets.
 
 ## Delivered Assets
 
@@ -24,9 +24,15 @@ Establish the design system foundation, token scale extensions, reusable UI prim
 - `Container` (Server): Layout boundary in `sm`, `md`, `lg`, and `full` widths.
 - `EmptyState` (Server): Composite primitive with icon slot, title, description, and action button slot.
 
-### 3. Icon Library (`src/components/ui/Icons/`)
-- 20 stroke SVG icons created with consistent 24x24 viewBox, stroke-width 2, and `stroke="currentColor"`.
-- Barrel export file `src/components/ui/Icons/index.ts`.
+### 3. Icon Primitive (`src/components/ui/Icon/`)
+
+The icon system is Lucide-backed: a single `Icon` primitive (`src/components/ui/Icon/Icon.tsx`)
+renders a caller-supplied Lucide icon (`as`) at one stroke weight (`1.75`) and one
+sizing convention (`size`, default 24). Icons are decorative (`aria-hidden`) unless
+an `ariaLabel` is supplied, and the `/design` route showcases the 20 Lucide icons
+the system uses (House, Search, CirclePlus, MessageSquare, User, Bell,
+ShoppingCart, Heart, Share2, MessageCircle, Bookmark, Settings, ChevronRight,
+ChevronDown, Check, X, CircleAlert, Wallet, Store, LogOut) rendered through `Icon`.
 
 ### 4. Showcase Verification Route (`src/app/design/`)
 - Internal dev route at `/design` rendering all 12 design system sections:

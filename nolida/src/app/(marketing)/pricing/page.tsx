@@ -4,8 +4,9 @@ import { Section } from "@/components/marketing/Section/Section";
 import { SectionHeading } from "@/components/marketing/SectionHeading/SectionHeading";
 import { Accordion } from "@/components/marketing/Accordion/Accordion";
 import { CtaSection } from "@/components/marketing/CtaSection/CtaSection";
+import { User, Store } from "lucide-react";
 import { Card } from "@/components/ui/Card/Card";
-import { UserIcon, StoreIcon } from "@/components/ui/Icons";
+import { Icon } from "@/components/ui/Icon/Icon";
 import "../pages.css";
 
 export const metadata: Metadata = {
@@ -64,7 +65,7 @@ export default function PricingPage() {
         <div className="pg-grid">
           <Card className="pg-card">
             <span className="pg-card__icon" aria-hidden="true">
-              <UserIcon size={22} />
+              <Icon as={User} size={22} />
             </span>
             <h3 className="pg-card__title">For customers</h3>
             <p className="pg-card__text">
@@ -75,7 +76,7 @@ export default function PricingPage() {
           </Card>
           <Card className="pg-card">
             <span className="pg-card__icon" aria-hidden="true">
-              <StoreIcon size={22} />
+              <Icon as={Store} size={22} />
             </span>
             <h3 className="pg-card__title">For businesses</h3>
             <p className="pg-card__text">

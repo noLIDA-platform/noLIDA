@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/marketing/Hero/Hero";
 import { Section } from "@/components/marketing/Section/Section";
+import { CircleAlert } from "lucide-react";
 import { SectionHeading } from "@/components/marketing/SectionHeading/SectionHeading";
-import { AlertIcon } from "@/components/ui/Icons";
+import { Icon } from "@/components/ui/Icon/Icon";
 import "../pages.css";
 
 export const metadata: Metadata = {
@@ -43,7 +44,7 @@ export default function PrivacyPage() {
 
           <p className="pg-notice" role="note">
             <span className="pg-notice__icon" aria-hidden="true">
-              <AlertIcon size={20} />
+              <Icon as={CircleAlert} size={20} />
             </span>
             <span>
               <strong>Placeholder — not legal text.</strong> This page is a

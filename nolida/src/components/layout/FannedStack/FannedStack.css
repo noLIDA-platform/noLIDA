@@ -18,9 +18,11 @@
   position: relative;
   width: 100%;
   /* The cards are absolutely positioned, so the container needs its own
-     height. A rotated card is taller than its aspect ratio alone implies
-     (~38% taller at 13deg), so the ratio is deliberately generous. */
-  aspect-ratio: 1.75 / 1;
+     height. Each card is a 4x-tall portrait crop of a 1664x928 screenshot
+     (aspect 1664/3712), and a rotated card is taller than its aspect ratio
+     alone implies (~10% taller at 13deg), so the ratio is deliberately
+     generous. */
+  aspect-ratio: 0.82 / 1;
   padding-block: var(--space-2);
   display: block;
 }
@@ -32,6 +34,10 @@
     (100% - var(--fanned-card-w)) * var(--fan-index) / 3
   );
   width: var(--fanned-card-w);
+  /* Cards are 4x taller than the 1664x928 screenshot they crop
+     (1664/3712), so the crop keeps the full width and shows the tall
+     centre band of the image. */
+  aspect-ratio: 1664 / 3712;
   /* Center the card on the container's midline, then apply the fan rotation
      and the outer cards' lift. */
   transform: translateY(-50%) translateY(calc(var(--fan-lift) * 1% * var(--fanned-lift-scale)))
@@ -50,8 +56,12 @@
 
 .fanned-stack__image {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
+  /* Fill the 4x-tall portrait card from the 16:9 screenshot without
+     distortion: keep the full width, crop top and bottom evenly. */
+  object-fit: cover;
+  object-position: center;
   /* Nothing interactive lives in a screenshot — never let a drag or a
      long-press turn one into a gesture target. */
   pointer-events: none;
@@ -78,7 +88,7 @@
   --fanned-rotate-scale: 0.72;
   --fanned-lift-scale: 0.6;
   --fanned-shadow: var(--shadow-md);
-  aspect-ratio: 2 / 1;
+  aspect-ratio: 0.9 / 1;
   padding-block: 0;
 }
 
@@ -88,7 +98,7 @@
     --fanned-card-w: 38%;
     --fanned-rotate-scale: 0.7;
     --fanned-lift-scale: 0.5;
-    aspect-ratio: 2.1 / 1;
+    aspect-ratio: 0.95 / 1;
   }
 }
 

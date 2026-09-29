@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { Heart, Search, User } from "lucide-react";
 import { Hero } from "@/components/marketing/Hero/Hero";
 import { Section } from "@/components/marketing/Section/Section";
 import { SectionHeading } from "@/components/marketing/SectionHeading/SectionHeading";
 import { CtaSection } from "@/components/marketing/CtaSection/CtaSection";
 import { Card } from "@/components/ui/Card/Card";
-import { HeartIcon, SearchIcon, UserIcon } from "@/components/ui/Icons";
+import { Icon } from "@/components/ui/Icon/Icon";
 import "../pages.css";
 
 export const metadata: Metadata = {
@@ -15,17 +16,17 @@ export const metadata: Metadata = {
 
 const BELIEFS: readonly { icon: React.ReactNode; title: string; text: string }[] = [
   {
-    icon: <SearchIcon size={22} />,
+    icon: <Icon as={Search} size={22} />,
     title: "Simplicity",
     text: "Finding work and hiring help should take minutes, not days. Every screen in noLIDA is built to be obvious.",
   },
   {
-    icon: <HeartIcon size={22} />,
+    icon: <Icon as={Heart} size={22} />,
     title: "Trust",
     text: "Verified businesses, transparent prices, and payments that only move when both sides agree.",
   },
   {
-    icon: <UserIcon size={22} />,
+    icon: <Icon as={User} size={22} />,
     title: "Opportunity",
     text: "We want the small business down the road to have the same reach as the biggest name in the country.",
   },

@@ -11,27 +11,28 @@ import { Spinner } from "@/components/ui/Spinner/Spinner";
 import { Link } from "@/components/ui/Link/Link";
 import { EmptyState } from "@/components/ui/EmptyState/EmptyState";
 import {
-  HomeIcon,
-  SearchIcon,
-  PlusCircleIcon,
-  MessageIcon,
-  UserIcon,
-  BellIcon,
-  CartIcon,
-  HeartIcon,
-  ShareIcon,
-  CommentIcon,
-  BookmarkIcon,
-  SettingsIcon,
-  ChevronRightIcon,
-  ChevronDownIcon,
-  CheckIcon,
-  XIcon,
-  AlertIcon,
-  WalletIcon,
-  StoreIcon,
-  LogoutIcon,
-} from "@/components/ui/Icons";
+  House,
+  Search,
+  CirclePlus,
+  MessageSquare,
+  User,
+  Bell,
+  ShoppingCart,
+  Heart,
+  Share2,
+  MessageCircle,
+  Bookmark,
+  Settings,
+  ChevronRight,
+  ChevronDown,
+  Check,
+  X,
+  CircleAlert,
+  Wallet,
+  Store,
+  LogOut,
+} from "lucide-react";
+import { Icon } from "@/components/ui/Icon/Icon";
 import { InteractiveDemo } from "./InteractiveDemo";
 import { Logo } from "@/components/brand/Logo/Logo";
 import "./page.css";
@@ -49,7 +50,7 @@ export default function DesignPage(): React.JSX.Element {
       <Container size="lg">
         {/* Dev only banner */}
         <div className="design-banner">
-          <AlertIcon size={18} />
+          <Icon as={CircleAlert} size={18} />
           <span>
             <strong>Dev-Only Showcase:</strong> This route is for internal design token and UI primitive verification. It is not linked anywhere in the consumer navigation.
           </span>
@@ -324,31 +325,31 @@ export default function DesignPage(): React.JSX.Element {
           </div>
         </section>
 
-        {/* 11. Icon Set (20 icons) */}
+        {/* 11. Icon Set (20 Lucide icons, rendered through the Icon primitive) */}
         <section className="design-section" id="icons">
-          <h2 className="design-section__title">11. Icon Set (20 SVG Stroke Icons)</h2>
-          <p className="design-section__desc">24x24 viewBox, stroke-width 2, inherits current text color.</p>
+          <h2 className="design-section__title">11. Icon Set (20 Lucide Icons)</h2>
+          <p className="design-section__desc">Rendered through the Icon primitive at stroke-width 1.75, inherits current text color.</p>
           <div className="design-grid-icons">
-            <div className="design-icon-card"><HomeIcon size={24} /><span className="design-icon-name">HomeIcon</span></div>
-            <div className="design-icon-card"><SearchIcon size={24} /><span className="design-icon-name">SearchIcon</span></div>
-            <div className="design-icon-card"><PlusCircleIcon size={24} /><span className="design-icon-name">PlusCircleIcon</span></div>
-            <div className="design-icon-card"><MessageIcon size={24} /><span className="design-icon-name">MessageIcon</span></div>
-            <div className="design-icon-card"><UserIcon size={24} /><span className="design-icon-name">UserIcon</span></div>
-            <div className="design-icon-card"><BellIcon size={24} /><span className="design-icon-name">BellIcon</span></div>
-            <div className="design-icon-card"><CartIcon size={24} /><span className="design-icon-name">CartIcon</span></div>
-            <div className="design-icon-card"><HeartIcon size={24} /><span className="design-icon-name">HeartIcon</span></div>
-            <div className="design-icon-card"><ShareIcon size={24} /><span className="design-icon-name">ShareIcon</span></div>
-            <div className="design-icon-card"><CommentIcon size={24} /><span className="design-icon-name">CommentIcon</span></div>
-            <div className="design-icon-card"><BookmarkIcon size={24} /><span className="design-icon-name">BookmarkIcon</span></div>
-            <div className="design-icon-card"><SettingsIcon size={24} /><span className="design-icon-name">SettingsIcon</span></div>
-            <div className="design-icon-card"><ChevronRightIcon size={24} /><span className="design-icon-name">ChevronRightIcon</span></div>
-            <div className="design-icon-card"><ChevronDownIcon size={24} /><span className="design-icon-name">ChevronDownIcon</span></div>
-            <div className="design-icon-card"><CheckIcon size={24} /><span className="design-icon-name">CheckIcon</span></div>
-            <div className="design-icon-card"><XIcon size={24} /><span className="design-icon-name">XIcon</span></div>
-            <div className="design-icon-card"><AlertIcon size={24} /><span className="design-icon-name">AlertIcon</span></div>
-            <div className="design-icon-card"><WalletIcon size={24} /><span className="design-icon-name">WalletIcon</span></div>
-            <div className="design-icon-card"><StoreIcon size={24} /><span className="design-icon-name">StoreIcon</span></div>
-            <div className="design-icon-card"><LogoutIcon size={24} /><span className="design-icon-name">LogoutIcon</span></div>
+            <div className="design-icon-card"><Icon as={House} size={24} /><span className="design-icon-name">House</span></div>
+            <div className="design-icon-card"><Icon as={Search} size={24} /><span className="design-icon-name">Search</span></div>
+            <div className="design-icon-card"><Icon as={CirclePlus} size={24} /><span className="design-icon-name">CirclePlus</span></div>
+            <div className="design-icon-card"><Icon as={MessageSquare} size={24} /><span className="design-icon-name">MessageSquare</span></div>
+            <div className="design-icon-card"><Icon as={User} size={24} /><span className="design-icon-name">User</span></div>
+            <div className="design-icon-card"><Icon as={Bell} size={24} /><span className="design-icon-name">Bell</span></div>
+            <div className="design-icon-card"><Icon as={ShoppingCart} size={24} /><span className="design-icon-name">ShoppingCart</span></div>
+            <div className="design-icon-card"><Icon as={Heart} size={24} /><span className="design-icon-name">Heart</span></div>
+            <div className="design-icon-card"><Icon as={Share2} size={24} /><span className="design-icon-name">Share2</span></div>
+            <div className="design-icon-card"><Icon as={MessageCircle} size={24} /><span className="design-icon-name">MessageCircle</span></div>
+            <div className="design-icon-card"><Icon as={Bookmark} size={24} /><span className="design-icon-name">Bookmark</span></div>
+            <div className="design-icon-card"><Icon as={Settings} size={24} /><span className="design-icon-name">Settings</span></div>
+            <div className="design-icon-card"><Icon as={ChevronRight} size={24} /><span className="design-icon-name">ChevronRight</span></div>
+            <div className="design-icon-card"><Icon as={ChevronDown} size={24} /><span className="design-icon-name">ChevronDown</span></div>
+            <div className="design-icon-card"><Icon as={Check} size={24} /><span className="design-icon-name">Check</span></div>
+            <div className="design-icon-card"><Icon as={X} size={24} /><span className="design-icon-name">X</span></div>
+            <div className="design-icon-card"><Icon as={CircleAlert} size={24} /><span className="design-icon-name">CircleAlert</span></div>
+            <div className="design-icon-card"><Icon as={Wallet} size={24} /><span className="design-icon-name">Wallet</span></div>
+            <div className="design-icon-card"><Icon as={Store} size={24} /><span className="design-icon-name">Store</span></div>
+            <div className="design-icon-card"><Icon as={LogOut} size={24} /><span className="design-icon-name">LogOut</span></div>
           </div>
         </section>
 
@@ -357,7 +358,7 @@ export default function DesignPage(): React.JSX.Element {
           <h2 className="design-section__title">12. Composite Primitives & Interactive Test</h2>
           <Card variant="default">
             <EmptyState
-              icon={<StoreIcon size={44} />}
+              icon={<Icon as={Store} size={44} />}
               title="No Listings Found"
               description="Your shop is currently empty. Create your first product listing to start selling across the marketplace."
               action={<Button variant="primary">Create First Listing</Button>}

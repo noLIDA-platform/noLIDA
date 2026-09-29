@@ -48,21 +48,25 @@ All primitives live under `src/components/ui/` with modular scoped CSS files fol
 
 ## 3. Icon System
 
-20 inline SVG stroke icons located in `src/components/ui/Icons/`:
-- `HomeIcon`, `SearchIcon`, `PlusCircleIcon`, `MessageIcon`, `UserIcon`
-- `BellIcon`, `CartIcon`, `HeartIcon`, `ShareIcon`, `CommentIcon`
-- `BookmarkIcon`, `SettingsIcon`, `ChevronRightIcon`, `ChevronDownIcon`, `CheckIcon`
-- `XIcon`, `AlertIcon`, `WalletIcon`, `StoreIcon`, `LogoutIcon`
+The icon system is Lucide-backed: one `Icon` primitive in `src/components/ui/Icon/`
+renders a caller-supplied Lucide icon (`as`) at a single stroke weight (`1.75`)
+and a single sizing convention (`size`, default 24):
 
-Each icon conforms to the `IconProps` contract:
 ```typescript
 export interface IconProps {
+  as: LucideIcon; // e.g. Search, ShoppingCart, CircleAlert
   size?: number; // default: 24
+  strokeWidth?: number; // default: 1.75 — the design-system standard
   className?: string;
-  "aria-hidden"?: boolean; // default: true
+  ariaLabel?: string; // omit for decorative icons (aria-hidden="true")
 }
 ```
-All icons inherit `stroke="currentColor"` and utilize stroke-width 2 with rounded caps and joins.
+
+The `/design` route showcases the 20 Lucide icons the system uses — `House`,
+`Search`, `CirclePlus`, `MessageSquare`, `User`, `Bell`, `ShoppingCart`, `Heart`,
+`Share2`, `MessageCircle`, `Bookmark`, `Settings`, `ChevronRight`, `ChevronDown`,
+`Check`, `X`, `CircleAlert`, `Wallet`, `Store`, `LogOut` — all rendered through
+`Icon`, so every icon in the app shares one stroke weight and one sizing rule.
 
 ---
 
@@ -86,23 +90,11 @@ All icons inherit `stroke="currentColor"` and utilize stroke-width 2 with rounde
 
 ---
 
-## 3. Icon System
+## 3. Icon System (duplicate — see above; kept for anchor stability)
 
-20 inline SVG stroke icons located in `src/components/ui/Icons/`:
-- `HomeIcon`, `SearchIcon`, `PlusCircleIcon`, `MessageIcon`, `UserIcon`
-- `BellIcon`, `CartIcon`, `HeartIcon`, `ShareIcon`, `CommentIcon`
-- `BookmarkIcon`, `SettingsIcon`, `ChevronRightIcon`, `ChevronDownIcon`, `CheckIcon`
-- `XIcon`, `AlertIcon`, `WalletIcon`, `StoreIcon`, `LogoutIcon`
-
-Each icon conforms to the `IconProps` contract:
-```typescript
-export interface IconProps {
-  size?: number; // default: 24
-  className?: string;
-  "aria-hidden"?: boolean; // default: true
-}
-```
-All icons inherit `stroke="currentColor"` and utilize stroke-width 2 with rounded caps and joins.
+Same as §3 above: the Lucide-backed `Icon` primitive (`src/components/ui/Icon/`)
+is the only icon API. The `/design` route showcases the 20 Lucide icons the
+system uses, all rendered through `Icon` at stroke-width 1.75.
 
 ---
 

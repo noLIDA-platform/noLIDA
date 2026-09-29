@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import { Logo } from "@/components/brand/Logo/Logo";
 import { Button } from "@/components/ui/Button/Button";
 import { Link as UiLink } from "@/components/ui/Link/Link";
-import { XIcon } from "@/components/ui/Icons";
+import { Icon } from "@/components/ui/Icon/Icon";
 import "./SiteHeader.css";
 
 interface NavItem {
@@ -153,7 +154,7 @@ export default function SiteHeader() {
                 aria-label="Close menu"
                 onClick={() => setMenuOpen(false)}
               >
-                <XIcon size={20} />
+                <Icon as={X} size={20} />
               </button>
             </div>
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
-import { ChevronDownIcon } from "@/components/ui/Icons";
+import { ChevronDown } from "lucide-react";
+import { Icon } from "@/components/ui/Icon/Icon";
 import "./Accordion.css";
 
 export interface AccordionItem {
@@ -61,7 +62,8 @@ export function Accordion({
                 onClick={() => toggle(index)}
               >
                 <span className="mk-accordion__question">{item.question}</span>
-                <ChevronDownIcon
+                <Icon
+                  as={ChevronDown}
                   size={20}
                   className={`mk-accordion__chevron${isOpen ? " mk-accordion__chevron--open" : ""}`}
                 />

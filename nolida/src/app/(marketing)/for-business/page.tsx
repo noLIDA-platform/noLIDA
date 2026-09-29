@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { Bell, Check, Wallet } from "lucide-react";
 import { Hero } from "@/components/marketing/Hero/Hero";
 import { Section } from "@/components/marketing/Section/Section";
 import { SectionHeading } from "@/components/marketing/SectionHeading/SectionHeading";
 import { StepsSection } from "@/components/marketing/StepsSection/StepsSection";
 import { Card } from "@/components/ui/Card/Card";
 import { Button } from "@/components/ui/Button/Button";
-import { BellIcon, CheckIcon, WalletIcon } from "@/components/ui/Icons";
+import { Icon } from "@/components/ui/Icon/Icon";
 import { buildWhatsAppHref } from "@/lib/support/whatsapp";
 import "../pages.css";
 
@@ -17,17 +18,17 @@ export const metadata: Metadata = {
 
 const WHY_POINTS: readonly { icon: React.ReactNode; title: string; text: string }[] = [
   {
-    icon: <BellIcon size={22} />,
+    icon: <Icon as={Bell} size={22} />,
     title: "Requests that fit you",
     text: "See the jobs people near you actually need done, and respond to the ones you can handle.",
   },
   {
-    icon: <CheckIcon size={22} />,
+    icon: <Icon as={Check} size={22} />,
     title: "Bookings you control",
     text: "Agree the time, confirm the scope, and keep every job in one place instead of scattered notebooks.",
   },
   {
-    icon: <WalletIcon size={22} />,
+    icon: <Icon as={Wallet} size={22} />,
     title: "Paid on time",
     text: "Customers pay inside noLIDA, and payouts land in your wallet without chasing anyone.",
   },
