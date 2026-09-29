@@ -1,0 +1,26 @@
+/* Auth route group — shell shared by every screen in (auth).
+ *
+ * `--auth-chrome-h` is the single source of truth for the SlimTopBar height:
+ * SlimTopBar consumes it, and AuthSplitShell subtracts it from 100dvh so the
+ * split fills exactly the remaining viewport with no page scroll.
+ */
+
+.auth-shell {
+  --auth-chrome-h: 56px;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background-color: var(--color-bg);
+}
+
+.auth-shell__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.auth-shell__main > * {
+  flex: 1;
+}

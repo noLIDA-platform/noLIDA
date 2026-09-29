@@ -47,9 +47,13 @@
 - Ask before proceeding if anything is unclear. Never guess.
 
 ## Phase status
-- Phase 0: complete
+- Phase 0: complete (scaffold, env, health route)
 - Phase 1: complete (UI primitives, design tokens, `/design` showcase)
 - Phase 2: complete (brand tokens, generated brand assets, logo, marketing site)
+- Phase 3: **not started** — database schema, migrations, RLS and repositories were never built. There is no `src/lib/server/`.
+- Phase 4: **not started** — auth API, session, bcrypt hashing and Route Handlers were never built.
+- Phase 4B: complete (auth UI, frontend only — see `docs/PHASE-4B.md`)
+- Phase 5+: not started
 
 ## Design System (Phase 1)
 - All colors come from CSS variables in `styles/tokens.css` or `styles/tokens-ui.css`. Never hardcode.
@@ -83,8 +87,8 @@
 - Public pages live in `src/app/(marketing)/` and inherit its layout.
 - Marketing layout wraps pages with `SiteHeader` + `SiteFooter`.
 - Marketing pages never require authentication.
-- CTA buttons link to `/signup` and `/login`. Those routes are built in Phase 4 — until then they 404 (expected).
+- CTA buttons link to `/signup` and `/login`. Both routes now exist: `/signup` renders, `/login` redirects to `/` (Phase 4B).
 - Compose pages from `src/components/marketing/` section components; do not hand-roll page layouts.
-- Shared page primitives live in `src/app/(marketing)/pages.css` (`.pg-*`); landing-only blocks in `page.css`.
+- Shared page primitives live in `src/app/(marketing)/pages.css` (`.pg-*`). There is no landing page since Phase 4B, so `page.css` is gone.
 - WhatsApp support link reads `process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP` via `buildWhatsAppHref()` in `src/lib/support/whatsapp.ts`. If not set, render a disabled button plus an explanation — never a broken link.
 - `/terms` and `/privacy` are placeholders. Never write plausible-sounding legal copy.

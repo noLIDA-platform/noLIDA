@@ -1,0 +1,6 @@
+/* VerifyForm — the form body inside AuthPanel. */
+.verify-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}

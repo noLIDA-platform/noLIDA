@@ -1,0 +1,80 @@
+/* SlimTopBar — 56px bar above the auth split. */
+.slim-top-bar {
+  position: relative;
+  z-index: 10;
+  /* Kept in sync with the `--auth-chrome-h` that AuthSplitShell subtracts. */
+  height: var(--auth-chrome-h, 56px);
+  background-color: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.slim-top-bar__inner {
+  height: 100%;
+  padding-inline: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.slim-top-bar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.slim-top-bar__brand:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+/* Wordmark is set here rather than reusing Logo's, so the bar can use the
+   compact icon-only lockup and keep the exact type treatment. */
+.slim-top-bar__wordmark {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+  line-height: var(--leading-none);
+}
+
+.slim-top-bar__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  /* Pushes the nav and the CTA apart on wide screens. */
+  margin-inline: auto;
+}
+
+.slim-top-bar__cta {
+  flex-shrink: 0;
+}
+
+/* Only one CTA is shown at a time — the other is removed from the box tree
+   with `display: none`, so it is skipped by Tab and by screen readers. */
+.slim-top-bar__cta--narrow {
+  display: none;
+}
+
+/* Below 768px the link row is dropped and the CTA takes over the marketing
+   path, because this screen has no site footer to fall back on. */
+@media (max-width: 767px) {
+  .slim-top-bar__inner {
+    padding-inline: var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .slim-top-bar__nav {
+    display: none;
+  }
+
+  .slim-top-bar__cta--wide {
+    display: none;
+  }
+
+  .slim-top-bar__cta--narrow {
+    display: inline-flex;
+  }
+}

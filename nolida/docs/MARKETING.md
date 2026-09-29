@@ -35,7 +35,7 @@ Both use the marketing components below; neither reaches into `src/lib/server`.
 
 | Route | Purpose | Key blocks |
 |---|---|---|
-| `/` | Landing page. The single page that has to sell the product in 20 seconds. | Hero, FeatureGrid, StepsSection, navy business split, StatsRow, trust cards, CtaSection |
+| `/` | **Sign-in screen since Phase 4B.** Was the marketing landing page. | AuthSplitShell (FannedStack + HeroBlock), LoginForm |
 | `/about` | What noLIDA is and what we believe. | Hero, 5-paragraph prose, 3 belief cards, CtaSection |
 | `/how-it-works` | Two journeys: for customers, and for businesses getting listed. | Hero, StepsSection ×2 (4 steps, 5 steps), navy recap, CtaSection to `/help` |
 | `/for-business` | The pitch for business owners, plus fees and how to get listed. | Hero, 3 "why" cards, 5-step listing flow, two fee cards, navy contact block |
@@ -122,8 +122,6 @@ variants are unchanged, so `/design` renders exactly as before.
 
 ## Page styles
 
-- `src/app/(marketing)/page.css` — landing-only blocks (business split, trust
-  cards). Imported by `page.tsx` only.
 - `src/app/(marketing)/pages.css` — shared `.pg-*` primitives used by the seven
   supporting pages (prose, card grids, bullet lists, worked-example rows,
   notice callout, FAQ groups, contact block).

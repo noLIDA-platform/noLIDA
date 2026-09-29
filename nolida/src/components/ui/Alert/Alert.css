@@ -1,0 +1,28 @@
+/* Alert — inline message banner. Colours come from the semantic tint tokens
+   in tokens-ui.css, so dark mode is handled there, not here. */
+.ui-alert {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+}
+
+.ui-alert--error {
+  color: var(--tint-error-text);
+  background-color: var(--tint-error-bg);
+  border-color: color-mix(in srgb, var(--tint-error-text) 30%, transparent);
+}
+
+.ui-alert--success {
+  color: var(--tint-success-text);
+  background-color: var(--tint-success-bg);
+  border-color: color-mix(in srgb, var(--tint-success-text) 30%, transparent);
+}
+
+.ui-alert--info {
+  color: var(--tint-default-text);
+  background-color: var(--tint-default-bg);
+  border-color: var(--color-border);
+}

@@ -1,0 +1,47 @@
+/* SignupForm — the form body inside AuthPanel. */
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* TERMS CHECKBOX — the Input primitive is text-only, so this is local. */
+.signup-form__terms {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.signup-form__check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.signup-form__checkbox {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.signup-form__checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.signup-form__checkbox:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.signup-form__terms-error {
+  font-size: var(--text-xs);
+  color: var(--color-error);
+}

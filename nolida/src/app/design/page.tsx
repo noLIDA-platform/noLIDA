@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/Input/Input";
 import { Textarea } from "@/components/ui/Textarea/Textarea";
 import { Card } from "@/components/ui/Card/Card";
 import { Badge } from "@/components/ui/Badge/Badge";
+import { Alert } from "@/components/ui/Alert/Alert";
 import { Spinner } from "@/components/ui/Spinner/Spinner";
 import { Link } from "@/components/ui/Link/Link";
 import { EmptyState } from "@/components/ui/EmptyState/EmptyState";
@@ -451,6 +452,29 @@ export default function DesignPage(): React.JSX.Element {
           </h3>
           <div className="design-navy-panel design-navy-panel--subtle">
             <p className="design-navy-panel__label">--color-navy-subtle · #0f1535</p>
+          </div>
+        </section>
+        {/* 16. Alert */}
+        <section className="design-section" id="alert">
+          <h2 className="design-section__title">16. Alert</h2>
+          <p className="design-section__desc">
+            Inline message banner for form-level errors, confirmations and
+            notices. Colours come from the semantic tint tokens, so dark mode is
+            handled centrally. Errors default to <code>role=&quot;alert&quot;</code>;
+            the other variants default to <code>role=&quot;status&quot;</code>.
+          </p>
+
+          <div className="design-stack">
+            <Alert variant="error">
+              We couldn&apos;t sign you in. Please try again.
+            </Alert>
+            <Alert variant="success">
+              Your password has been updated.
+            </Alert>
+            <Alert variant="info">
+              If an account exists for that address, we&apos;ve sent a reset
+              link.
+            </Alert>
           </div>
         </section>
       </Container>

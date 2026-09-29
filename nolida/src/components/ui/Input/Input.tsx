@@ -14,6 +14,15 @@ export interface InputProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
+  /**
+   * Lets callers set correct browser autofill, IME and form semantics. The
+   * auth forms rely on `autoComplete="username"` / `"current-password"` so
+   * password managers offer the right account.
+   */
+  name?: string;
+  autoComplete?: string;
+  inputMode?: "none" | "text" | "email" | "tel" | "url" | "numeric" | "search";
+  autoFocus?: boolean;
   className?: string;
 }
 
@@ -28,6 +37,10 @@ export function Input({
   onChange,
   placeholder,
   disabled = false,
+  name,
+  autoComplete,
+  inputMode,
+  autoFocus = false,
   className,
 }: InputProps): React.JSX.Element {
   const generatedId = React.useId();
@@ -62,11 +75,15 @@ export function Input({
       <input
         id={inputId}
         type={type}
+        name={name}
         value={value}
         defaultValue={defaultValue}
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        autoFocus={autoFocus}
         aria-invalid={error ? "true" : undefined}
         aria-describedby={describedBy}
         className={inputClasses}

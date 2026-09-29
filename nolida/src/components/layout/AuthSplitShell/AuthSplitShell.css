@@ -1,0 +1,134 @@
+/* AuthSplitShell — gradient visual panel beside an auth form.
+ *
+ * Orientation is done with grid areas rather than DOM order, so the form
+ * always comes last in the DOM (it is the content that matters for reading
+ * order and Tab) while `grid-template-areas` decides which side it lands on.
+ */
+
+.auth-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  /* `--auth-chrome-h` is the height of any bar above the split (the
+     SlimTopBar). The auth layout sets it once so the shell and the bar agree;
+     standalone use falls back to full viewport height. */
+  min-height: calc(100dvh - var(--auth-chrome-h, 0px));
+}
+
+.auth-split--form-right {
+  grid-template-areas: "panel form";
+}
+
+.auth-split--form-left {
+  grid-template-areas: "form panel";
+}
+
+/* PANEL — the gradient surface holding the fanned product screenshots. */
+.auth-split__panel {
+  grid-area: panel;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-7);
+  background-image: var(--color-gradient-hero);
+  color: var(--text-inverse);
+}
+
+/* Soft brand glow layered over the gradient, echoing the Hero vignette. */
+.auth-split__glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(
+      ellipse 70% 55% at 30% 25%,
+      color-mix(in srgb, var(--color-accent-cyan) 26%, transparent) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 65% 55% at 78% 80%,
+      color-mix(in srgb, var(--color-accent-magenta) 22%, transparent) 0%,
+      transparent 65%
+    );
+}
+
+.auth-split__visual {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-7);
+}
+
+/* `--stacked` adds the HeroBlock below the fan. Without it the panel keeps a
+   single centred column, which is what the other auth pages get. */
+.auth-split--stacked .auth-split__panel {
+  padding-block: var(--space-7);
+}
+
+.auth-split__beneath {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* FORM */
+.auth-split__form {
+  grid-area: form;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-6);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.auth-split__form-inner {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* TABLET — keep both panels, but give the form more room. The fan is scaled
+   down by its own short-viewport media query, not here, so it stays legible. */
+@media (max-width: 1023px) {
+  .auth-split__panel {
+    padding: var(--space-7) var(--space-5);
+  }
+
+  .auth-split__form {
+    padding: var(--space-7) var(--space-5);
+  }
+
+  .auth-split__visual {
+    gap: var(--space-6);
+  }
+}
+
+/* MOBILE — drop the decorative panel entirely; the form owns the screen.
+   The base `calc(100dvh - --auth-chrome-h)` already accounts for the bar,
+   so no height override is needed here. */
+@media (max-width: 767px) {
+  .auth-split {
+    grid-template-columns: 1fr;
+    grid-template-areas: "form";
+  }
+
+  .auth-split__panel {
+    display: none;
+  }
+
+  .auth-split__form {
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .auth-split__form-inner {
+    max-width: 460px;
+  }
+}

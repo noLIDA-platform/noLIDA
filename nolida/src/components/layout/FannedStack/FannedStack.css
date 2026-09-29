@@ -1,0 +1,99 @@
+/* FannedStack — decorative fan of product screenshots.
+ *
+ * Layout maths: the container reserves a fixed-width card (`--fanned-card-w`)
+ * and spreads the four cards across whatever width is left over. Each card's
+ * `left` is therefore `index / 3 * (100% - card width)`, so changing
+ * `--fanned-card-w` re-lays out the whole fan with no other edit.
+ *
+ * Rotations and lifts arrive per card as unitless custom properties
+ * (`--fan-rotate`, `--fan-lift`) and are converted to lengths/angles here.
+ */
+
+.fanned-stack {
+  --fanned-card-w: 46%;
+  --fanned-rotate-scale: 1;
+  --fanned-lift-scale: 1;
+  --fanned-shadow: var(--shadow-lg);
+
+  position: relative;
+  width: 100%;
+  /* The cards are absolutely positioned, so the container needs its own
+     height. A rotated card is taller than its aspect ratio alone implies
+     (~38% taller at 13deg), so the ratio is deliberately generous. */
+  aspect-ratio: 1.75 / 1;
+  padding-block: var(--space-2);
+  display: block;
+}
+
+.fanned-stack__card {
+  position: absolute;
+  top: 50%;
+  left: calc(
+    (100% - var(--fanned-card-w)) * var(--fan-index) / 3
+  );
+  width: var(--fanned-card-w);
+  /* Center the card on the container's midline, then apply the fan rotation
+     and the outer cards' lift. */
+  transform: translateY(-50%) translateY(calc(var(--fan-lift) * 1% * var(--fanned-lift-scale)))
+    rotate(calc(var(--fan-rotate) * 1deg * var(--fanned-rotate-scale)));
+  transform-origin: 50% 100%;
+  z-index: var(--fan-z);
+  display: block;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-bg);
+  box-shadow: var(--fanned-shadow);
+  /* Staggered entrance: rise and straighten into the resting fan. */
+  animation: fanned-enter var(--duration-slow) var(--ease-standard) both;
+  animation-delay: var(--fan-delay);
+}
+
+.fanned-stack__image {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* Nothing interactive lives in a screenshot — never let a drag or a
+     long-press turn one into a gesture target. */
+  pointer-events: none;
+  user-select: none;
+}
+
+@keyframes fanned-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateY(calc(var(--fan-lift) * 1% * var(--fanned-lift-scale) + 18px))
+      rotate(calc(var(--fan-rotate) * 1deg * var(--fanned-rotate-scale) * 1.18));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateY(calc(var(--fan-lift) * 1% * var(--fanned-lift-scale)))
+      rotate(calc(var(--fan-rotate) * 1deg * var(--fanned-rotate-scale)));
+  }
+}
+
+/* `compact` is for panels where the stack shares the column with other
+   content: smaller cards, tighter fan, lighter shadow. */
+.fanned-stack--compact {
+  --fanned-card-w: 40%;
+  --fanned-rotate-scale: 0.72;
+  --fanned-lift-scale: 0.6;
+  --fanned-shadow: var(--shadow-md);
+  aspect-ratio: 2 / 1;
+  padding-block: 0;
+}
+
+/* Short landscape viewports: the fan must not push the form out of view. */
+@media (max-height: 720px) and (min-width: 768px) {
+  .fanned-stack {
+    --fanned-card-w: 38%;
+    --fanned-rotate-scale: 0.7;
+    --fanned-lift-scale: 0.5;
+    aspect-ratio: 2.1 / 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fanned-stack__card {
+    animation: none;
+  }
+}

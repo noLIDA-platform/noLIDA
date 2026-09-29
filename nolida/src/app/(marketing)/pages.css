@@ -1,6 +1,7 @@
 /* Shared layout primitives for the supporting marketing pages
    (/about, /how-it-works, /for-business, /pricing, /terms, /privacy, /help).
-   The landing page uses its own page.css. */
+   There is no marketing landing page since Phase 4B — `/` is the sign-in
+   screen — so the old landing-only page.css no longer exists. */
 
 .pg-stack {
   display: flex;

@@ -1,0 +1,33 @@
+import type { Metadata } from "next";
+import { AuthSplitShell } from "@/components/layout/AuthSplitShell/AuthSplitShell";
+import { HeroBlock } from "@/components/marketing/HeroBlock/HeroBlock";
+import { VerifyForm } from "@/components/auth/VerifyForm/VerifyForm";
+
+export const metadata: Metadata = {
+  title: "Verify your account",
+  description: "Enter the verification code we sent you to activate noLIDA.",
+};
+
+/**
+ * Account verification. There is no session in this phase, so the form does
+ * not claim to know which address the code went to — it asks for the code and
+ * lets Phase 4C supply the identifier from the session.
+ */
+export default function VerifyPage() {
+  return (
+    <AuthSplitShell
+      orientation="form-right"
+      beneathStack={
+        <HeroBlock
+          eyebrow="Almost there"
+          title="One code and you're in."
+          subtitle="Verifying your email or phone keeps your account and your payments safe."
+          primaryCta={{ label: "Why verify?", href: "/help" }}
+          size="md"
+        />
+      }
+    >
+      <VerifyForm headingLevel="h2" />
+    </AuthSplitShell>
+  );
+}

@@ -66,6 +66,15 @@
   align-items: center;
 }
 
+/* Full-width vertical list — for banners and messages that must not sit
+   side by side. */
+.design-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 560px;
+}
+
 .design-grid-swatches {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
