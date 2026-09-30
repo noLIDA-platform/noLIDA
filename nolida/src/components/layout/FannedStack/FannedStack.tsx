@@ -89,8 +89,8 @@ export function FannedStack({
               alt=""
               width={1664}
               height={928}
-              sizes="(max-width: 1023px) 22vw, 240px"
-              quality={85}
+              sizes="(max-width: 1023px) 30vw, 480px"
+              quality={92}
               className="fanned-stack__image"
             />
           </span>

@@ -18,11 +18,12 @@
   position: relative;
   width: 100%;
   /* The cards are absolutely positioned, so the container needs its own
-     height. Each card is a 4x-tall portrait crop of a 1664x928 screenshot
-     (aspect 1664/3712), and a rotated card is taller than its aspect ratio
-     alone implies (~10% taller at 13deg), so the ratio is deliberately
-     generous. */
-  aspect-ratio: 0.82 / 1;
+     height. Cards use a 16:10 landscape crop — close to the 1664x928
+     source (16:9) — so `object-fit: cover` only trims a thin band and
+     never upscales: text stays sharp on retina screens. A rotated card is
+     taller than its aspect ratio alone implies (~8% taller at 13deg), so
+     the ratio leaves headroom for the fan. */
+  aspect-ratio: 2.1 / 1;
   padding-block: var(--space-2);
   display: block;
 }
@@ -34,10 +35,12 @@
     (100% - var(--fanned-card-w)) * var(--fan-index) / 3
   );
   width: var(--fanned-card-w);
-  /* Cards are 4x taller than the 1664x928 screenshot they crop
-     (1664/3712), so the crop keeps the full width and shows the tall
-     centre band of the image. */
-  aspect-ratio: 1664 / 3712;
+  /* Cards use a 16:10 landscape crop (1664/1040) — near-identical to the
+     1664x928 source — so the crop trims a thin band off the sides with no
+     upscale: more source pixels per displayed pixel keeps text sharp on
+     retina screens, and the shorter card answers the "reduce the length"
+     ask. */
+  aspect-ratio: 1664 / 1040;
   /* Center the card on the container's midline, then apply the fan rotation
      and the outer cards' lift. */
   transform: translateY(-50%) translateY(calc(var(--fan-lift) * 1% * var(--fanned-lift-scale)))
@@ -58,8 +61,9 @@
   width: 100%;
   height: 100%;
   display: block;
-  /* Fill the 4x-tall portrait card from the 16:9 screenshot without
-     distortion: keep the full width, crop top and bottom evenly. */
+  /* Fill the 16:10 card from the 16:9 screenshot without distortion:
+     equal sharpness on every card, so no single screenshot looks softer
+     than its neighbours. */
   object-fit: cover;
   object-position: center;
   /* Nothing interactive lives in a screenshot — never let a drag or a
@@ -88,7 +92,7 @@
   --fanned-rotate-scale: 0.72;
   --fanned-lift-scale: 0.6;
   --fanned-shadow: var(--shadow-md);
-  aspect-ratio: 0.9 / 1;
+  aspect-ratio: 2.2 / 1;
   padding-block: 0;
 }
 
@@ -98,7 +102,7 @@
     --fanned-card-w: 38%;
     --fanned-rotate-scale: 0.7;
     --fanned-lift-scale: 0.5;
-    aspect-ratio: 0.95 / 1;
+    aspect-ratio: 2.3 / 1;
   }
 }
 
