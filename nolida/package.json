@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "generate:brand": "tsx scripts/generate-brand-assets.ts"
+    "generate:brand": "tsx scripts/generate-brand-assets.ts",
+    "migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
+    "test:auth": "tsx --env-file-if-exists=.env.local scripts/test-auth.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

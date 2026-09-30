@@ -46,11 +46,24 @@
 - After each phase: run npm run build, commit, push.
 - Ask before proceeding if anything is unclear. Never guess.
 
+## Auth Backend (Phase 3)
+- All auth routes run on the Node.js runtime.
+- OTP codes hashed with SHA-256. Never stored plain, never logged in
+  production.
+- Passwords hashed with bcryptjs (rounds=12). Never logged.
+- Sessions use crypto.randomBytes(32) tokens; only SHA-256 hash stored.
+- Session cookies: HttpOnly, SameSite=Lax, Secure in production.
+- Cookie name: nolida_session.
+- Every auth action writes a row to security_events.
+- Rate limiting is in-memory for now — must move to Redis before launch.
+- Auth service owns all logic; repositories own only SQL.
+- Never reveal whether an email/phone exists in password-reset flows.
+
 ## Phase status
 - Phase 0: complete (scaffold, env, health route)
 - Phase 1: complete (UI primitives, design tokens, `/design` showcase)
 - Phase 2: complete (brand tokens, generated brand assets, logo, marketing site)
-- Phase 3: **not started** — database schema, migrations, RLS and repositories were never built. There is no `src/lib/server/`.
+- Phase 3: in progress (database, auth backend — migrations, repositories, services, routes)
 - Phase 4: **not started** — auth API, session, bcrypt hashing and Route Handlers were never built.
 - Phase 4B: complete (auth UI, frontend only — see `docs/PHASE-4B.md`)
 - Phase 5+: not started
