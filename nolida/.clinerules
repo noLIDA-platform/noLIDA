@@ -63,10 +63,21 @@
 - Phase 0: complete (scaffold, env, health route)
 - Phase 1: complete (UI primitives, design tokens, `/design` showcase)
 - Phase 2: complete (brand tokens, generated brand assets, logo, marketing site)
-- Phase 3: in progress (database, auth backend — migrations, repositories, services, routes)
-- Phase 4: **not started** — auth API, session, bcrypt hashing and Route Handlers were never built.
-- Phase 4B: complete (auth UI, frontend only — see `docs/PHASE-4B.md`)
-- Phase 5+: not started
+- Phase 3: complete (database + auth backend — migrations, repositories, services, routes)
+- Phase 4: complete (auth screens wired to the API; HTTP end-to-end green — see `docs/PHASE-4.md` and `docs/AUTH-UI.md`)
+- Phase 4B: complete (auth screens, layout and orientation — see `docs/PHASE-4B.md`)
+- Phase 5: not started (profile and account settings, first session-gated page)
+- Phase 6+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
+
+## Auth UI (Phase 4) — locked rules
+- `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
+- The 6-digit reset code is entered ONLY on `/reset-password`, which consumes it together with the new password. Never add a code step to `/verify` — `otp_records` are single-use and the user would be left with a spent code.
+- No OTP resend endpoint exists. RESET codes are re-issued through `/api/auth/forgot-password`; a missing REGISTER code means restarting signup. Do not invent a resend silently.
+- Auth forms call `apiFetch` from `@/lib/client/api` and render `error.message`; never surface a raw response or a caught exception.
+- Client zod rules are a courtesy. Never relax a server rule to match a form.
+- A query-string `identifier` is prefill only. It must never stand in for the OTP check.
+- `/home` is Phase 7: a successful sign-in or verify navigating there and hitting a 404 is expected, along with the four accepted `no-location-assign-relative-destination` warnings.
+- Money vocabulary is locked by `docs/PRODUCT.md`: plan, subscription, wallet, earnings, virtual card, fintail, eligibility.
 
 ## Design System (Phase 1)
 - All colors come from CSS variables in `styles/tokens.css` or `styles/tokens-ui.css`. Never hardcode.

@@ -1,13 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { z } from "zod";
 import { AuthPanel } from "@/components/auth/AuthPanel/AuthPanel";
 import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
-import { readRedirectTo } from "@/lib/api/envelope";
+import { apiFetch } from "@/lib/client/api";
 import "./LoginForm.css";
 
 /**
@@ -41,15 +42,24 @@ export interface LoginFormProps {
   headingLevel?: "h1" | "h2";
 }
 
-export function LoginForm({
+interface LoginResponse {
+  userId: string;
+  expiresAt: string;
+}
+
+function LoginFormInner({
   redirectTo = "/home",
   headingLevel = "h1",
 }: LoginFormProps): React.JSX.Element {
+  const searchParams = useSearchParams();
+  const resetParam = searchParams.get("reset");
   const [identifier, setIdentifier] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errors, setErrors] = React.useState<FieldErrors>({});
   const [formError, setFormError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+
+  const showResetBanner = resetParam === "1";
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -76,22 +86,22 @@ export function LoginForm({
     setSubmitting(true);
 
     try {
-      // The auth API is Phase 4C and does not exist yet, so this call is
-      // expected to fail in the current build. It is written against the
-      // agreed contract: { ok: true, data: { redirectTo } } on success.
-      const response = await fetch("/api/auth/login", {
+      const trimmed = parsed.data.identifier.trim();
+      const body = trimmed.includes("@")
+        ? { email: trimmed, password: parsed.data.password }
+        : { phone: trimmed, password: parsed.data.password };
+
+      const result = await apiFetch<LoginResponse>("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed.data),
+        body,
       });
 
-      if (!response.ok) {
-        setFormError("We couldn't sign you in. Please try again.");
+      if (!result.ok) {
+        setFormError(result.error.message);
         return;
       }
 
-      const payload: unknown = await response.json();
-      window.location.assign(readRedirectTo(payload, redirectTo));
+      window.location.assign(redirectTo);
     } catch {
       setFormError("Something went wrong. Please try again.");
     } finally {
@@ -112,6 +122,11 @@ export function LoginForm({
       }
     >
       <form className="login-form" onSubmit={handleSubmit} noValidate>
+        {showResetBanner ? (
+          <Alert variant="success">
+            Password reset. Please log in with your new password.
+          </Alert>
+        ) : null}
         {formError ? <Alert variant="error">{formError}</Alert> : null}
 
         <Input
@@ -151,4 +166,13 @@ export function LoginForm({
   );
 }
 
+export function LoginForm(props: LoginFormProps): React.JSX.Element {
+  return (
+    <Suspense>
+      <LoginFormInner {...props} />
+    </Suspense>
+  );
+}
+
 export default LoginForm;
+

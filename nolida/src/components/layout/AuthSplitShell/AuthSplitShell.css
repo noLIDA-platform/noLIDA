@@ -14,11 +14,16 @@
   min-height: calc(100dvh - var(--auth-chrome-h, 0px));
 }
 
+/* The visual panel carries the brand moment, so it gets the larger half;
+   45% is still roomy for a 400px form. Column order follows the areas below,
+   so the first track always matches the first name in `grid-template-areas`. */
 .auth-split--form-right {
+  grid-template-columns: 55% 45%;
   grid-template-areas: "panel form";
 }
 
 .auth-split--form-left {
+  grid-template-columns: 45% 55%;
   grid-template-areas: "form panel";
 }
 
@@ -95,8 +100,20 @@
   gap: var(--space-5);
 }
 
-/* TABLET — keep both panels, but give the form more room. The fan is scaled
-   down by its own short-viewport media query, not here, so it stays legible. */
+/* TABLET — keep both panels, but give the form more room: the decorative
+   panel narrows to 40% and the form takes the rest. Padding tightens too.
+   The fan is scaled down by its own short-viewport media query, not here, so
+   it stays legible. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .auth-split--form-right {
+    grid-template-columns: 40% 60%;
+  }
+
+  .auth-split--form-left {
+    grid-template-columns: 60% 40%;
+  }
+}
+
 @media (max-width: 1023px) {
   .auth-split__panel {
     padding: var(--space-7) var(--space-5);

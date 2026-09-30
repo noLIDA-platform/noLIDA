@@ -9,10 +9,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * Password reset. The token rides in the query string (`?token=…`), which is
- * how the reset email links here. Only the presence of the token is checked —
- * it is validated by the server when the form is submitted, since a token
- * cannot be trusted just because it arrived in a URL.
+ * Password reset, step two. The identifier rides in on the query string
+ * (`?identifier=…`) handed over by /forgot-password once a code has been sent.
+ * The code itself is entered here, together with the new password, and is
+ * validated server-side — nothing that arrives in a URL can be trusted on its
+ * own.
  */
 export default async function ResetPasswordPage({
   searchParams,
@@ -20,8 +21,8 @@ export default async function ResetPasswordPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const raw = params.token;
-  const token = typeof raw === "string" && raw.length > 0 ? raw : null;
+  const raw = params.identifier;
+  const identifier = typeof raw === "string" && raw.length > 0 ? raw : null;
 
   return (
     <AuthSplitShell
@@ -36,7 +37,7 @@ export default async function ResetPasswordPage({
         />
       }
     >
-      <ResetPasswordForm headingLevel="h2" token={token} redirectTo="/" />
+      <ResetPasswordForm headingLevel="h2" identifier={identifier} />
     </AuthSplitShell>
   );
 }

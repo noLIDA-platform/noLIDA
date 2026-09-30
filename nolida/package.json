@@ -9,7 +9,8 @@
     "lint": "eslint",
     "generate:brand": "tsx scripts/generate-brand-assets.ts",
     "migrate": "tsx --env-file-if-exists=.env.local scripts/migrate.ts",
-    "test:auth": "tsx --env-file-if-exists=.env.local scripts/test-auth.ts"
+    "test:auth": "tsx --env-file-if-exists=.env.local scripts/test-auth.ts",
+    "test:auth:http": "tsx --env-file-if-exists=.env.local scripts/test-auth-http.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

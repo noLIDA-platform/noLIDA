@@ -7,11 +7,17 @@ import { AuthPanel } from "@/components/auth/AuthPanel/AuthPanel";
 import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
-import { readRedirectTo } from "@/lib/api/envelope";
+import { apiFetch } from "@/lib/client/api";
 import "./ResetPasswordForm.css";
+
+const CODE_LENGTH = 6;
 
 const RESET_SCHEMA = z
   .object({
+    code: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, `Enter the ${CODE_LENGTH}-digit code`),
     password: z
       .string()
       .min(8, "Use at least 8 characters")
@@ -23,32 +29,34 @@ const RESET_SCHEMA = z
     message: "Passwords do not match",
   });
 
+type FieldErrors = Partial<
+  Record<"code" | "password" | "confirmPassword", string>
+>;
+
 export interface ResetPasswordFormProps {
   /**
-   * Reset token from the email link. The page reads it from the query string;
-   * without one the form renders a "link is invalid" state instead.
+   * Email or phone the reset code was sent to. `/forgot-password` hands it over
+   * on the query string; without it there is nothing to reset against.
    */
-  token?: string | null;
-  redirectTo?: string;
+  identifier?: string | null;
   headingLevel?: "h1" | "h2";
 }
 
 export function ResetPasswordForm({
-  token = null,
-  redirectTo = "/",
+  identifier = null,
   headingLevel = "h1",
 }: ResetPasswordFormProps): React.JSX.Element {
+  const [code, setCode] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
-  const [errors, setErrors] = React.useState<
-    Partial<Record<"password" | "confirmPassword", string>>
-  >({});
+  const [errors, setErrors] = React.useState<FieldErrors>({});
   const [formError, setFormError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
-  // No token means the mail client stripped it or the user typed the URL.
-  // Validating on the server would be pointless — there is nothing to send.
-  if (!token) {
+  // The identifier arrives from /forgot-password. Someone landing here
+  // directly has nothing to submit, so we say so instead of firing a doomed
+  // request.
+  if (!identifier) {
     return (
       <AuthPanel
         title="Reset link needed"
@@ -56,13 +64,13 @@ export function ResetPasswordForm({
         showSocial={false}
         footer={
           <p>
-            <Link href="/forgot-password">Request a new link</Link>
+            <Link href="/">Back to sign in</Link>
           </p>
         }
       >
         <Alert variant="error">
-          This password reset link is missing or incomplete. Please request a
-          new one.
+          This password reset page is missing its details. Request a new code and
+          we&apos;ll bring you back here with your details filled in.
         </Alert>
       </AuthPanel>
     );
@@ -76,12 +84,15 @@ export function ResetPasswordForm({
 
     setFormError(null);
 
-    const parsed = RESET_SCHEMA.safeParse({ password, confirmPassword });
+    const parsed = RESET_SCHEMA.safeParse({ code, password, confirmPassword });
     if (!parsed.success) {
-      const next: Partial<Record<"password" | "confirmPassword", string>> = {};
+      const next: FieldErrors = {};
       for (const issue of parsed.error.issues) {
         const key = issue.path[0];
-        if ((key === "password" || key === "confirmPassword") && !next[key]) {
+        if (
+          (key === "code" || key === "password" || key === "confirmPassword") &&
+          !next[key]
+        ) {
           next[key] = issue.message;
         }
       }
@@ -93,22 +104,23 @@ export function ResetPasswordForm({
     setSubmitting(true);
 
     try {
-      // Phase 4C endpoint; expected to fail in this build.
-      const response = await fetch("/api/auth/reset-password", {
+      const result = await apiFetch<unknown>("/api/auth/reset-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password: parsed.data.password }),
+        body: {
+          identifier,
+          code: parsed.data.code,
+          newPassword: parsed.data.password,
+        },
       });
 
-      if (!response.ok) {
-        setFormError(
-          "We couldn't reset your password. The link may have expired.",
-        );
+      if (!result.ok) {
+        setFormError(result.error.message);
         return;
       }
 
-      const payload: unknown = await response.json();
-      window.location.assign(readRedirectTo(payload, redirectTo));
+      // `/` reads `?reset=1` and shows a "password reset, please log in"
+      // banner. Full navigation also drops any stale client state.
+      window.location.assign("/?reset=1");
     } catch {
       setFormError("Something went wrong. Please try again.");
     } finally {
@@ -120,16 +132,35 @@ export function ResetPasswordForm({
     <AuthPanel
       title="Set a new password"
       headingLevel={headingLevel}
-      subtitle="Choose a password you haven't used before."
+      subtitle={`Choose a new password for ${identifier}.`}
       showSocial={false}
       footer={
         <p>
+          Didn&apos;t get the code?{" "}
+          <Link href="/forgot-password">Request a new one</Link>
+          {" · "}
           <Link href="/">Back to sign in</Link>
         </p>
       }
     >
       <form className="reset-password__form" onSubmit={handleSubmit} noValidate>
         {formError ? <Alert variant="error">{formError}</Alert> : null}
+
+        <Input
+          id="reset-code"
+          label="Verification code"
+          type="text"
+          autoComplete="one-time-code"
+          inputMode="numeric"
+          placeholder="000000"
+          hint="The 6-digit code we just sent you."
+          value={code}
+          onChange={(event) =>
+            setCode(event.target.value.replace(/\D/g, "").slice(0, CODE_LENGTH))
+          }
+          error={errors.code}
+          disabled={submitting}
+        />
 
         <Input
           id="reset-password"

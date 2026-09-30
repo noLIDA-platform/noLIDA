@@ -9,9 +9,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Account verification. There is no session in this phase, so the form does
- * not claim to know which address the code went to — it asks for the code and
- * lets Phase 4C supply the identifier from the session.
+ * Account verification. The identifier and the OTP purpose arrive on the query
+ * string (`/verify?identifier=…&purpose=REGISTER|RESET`) from /signup or
+ * /forgot-password; `VerifyForm` reads them itself and renders a "link is
+ * missing its details" state when they are absent.
  */
 export default function VerifyPage() {
   return (

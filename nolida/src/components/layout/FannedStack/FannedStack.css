@@ -14,6 +14,11 @@
   --fanned-rotate-scale: 1;
   --fanned-lift-scale: 1;
   --fanned-shadow: var(--shadow-lg);
+  /* Continuous float: how far a card drifts and how long one cycle takes.
+     Per-card phase and duration are derived from `--fan-index` below so the
+     four cards never move in lockstep. */
+  --fan-float-distance: -8px;
+  --fan-float-duration: 7s;
 
   position: relative;
   width: 100%;
@@ -52,9 +57,34 @@
   overflow: hidden;
   background-color: var(--color-bg);
   box-shadow: var(--fanned-shadow);
-  /* Staggered entrance: rise and straighten into the resting fan. */
-  animation: fanned-enter var(--duration-slow) var(--ease-standard) both;
-  animation-delay: var(--fan-delay);
+  /* Two animations at once: the one-shot entrance on `transform`, and a
+     continuous float on the independent `translate` property. They compose
+     because `translate` is applied before `transform`, so the drift stays
+     vertical on screen instead of tilting with each card's rotation. */
+  animation:
+    fanned-enter var(--duration-slow) var(--ease-standard) both,
+    fanned-float var(--fan-float-period) ease-in-out infinite;
+  animation-delay:
+    var(--fan-delay),
+    calc(var(--fan-delay) + var(--fan-index) * 0.45s);
+}
+
+/* Each card gets its own period (derived from --fan-index) so the four cards
+   drift out of phase rather than pulsing together. */
+.fanned-stack__card:nth-child(1) {
+  --fan-float-period: var(--fan-float-duration);
+}
+
+.fanned-stack__card:nth-child(2) {
+  --fan-float-period: calc(var(--fan-float-duration) + 1.4s);
+}
+
+.fanned-stack__card:nth-child(3) {
+  --fan-float-period: calc(var(--fan-float-duration) + 0.6s);
+}
+
+.fanned-stack__card:nth-child(4) {
+  --fan-float-period: calc(var(--fan-float-duration) + 2.2s);
 }
 
 .fanned-stack__image {
@@ -82,6 +112,19 @@
     opacity: 1;
     transform: translateY(-50%) translateY(calc(var(--fan-lift) * 1% * var(--fanned-lift-scale)))
       rotate(calc(var(--fan-rotate) * 1deg * var(--fanned-rotate-scale)));
+  }
+}
+
+/* Continuous drift. Uses the independent `translate` property rather than
+   `transform`, so it layers on top of the fan's centring + rotation instead of
+   replacing them. */
+@keyframes fanned-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 var(--fan-float-distance);
   }
 }
 

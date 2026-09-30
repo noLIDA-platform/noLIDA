@@ -4,3 +4,11 @@
   flex-direction: column;
   gap: var(--space-4);
 }
+
+/* Resend row: a single line of guidance with a link back out. */
+.verify-form__resend {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+

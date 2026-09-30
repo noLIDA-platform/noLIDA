@@ -7,86 +7,101 @@ import { AuthPanel } from "@/components/auth/AuthPanel/AuthPanel";
 import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
-import { readRedirectTo } from "@/lib/api/envelope";
+import { apiFetch } from "@/lib/client/api";
 import "./SignupForm.css";
 
 /** Nigerian mobile numbers in local (0…) or international (+234…) form. */
 const PHONE_PATTERN = /^(?:\+?234|0)[789]\d{9}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/**
- * The server is the authority on all of this (Phase 4C). These rules exist so
- * an obvious mistake is caught without a round trip. The 8-character minimum
- * matches the documented password policy.
- */
-const SIGNUP_SCHEMA = z
-  .object({
-    fullName: z
-      .string()
-      .trim()
-      .min(2, "Enter your full name")
-      .max(120, "That is too long"),
-    identifier: z
-      .string()
-      .trim()
-      .min(1, "Enter your email or phone number")
-      .max(254, "That is too long")
-      .refine(
-        (value) => EMAIL_PATTERN.test(value) || PHONE_PATTERN.test(value),
-        "Enter a valid email or Nigerian phone number",
-      ),
-    password: z
-      .string()
-      .min(8, "Use at least 8 characters")
-      .max(128, "That is too long"),
-    confirmPassword: z.string().min(1, "Confirm your password"),
-    // The checkbox is part of the schema so that one `safeParse` owns every
-    // rule and the error lands on the right field like any other.
-    acceptTerms: z
-      .boolean()
-      .refine((value) => value, "You must accept the terms to continue"),
-  })
-  .refine((values) => values.password === values.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match",
-  });
+type SignupMethod = "email" | "phone";
 
-type FieldErrors = Partial<
-  Record<
-    "fullName" | "identifier" | "password" | "confirmPassword" | "acceptTerms",
-    string
-  >
->;
+const CONTACT_SCHEMA = z.object({
+  identifier: z
+    .string()
+    .trim()
+    .min(1, "Enter your email or phone number")
+    .max(254, "That is too long"),
+});
+
+const PASSWORD_SCHEMA = z.object({
+  password: z
+    .string()
+    .min(8, "Use at least 8 characters")
+    .max(128, "That is too long"),
+  acceptTerms: z
+    .boolean()
+    .refine((value) => value, "You must accept the terms to continue"),
+});
+
+type ContactError = string | undefined;
+type PasswordErrors = Partial<Record<"password" | "acceptTerms", string>>;
 
 export interface SignupFormProps {
-  /** Where to send the user once the account exists. */
-  redirectTo?: string;
   headingLevel?: "h1" | "h2";
 }
 
+interface RegisterResponse {
+  userId: string;
+  identifier: string;
+  identifierType: "EMAIL" | "PHONE";
+}
+
+function methodOf(identifier: string, method: SignupMethod): boolean {
+  return method === "email"
+    ? EMAIL_PATTERN.test(identifier)
+    : PHONE_PATTERN.test(identifier);
+}
+
 export function SignupForm({
-  redirectTo = "/verify",
   headingLevel = "h1",
 }: SignupFormProps): React.JSX.Element {
-  const [values, setValues] = React.useState({
-    fullName: "",
-    identifier: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [step, setStep] = React.useState<1 | 2>(1);
+  const [method, setMethod] = React.useState<SignupMethod>("email");
+  const [identifier, setIdentifier] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [acceptTerms, setAcceptTerms] = React.useState(false);
-  const [errors, setErrors] = React.useState<FieldErrors>({});
+  const [contactError, setContactError] = React.useState<ContactError>(undefined);
+  const [passwordErrors, setPasswordErrors] = React.useState<PasswordErrors>({});
   const [formError, setFormError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
 
-  const setField =
-    (field: keyof typeof values) =>
-    (event: React.ChangeEvent<HTMLInputElement>): void => {
-      const next = event.target.value;
-      setValues((current) => ({ ...current, [field]: next }));
-    };
+  const identifierLabel =
+    method === "email" ? "Email address" : "Phone number";
 
-  const handleSubmit = async (
+  const handleMethodChange = (next: SignupMethod): void => {
+    setMethod(next);
+    setContactError(undefined);
+    setFormError(null);
+  };
+
+  const handleStep1Next = (): void => {
+    setFormError(null);
+
+    const parsed = CONTACT_SCHEMA.safeParse({ identifier });
+    if (!parsed.success) {
+      setContactError(
+        parsed.error.issues[0]?.message ?? "Enter your email or phone number",
+      );
+      return;
+    }
+
+    const trimmed = parsed.data.identifier.trim();
+    if (!methodOf(trimmed, method)) {
+      setContactError(
+        method === "email"
+          ? "Enter a valid email address"
+          : "Enter a valid Nigerian phone number",
+      );
+      return;
+    }
+
+    setContactError(undefined);
+    setIdentifier(trimmed);
+    setStep(2);
+  };
+
+  const handleStep2Submit = async (
     event: React.FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
@@ -94,42 +109,41 @@ export function SignupForm({
 
     setFormError(null);
 
-    const parsed = SIGNUP_SCHEMA.safeParse({ ...values, acceptTerms });
+    const parsed = PASSWORD_SCHEMA.safeParse({ password, acceptTerms });
     if (!parsed.success) {
-      const next: FieldErrors = {};
+      const next: PasswordErrors = {};
       for (const issue of parsed.error.issues) {
         const key = issue.path[0];
-        if (typeof key === "string" && !(key in next)) {
-          next[key as keyof FieldErrors] = issue.message;
+        if ((key === "password" || key === "acceptTerms") && !next[key]) {
+          next[key] = issue.message;
         }
       }
-      setErrors(next);
+      setPasswordErrors(next);
       return;
     }
 
-    setErrors({});
+    setPasswordErrors({});
     setSubmitting(true);
 
     try {
-      // Phase 4C endpoint, written against the agreed contract. It does not
-      // exist yet, so this is expected to report a failure in this build.
-      const response = await fetch("/api/auth/signup", {
+      const body =
+        method === "email"
+          ? { email: identifier, password: parsed.data.password }
+          : { phone: identifier, password: parsed.data.password };
+
+      const result = await apiFetch<RegisterResponse>("/api/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: parsed.data.fullName,
-          identifier: parsed.data.identifier,
-          password: parsed.data.password,
-        }),
+        body,
       });
 
-      if (!response.ok) {
-        setFormError("We couldn't create your account. Please try again.");
+      if (!result.ok) {
+        setFormError(result.error.message);
         return;
       }
 
-      const payload: unknown = await response.json();
-      window.location.assign(readRedirectTo(payload, redirectTo));
+      window.location.assign(
+        `/verify?identifier=${encodeURIComponent(identifier)}&purpose=REGISTER`,
+      );
     } catch {
       setFormError("Something went wrong. Please try again.");
     } finally {
@@ -137,43 +151,102 @@ export function SignupForm({
     }
   };
 
+  if (step === 1) {
+    return (
+      <AuthPanel
+        title="Create your account"
+        headingLevel={headingLevel}
+        subtitle="Sign up in seconds."
+        footer={
+          <p>
+            Already have an account? <Link href="/">Sign in</Link>
+          </p>
+        }
+      >
+        <div className="signup-form">
+          {formError ? <Alert variant="error">{formError}</Alert> : null}
+
+          <div
+            className="signup-form__methods"
+            role="group"
+            aria-label="Sign up with"
+          >
+            <button
+              type="button"
+              className={
+                method === "email"
+                  ? "signup-form__method signup-form__method--active"
+                  : "signup-form__method"
+              }
+              aria-pressed={method === "email"}
+              onClick={() => handleMethodChange("email")}
+            >
+              Email
+            </button>
+            <button
+              type="button"
+              className={
+                method === "phone"
+                  ? "signup-form__method signup-form__method--active"
+                  : "signup-form__method"
+              }
+              aria-pressed={method === "phone"}
+              onClick={() => handleMethodChange("phone")}
+            >
+              Phone
+            </button>
+          </div>
+
+          <Input
+            id="signup-identifier"
+            label={identifierLabel}
+            type={method === "email" ? "email" : "tel"}
+            autoComplete={method === "email" ? "email" : "tel"}
+            inputMode="email"
+            placeholder={
+              method === "email" ? "you@example.com" : "+234 800 000 0000"
+            }
+            value={identifier}
+            onChange={(event) => {
+              setIdentifier(event.target.value);
+              setContactError(undefined);
+            }}
+            error={contactError}
+            disabled={submitting}
+          />
+
+          <Button type="button" size="lg" fullWidth onClick={handleStep1Next}>
+            Continue
+          </Button>
+        </div>
+      </AuthPanel>
+    );
+  }
+
   return (
     <AuthPanel
-      title="Create your account"
+      title="Choose a password"
       headingLevel={headingLevel}
-      subtitle="Join noLIDA. It's free."
+      subtitle={`For ${identifier}`}
       footer={
         <p>
           Already have an account? <Link href="/">Sign in</Link>
         </p>
       }
     >
-      <form className="signup-form" onSubmit={handleSubmit} noValidate>
+      <form className="signup-form" onSubmit={handleStep2Submit} noValidate>
         {formError ? <Alert variant="error">{formError}</Alert> : null}
 
-        <Input
-          id="signup-name"
-          label="Full name"
-          type="text"
-          autoComplete="name"
-          value={values.fullName}
-          onChange={setField("fullName")}
-          error={errors.fullName}
-          disabled={submitting}
-        />
-
-        <Input
-          id="signup-identifier"
-          label="Email or phone number"
-          type="text"
-          autoComplete="username"
-          inputMode="email"
-          hint="We'll send a verification code here."
-          value={values.identifier}
-          onChange={setField("identifier")}
-          error={errors.identifier}
-          disabled={submitting}
-        />
+        <p className="signup-form__edit">
+          <button
+            type="button"
+            className="signup-form__edit-btn"
+            onClick={() => setStep(1)}
+            disabled={submitting}
+          >
+            Use a different {method === "email" ? "email" : "phone number"}
+          </button>
+        </p>
 
         <Input
           id="signup-password"
@@ -181,20 +254,9 @@ export function SignupForm({
           type="password"
           autoComplete="new-password"
           hint="At least 8 characters."
-          value={values.password}
-          onChange={setField("password")}
-          error={errors.password}
-          disabled={submitting}
-        />
-
-        <Input
-          id="signup-confirm-password"
-          label="Confirm password"
-          type="password"
-          autoComplete="new-password"
-          value={values.confirmPassword}
-          onChange={setField("confirmPassword")}
-          error={errors.confirmPassword}
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          error={passwordErrors.password}
           disabled={submitting}
         />
 
@@ -206,9 +268,9 @@ export function SignupForm({
               onChange={(event) => setAcceptTerms(event.target.checked)}
               disabled={submitting}
               className="signup-form__checkbox"
-              aria-invalid={errors.acceptTerms ? "true" : undefined}
+              aria-invalid={passwordErrors.acceptTerms ? "true" : undefined}
               aria-describedby={
-                errors.acceptTerms ? "signup-terms-error" : undefined
+                passwordErrors.acceptTerms ? "signup-terms-error" : undefined
               }
             />
             <span>
@@ -217,19 +279,29 @@ export function SignupForm({
             </span>
           </label>
 
-          {errors.acceptTerms ? (
+          {passwordErrors.acceptTerms ? (
             <span
               id="signup-terms-error"
               role="alert"
               className="signup-form__terms-error"
             >
-              {errors.acceptTerms}
+              {passwordErrors.acceptTerms}
             </span>
           ) : null}
         </div>
 
         <Button type="submit" size="lg" fullWidth loading={submitting}>
           Create account
+        </Button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          fullWidth
+          disabled={submitting}
+          onClick={() => setStep(1)}
+        >
+          Back
         </Button>
       </form>
     </AuthPanel>

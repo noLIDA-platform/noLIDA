@@ -2,8 +2,10 @@
 
 Phase 4B repurposes the noLIDA front door so that `/` **is** the sign-in screen,
 and builds the auth user interface that Phase 4 was originally supposed to
-provide. It is **frontend only**: no session, no database writes, no password
-hashing. Those arrive in Phase 4C.
+provide. It was **frontend only**: no session, no database writes, no password
+hashing. That wiring landed afterwards as Phase 4 — read `docs/PHASE-4.md` for
+what changed since this file was written, and `docs/AUTH-UI.md` for the flows as
+they behave today.
 
 ## What changed
 
@@ -99,31 +101,40 @@ one place and both follow.
   password managers offer the right account (`username` / `current-password` on
   sign-in, `new-password` on sign-up and reset).
 
-## Not built (deliberately)
+## What was deferred, and where it went
 
-- **No auth API.** The forms post to `/api/auth/login`, `/api/auth/signup`,
-  `/api/auth/verify`, `/api/auth/verify/resend`, `/api/auth/forgot-password` and
-  `/api/auth/reset-password`. None of these exists yet, so every submission in
-  the current build reports a failure. That is the expected behaviour, not a bug.
-  They are written against the documented `{ ok: true, data }` contract so that
-  Phase 4C only has to implement the routes.
-- **No session, no redirect protection.** `/home` is Phase 7 and 404s today, so
-  a real successful sign-in would land on a 404 until then.
-- **Social sign-in is inert.** Google and Apple buttons render disabled with an
-  explanation. They need credentials and a provider decision that do not exist.
-- **No password strength meter, no caps-lock warning, no "remember me".**
+- **No auth API — closed by Phase 4.** The forms were written against the
+  documented `{ ok: true, data }` contract, and Phase 4 implemented the routes
+  behind them (`docs/PHASE-4.md`). Note the names differ from the original
+  sketch: the real routes are `/api/auth/register`, `/api/auth/verify-otp`,
+  `/api/auth/forgot-password` and `/api/auth/reset-password`. There is **no**
+  resend route, so no form offers a resend.
+- **No session, no redirect protection.** Still true. `/home` is Phase 7 and 404s
+  today, so a successful sign-in lands on a 404.
+- **Social sign-in is inert.** Still true. Google and Apple buttons render
+  disabled with an explanation. They need credentials and a provider decision
+  that do not exist.
+- **No password strength meter, no caps-lock warning, no "remember me".** Still
+  true. Session lifetime is whatever the service decides.
 
 ## Validation rules (client-side)
 
-These are a courtesy, not a security boundary — the server revalidates
-everything in Phase 4C.
+These are a courtesy, not a security boundary — each route zod-validates again,
+and the service validates a third time. As implemented (see `docs/AUTH-UI.md`
+for the matching server rules):
 
 - `LoginForm` — identifier is any non-empty string up to 254 characters (users
   sign in with either email **or** phone, so no email regex is applied);
-  password must be non-empty.
-- `SignupForm` — name 2–120 characters; identifier must match an email pattern
-  or a Nigerian phone pattern (`0[789]\d{9}` / `+234[789]\d{9}`); password
-  8–128 characters and must match the confirmation; terms must be accepted.
-- `VerifyForm` — exactly six digits.
-- `ResetPasswordForm` — password 8–128 characters and must match the
-  confirmation. A missing `?token=` renders an "invalid link" state instead.
+  password must be non-empty. The form picks the `email` or `phone` request key
+  by looking for `@`.
+- `SignupForm` — step 1 takes the identifier: an email pattern while the Email tab
+  is active, or a Nigerian phone pattern (`0[789]\d{9}` / `+234[789]\d{9}`) on the
+  Phone tab. Step 2 takes a password of 8–128 characters plus a required terms
+  checkbox. No name field and no confirm-password field; names arrive with the
+  Phase 5 profile.
+- `ForgotPasswordForm` — the same identifier rules as signup step 1.
+- `VerifyForm` — exactly six digits; non-digits are stripped as you type, so a
+  pasted `123 456` still works.
+- `ResetPasswordForm` — the six-digit code, a password of 8–128 characters, and a
+  confirmation that must match. A missing `?identifier=` renders a "Reset link
+  needed" state instead of a form that could only fail.

@@ -4,9 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { z } from "zod";
 import { AuthPanel } from "@/components/auth/AuthPanel/AuthPanel";
-import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
+import { apiFetch } from "@/lib/client/api";
 import "./ForgotPasswordForm.css";
 
 const IDENTIFIER_SCHEMA = z.object({
@@ -27,7 +27,6 @@ export function ForgotPasswordForm({
   const [identifier, setIdentifier] = React.useState("");
   const [error, setError] = React.useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = React.useState(false);
-  const [sent, setSent] = React.useState(false);
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -45,59 +44,38 @@ export function ForgotPasswordForm({
     setSubmitting(true);
 
     try {
-      // Phase 4C endpoint; expected to fail in this build. The response is
-      // ignored on purpose: revealing whether an account exists would leak
-      // which addresses are registered.
-      await fetch("/api/auth/forgot-password", {
+      // The response body is deliberately identical whether or not an account
+      // exists for this identifier — revealing the difference would leak which
+      // addresses are registered. A transport failure is different from "no
+      // such account", so that case alone surfaces an error.
+      const result = await apiFetch<unknown>("/api/auth/forgot-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed.data),
+        body: parsed.data,
       });
+
+      if (!result.ok) {
+        setSubmitting(false);
+        setError("Something went wrong. Please try again.");
+        return;
+      }
+
+      // The code itself went out by email/SMS. `/reset-password` collects that
+      // code together with the new password and is what consumes it — routing
+      // through /verify first would spend the code before it can be used.
+      window.location.assign(
+        `/reset-password?identifier=${encodeURIComponent(parsed.data.identifier)}`,
+      );
     } catch {
-      // Swallowed for the same reason — the user is told the same thing
-      // whether or not the request succeeded.
-    } finally {
       setSubmitting(false);
-      setSent(true);
+      setError("Something went wrong. Please try again.");
     }
   };
-
-  if (sent) {
-    return (
-      <AuthPanel
-        title="Check your inbox"
-        headingLevel={headingLevel}
-        showSocial={false}
-        footer={
-          <p>
-            Remembered it? <Link href="/">Back to sign in</Link>
-          </p>
-        }
-      >
-        <div className="forgot-password__sent">
-          <Alert variant="info">
-            If an account exists for {identifier}, we&apos;ve sent a link to
-            reset your password. The link expires in 30 minutes.
-          </Alert>
-
-          <Button
-            type="button"
-            variant="secondary"
-            fullWidth
-            onClick={() => setSent(false)}
-          >
-            Use a different email or phone
-          </Button>
-        </div>
-      </AuthPanel>
-    );
-  }
 
   return (
     <AuthPanel
       title="Forgot your password?"
       headingLevel={headingLevel}
-      subtitle="Enter your email or phone number and we'll send you a reset link."
+      subtitle="Enter your email or phone number and we'll send you a 6-digit code to choose a new password."
       showSocial={false}
       footer={
         <p>
@@ -119,7 +97,7 @@ export function ForgotPasswordForm({
         />
 
         <Button type="submit" size="lg" fullWidth loading={submitting}>
-          Send reset link
+          Send code
         </Button>
       </form>
     </AuthPanel>

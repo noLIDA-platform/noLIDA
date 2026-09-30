@@ -45,3 +45,80 @@
   font-size: var(--text-xs);
   color: var(--color-error);
 }
+
+
+/* EMAIL / PHONE TOGGLE — segmented control for the sign-up method. */
+.signup-form__methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.signup-form__method {
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.signup-form__method:hover:not(.signup-form__method--active) {
+  color: var(--color-text);
+}
+
+.signup-form__method--active {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-weight: var(--weight-semibold);
+  box-shadow: var(--shadow-sm);
+}
+
+.signup-form__method:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Step 2: lets the user correct the identifier without losing the step. */
+.signup-form__edit {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.signup-form__edit-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  text-decoration: none;
+  text-underline-offset: 2px;
+}
+
+.signup-form__edit-btn:hover {
+  text-decoration: underline;
+}
+
+.signup-form__edit-btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.signup-form__edit-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
