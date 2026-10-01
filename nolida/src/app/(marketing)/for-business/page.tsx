@@ -5,7 +5,6 @@ import { Section } from "@/components/marketing/Section/Section";
 import { SectionHeading } from "@/components/marketing/SectionHeading/SectionHeading";
 import { StepsSection } from "@/components/marketing/StepsSection/StepsSection";
 import { Card } from "@/components/ui/Card/Card";
-import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
 import "../pages.css";
