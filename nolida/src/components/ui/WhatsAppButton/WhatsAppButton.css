@@ -1,0 +1,41 @@
+.ui-whatsapp-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--color-primary);
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.ui-whatsapp-button--sm {
+  width: 36px;
+  height: 36px;
+}
+
+.ui-whatsapp-button--inverse {
+  border-color: var(--text-inverse);
+  background: transparent;
+  color: var(--text-inverse);
+}
+
+.ui-whatsapp-button:hover:not(:disabled) {
+  opacity: 0.82;
+}
+
+.ui-whatsapp-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.ui-whatsapp-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

@@ -175,6 +175,13 @@
   border-radius: var(--radius-sm);
 }
 
+.home-mobile__whatsapp {
+  position: absolute;
+  right: max(var(--space-5), env(safe-area-inset-right));
+  bottom: max(var(--space-5), env(safe-area-inset-bottom));
+  z-index: 3;
+}
+
 /* VIEW B — themed login surface. */
 .home-mobile--login {
   background-color: var(--color-bg);

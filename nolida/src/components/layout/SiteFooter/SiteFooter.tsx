@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo/Logo";
 import { Container } from "@/components/ui/Container/Container";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
 import "./SiteFooter.css";
 
 interface FooterLink {
@@ -62,6 +63,15 @@ export default function SiteFooter() {
                   </Link>
                 </li>
               ))}
+              {column.title === "Company" ? (
+                <li>
+                  <WhatsAppButton
+                    size="sm"
+                    label="Contact noLIDA on WhatsApp"
+                    message="Hi noLIDA, I have a question."
+                  />
+                </li>
+              ) : null}
             </ul>
           </nav>
         ))}

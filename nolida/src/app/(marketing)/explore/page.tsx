@@ -16,7 +16,7 @@ import { CtaSection } from "@/components/marketing/CtaSection/CtaSection";
 import { Button } from "@/components/ui/Button/Button";
 import { Card } from "@/components/ui/Card/Card";
 import { Icon } from "@/components/ui/Icon/Icon";
-import { buildWhatsAppHref } from "@/lib/support/whatsapp";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
 import "../pages.css";
 
 export const metadata: Metadata = {
@@ -44,10 +44,6 @@ const TRUST_ITEMS = [
 ] as const;
 
 export default function ExplorePage() {
-  const whatsappHref = buildWhatsAppHref(
-    process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP,
-  );
-
   return (
     <>
       <Hero
@@ -241,15 +237,10 @@ export default function ExplorePage() {
               gap: "var(--space-4)",
             }}
           >
-            {whatsappHref ? (
-              <Button as="link" href={whatsappHref} size="lg">
-                WhatsApp
-              </Button>
-            ) : (
-              <Button size="lg" disabled>
-                WhatsApp not configured
-              </Button>
-            )}
+            <WhatsAppButton
+              label="Ask noLIDA a question on WhatsApp"
+              message="Hi noLIDA, I have a question about noLIDA."
+            />
             <Button as="link" href="/help" variant="secondary" size="lg">
               Visit the Help Center
             </Button>

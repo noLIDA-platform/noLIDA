@@ -181,6 +181,13 @@
   color: var(--color-text-muted);
 }
 
+.pg-contact__whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-inverse);
+}
+
 /* Inverse text helpers used inside navy sections */
 .mk-section--navy .pg-prose,
 .mk-section--navy .pg-card__text,

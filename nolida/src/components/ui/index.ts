@@ -11,3 +11,5 @@ export * from "./Link/Link";
 
 // Icon primitive (Lucide-backed)
 export * from "./Icon/Icon";
+export * from "./WhatsAppButton/WhatsAppButton";
+export * from "./WhatsAppButton/WhatsAppIcon";

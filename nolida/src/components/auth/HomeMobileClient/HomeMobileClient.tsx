@@ -27,6 +27,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { LoginForm } from "@/components/auth/LoginForm/LoginForm";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
 import "./HomeMobileClient.css";
 
 export type HomeMobileView = "welcome" | "login";
@@ -143,6 +144,11 @@ export function HomeMobileClient({
             Already have an account? Sign in
           </button>
         </div>
+        <WhatsAppButton
+          className="home-mobile__whatsapp"
+          label="Message noLIDA on WhatsApp"
+          message="Hi noLIDA, I have a question about the app."
+        />
       </section>
     </div>
   );

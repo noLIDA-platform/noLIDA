@@ -7,7 +7,7 @@ import { StepsSection } from "@/components/marketing/StepsSection/StepsSection";
 import { Card } from "@/components/ui/Card/Card";
 import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
-import { buildWhatsAppHref } from "@/lib/support/whatsapp";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
 import "../pages.css";
 
 export const metadata: Metadata = {
@@ -35,21 +35,13 @@ const WHY_POINTS: readonly { icon: React.ReactNode; title: string; text: string 
 ];
 
 export default function ForBusinessPage() {
-  const whatsappHref = buildWhatsAppHref(
-    process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP,
-  );
-
   return (
     <>
       <Hero
         eyebrow="For business"
         title="Grow your business on noLIDA"
         subtitle="More customers, fewer no-shows, and a clear record of what you earned."
-        primaryCta={
-          whatsappHref
-            ? { label: "Contact us on WhatsApp", href: whatsappHref }
-            : null
-        }
+        primaryCta={{ label: "List your business", href: "/list-your-business" }}
         secondaryCta={{ label: "See how it works", href: "/how-it-works" }}
       />
 
@@ -134,21 +126,14 @@ export default function ForBusinessPage() {
           <p className="pg-contact__hint">
             Message us on WhatsApp and we will walk you through it.
           </p>
-          {whatsappHref ? (
-            <Button as="link" href={whatsappHref} variant="inverse" size="lg">
-              Contact us on WhatsApp
-            </Button>
-          ) : (
-            <Button size="lg" disabled>
-              WhatsApp not configured
-            </Button>
-          )}
-          {!whatsappHref ? (
-            <p className="pg-contact__hint">
-              Our WhatsApp support number will be published here as soon as
-              launch is confirmed.
-            </p>
-          ) : null}
+          <div className="pg-contact__whatsapp">
+            <WhatsAppButton
+              inverse
+              label="Ask about listing your business on WhatsApp"
+              message="Hi noLIDA, I want to list my business on noLIDA."
+            />
+            <span>Message us about listing your business</span>
+          </div>
         </div>
       </Section>
     </>

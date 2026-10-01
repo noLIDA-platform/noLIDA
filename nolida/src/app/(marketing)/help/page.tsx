@@ -3,8 +3,7 @@ import { Hero } from "@/components/marketing/Hero/Hero";
 import { Section } from "@/components/marketing/Section/Section";
 import { Accordion } from "@/components/marketing/Accordion/Accordion";
 import type { AccordionItem } from "@/components/marketing/Accordion/Accordion";
-import { Button } from "@/components/ui/Button/Button";
-import { buildWhatsAppHref } from "@/lib/support/whatsapp";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
 import "../pages.css";
 
 export const metadata: Metadata = {
@@ -67,10 +66,6 @@ const FAQ_GROUPS: readonly FaqGroup[] = [
 ];
 
 export default function HelpPage() {
-  const whatsappHref = buildWhatsAppHref(
-    process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP,
-  );
-
   return (
     <>
       <Hero
@@ -97,21 +92,14 @@ export default function HelpPage() {
             Our team is one message away. Send us a WhatsApp message and we will
             get back to you.
           </p>
-          {whatsappHref ? (
-            <Button as="link" href={whatsappHref} variant="inverse" size="lg">
-              Message us on WhatsApp
-            </Button>
-          ) : (
-            <Button size="lg" disabled>
-              WhatsApp not configured
-            </Button>
-          )}
-          {!whatsappHref ? (
-            <p className="pg-contact__hint">
-              Our WhatsApp support number will be published here as soon as
-              launch is confirmed.
-            </p>
-          ) : null}
+          <div className="pg-contact__whatsapp">
+            <WhatsAppButton
+              inverse
+              label="Get account help on WhatsApp"
+              message="Hi noLIDA, I need help with my account."
+            />
+            <span>Message our support team</span>
+          </div>
         </div>
       </Section>
     </>

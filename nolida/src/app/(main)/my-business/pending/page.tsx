@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
 import { getSubmissionStatus } from "@/lib/server/services/business.service";
+import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
 
 export const metadata: Metadata = { title: "Business review" };
 
@@ -35,6 +36,17 @@ export default async function MyBusinessPendingPage() {
             ? `Submission received on ${new Date(submission.submitted_at).toLocaleString()}. Our team will review the listing and update the status here.`
             : "Your business has not been submitted yet. Complete the details and send the listing for review."}
         </p>
+        {business?.status === "REJECTED" ? (
+          <WhatsAppButton
+            label="Get help with your rejected business submission on WhatsApp"
+            message="Hi noLIDA, I need help with my rejected business submission."
+          />
+        ) : (
+          <WhatsAppButton
+            label="Get help with your business submission on WhatsApp"
+            message="Hi noLIDA, I need help with my business submission."
+          />
+        )}
       </section>
     </main>
   );
