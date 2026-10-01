@@ -1,0 +1,27 @@
+/* Shared frame for every feed-backed page (/home, /favorites, /create,
+   /post/[id]).
+
+   One centred 600px column. The sidebar and bottom nav already frame the app,
+   so a second side rail here would fight them; a single readable measure is
+   what a text feed actually wants. Below the mobile breakpoint the column is
+   simply the full width. */
+
+.feed-page {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4) 0;
+}
+
+.feed-page__column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 600px;
+}
+
+@media (min-width: 768px) {
+  .feed-page {
+    padding: var(--space-5) 0;
+  }
+}

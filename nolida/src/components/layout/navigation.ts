@@ -1,4 +1,5 @@
 import {
+  Bookmark,
   Home,
   LifeBuoy,
   MessageCircle,
@@ -69,6 +70,7 @@ export const DRAWER_SECTIONS: readonly NavSection[] = [
     title: "Your account",
     items: [
       { href: "/profile", label: "Profile", icon: User },
+      { href: "/favorites", label: "Saved posts", icon: Bookmark },
       { href: "/wallet", label: "Wallet", icon: Wallet },
       { href: "/my-business", label: "My Business", icon: Store },
       { href: "/orders", label: "Orders", icon: Receipt },

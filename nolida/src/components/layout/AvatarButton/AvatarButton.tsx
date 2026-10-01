@@ -1,5 +1,6 @@
 import React from "react";
-import { initialsOf, type ShellUser } from "@/lib/client/shell-user";
+import { Avatar } from "@/components/ui/Avatar/Avatar";
+import type { ShellUser } from "@/lib/client/shell-user";
 import "./AvatarButton.css";
 
 export interface AvatarButtonProps {
@@ -16,9 +17,9 @@ export interface AvatarButtonProps {
 /**
  * The signed-in user's avatar, doubling as the trigger for the profile drawer.
  *
- * Avatar photos are not uploaded yet, so the fallback is not a corner case: it
- * is what everyone sees. `initialsOf` keeps it honest to the name that appears
- * beside it.
+ * The picture itself is the `Avatar` primitive's job, so the initials fallback
+ * lives in exactly one place. This component adds only what is specific to a
+ * control: the button element, the hover ring and the accessible name.
  *
  * The accessible name describes the action ("Profile and settings") rather than
  * the picture, because the picture is the person, not the destination.
@@ -32,7 +33,7 @@ export function AvatarButton({
 }: AvatarButtonProps): React.JSX.Element {
   const classes = [
     "app-avatar",
-    `app-avatar--${size}`,
+    size === "lg" ? "app-avatar--lg" : "",
     className ?? "",
   ]
     .filter(Boolean)
@@ -47,17 +48,7 @@ export function AvatarButton({
       aria-label="Profile and settings"
       className={classes}
     >
-      {user.avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={user.avatarUrl}
-          alt=""
-          className="app-avatar__img"
-          referrerPolicy="no-referrer"
-        />
-      ) : (
-        <span aria-hidden="true">{initialsOf(user.displayName)}</span>
-      )}
+      <Avatar src={user.avatarUrl} name={user.displayName} size={size} />
     </button>
   );
 }

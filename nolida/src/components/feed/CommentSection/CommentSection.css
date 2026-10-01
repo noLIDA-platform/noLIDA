@@ -1,0 +1,131 @@
+/* CommentSection — the thread under one post. */
+
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border);
+}
+
+.comments__status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.comments__status--error {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-error);
+}
+
+.comments__empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.comments__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.comments__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.comments__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  flex: 1;
+}
+
+.comments__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.comments__name {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.comments__time {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.comments__text {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.comments__actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.comments__action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.comments__action:hover {
+  color: var(--color-text);
+}
+
+.comments__action:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Filled heart for a liked comment — same red the post card uses. */
+.comments__action--active {
+  color: var(--color-error);
+}
+
+.comments__composer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.comments__composer-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.comments__composer-actions {
+  display: flex;
+  justify-content: flex-end;
+}

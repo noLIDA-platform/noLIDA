@@ -1,0 +1,52 @@
+/* Avatar — a picture, or the initials that stand in for one.
+   Sizes are fixed rather than a scale factor so a call site reads as a decision
+   (sm vs lg) instead of a number someone has to guess. */
+
+.ui-avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  color: #ffffff;
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.01em;
+  user-select: none;
+  /* Fallback fill. The photo, when there is one, covers it entirely. */
+  background-image: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-accent-magenta) 100%
+  );
+}
+
+.ui-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ui-avatar--sm {
+  width: 24px;
+  height: 24px;
+  font-size: var(--text-xs);
+}
+
+.ui-avatar--md {
+  width: 32px;
+  height: 32px;
+  font-size: var(--text-sm);
+}
+
+.ui-avatar--lg {
+  width: 48px;
+  height: 48px;
+  font-size: var(--text-lg);
+}
+
+.ui-avatar--xl {
+  width: 96px;
+  height: 96px;
+  font-size: var(--text-2xl);
+}

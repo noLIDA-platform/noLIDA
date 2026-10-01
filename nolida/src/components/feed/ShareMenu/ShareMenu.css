@@ -1,0 +1,131 @@
+/* ShareMenu — a small centred sheet. Same scrim-and-panel shape as the profile
+   drawer so the app has one idea of what a modal looks like. */
+
+.share-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.share-menu__scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background-color: rgb(10 14 39 / 55%);
+  cursor: default;
+}
+
+.share-menu__panel {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: var(--space-4);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-lg);
+}
+
+.share-menu__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.share-menu__title {
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+.share-menu__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.share-menu__close:hover {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+.share-menu__close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.share-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.share-menu__option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.share-menu__option:hover:not(:disabled) {
+  background-color: var(--color-bg-subtle);
+}
+
+.share-menu__option:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.share-menu__option:disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.share-menu__soon {
+  margin-left: auto;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.share-menu__message {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (min-width: 600px) {
+  .share-menu {
+    align-items: center;
+  }
+}

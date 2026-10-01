@@ -67,7 +67,8 @@
 - Phase 4: complete (auth screens wired to the API; HTTP end-to-end green — see `docs/PHASE-4.md` and `docs/AUTH-UI.md`)
 - Phase 4B: complete (auth screens, layout and orientation — see `docs/PHASE-4B.md`)
 - Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
-- Phase 5B: not started (profile editing and live account settings)
+- Phase 5B: in progress (feed, posts, comments, interactions — see `docs/FEED.md`)
+- Phase 5C: not started (profile editing and live account settings, deferred out of 5B)
 - Phase 6+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
 
 ## Auth UI (Phase 4) — locked rules
@@ -88,6 +89,21 @@
 - Sign out goes only through `POST /api/auth/logout`; the client neither reads nor writes the cookie.
 - Server Components read the session cookie via `readSessionToken()` (`src/lib/server/auth/session-cookie.ts`); Route Handlers keep using `readSessionCookie(request)`.
 - The theme switch in the profile drawer stays disabled until a theme preference can actually be saved.
+
+## Feed and Posts (Phase 5B)
+- Post types: GENERAL_POST, BUSINESS_POST, SERVICE_POST, PRODUCT_POST, REQUEST_POST, OFFER_POST, AVAILABILITY_POST, JOB_REQUEST_POST, ANNOUNCEMENT_POST, RECOMMENDATION_POST.
+- Post body: 1-5000 characters. Comment body: 1-2000 characters. Enforced by schema, service and DB CHECK constraint — in that order.
+- Posts are visible: PUBLIC (anyone signed in), FOLLOWERS (only followers), PRIVATE (only the author). Enforced in SQL by the `VISIBLE_TO_VIEWER` predicate; never filter a page after loading it.
+- A post the viewer may not see is 404, never 403. Never leak that a private post exists.
+- Feed ordering: `created_at DESC, id DESC`. Strictly chronological. Ranking, when it comes, replaces one repository call — not the caller.
+- Pagination is a `(created_at, id)` cursor. Repositories fetch `limit + 1`; the extra row is what makes `nextCursor` honest.
+- `liked`/`saved` are attached per-viewer with two batched `= ANY($1)` lookups per page. Never one query per post.
+- All interactions are idempotent. Liking twice is a no-op. Enforce it with `ON CONFLICT DO NOTHING` plus a UNIQUE constraint — never a read-then-write.
+- A counter and its row move inside one `withTransaction`. Counters are clamped with `GREATEST(0, n + delta)`.
+- Optimistic UI for likes and saves only, reverted exactly on failure. Comments and deletes wait for the server.
+- Media uploads (photos/videos) are NOT enabled yet — deferred until Cloudinary is configured. The composer shows disabled buttons rather than hiding them or faking an upload.
+- `/home` and `/create` share one `PostComposer`. `/favorites` renders the saved feed. `/post/[id]` is signed-in only — a genuinely public post page is a separate decision.
+- Feed types and constants live in `src/lib/feed/` (`constants.ts`, `types.ts`), which must stay importable from Client Components.
 
 ## Design System (Phase 1)
 - All colors come from CSS variables in `styles/tokens.css` or `styles/tokens-ui.css`. Never hardcode.

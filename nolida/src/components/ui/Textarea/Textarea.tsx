@@ -16,6 +16,12 @@ export interface TextareaProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /**
+   * Hard cap enforced by the browser. A courtesy, not a rule: the server
+   * validates the same length again. It exists so a counter and a paste cannot
+   * silently disagree.
+   */
+  maxLength?: number;
 }
 
 export function Textarea({
@@ -29,6 +35,7 @@ export function Textarea({
   onChange,
   placeholder,
   disabled = false,
+  maxLength,
   className,
 }: TextareaProps): React.JSX.Element {
   const generatedId = React.useId();
@@ -68,6 +75,7 @@ export function Textarea({
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
+        maxLength={maxLength}
         aria-invalid={error ? "true" : undefined}
         aria-describedby={describedBy}
         className={textareaClasses}

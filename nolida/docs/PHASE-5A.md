@@ -149,7 +149,7 @@ Run on this exact tree:
 
 ## Where this goes next
 
-**5B** turns `/profile` and the settings rows into editable screens backed by
-the API. Nothing built here moves for it: 5B fills screens that already exist,
-already render inside the shell, and already have their home in
-`navigation.ts`.
+This phase ended with `/home` holding a single honest empty state where a feed
+would go. That promise is kept in **5B** (see `docs/FEED.md`), which replaced
+the dashboard with a real feed; profile editing and live account settings moved
+to **5C**.

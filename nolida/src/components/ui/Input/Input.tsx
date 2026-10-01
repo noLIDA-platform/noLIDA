@@ -23,6 +23,18 @@ export interface InputProps {
   autoComplete?: string;
   inputMode?: "none" | "text" | "email" | "tel" | "url" | "numeric" | "search";
   autoFocus?: boolean;
+  /**
+   * Hard cap enforced by the browser — a courtesy, not a rule. The server
+   * validates the same length again; this only stops the field and the server
+   * from silently disagreeing.
+   */
+  maxLength?: number;
+  /**
+   * Accessible name for fields that have no visible `label` — an icon-only
+   * control in a toolbar, say. Prefer a visible `label` when there is room for
+   * one.
+   */
+  ariaLabel?: string;
   className?: string;
 }
 
@@ -41,6 +53,8 @@ export function Input({
   autoComplete,
   inputMode,
   autoFocus = false,
+  maxLength,
+  ariaLabel,
   className,
 }: InputProps): React.JSX.Element {
   const generatedId = React.useId();
@@ -84,6 +98,8 @@ export function Input({
         autoComplete={autoComplete}
         inputMode={inputMode}
         autoFocus={autoFocus}
+        maxLength={maxLength}
+        aria-label={ariaLabel}
         aria-invalid={error ? "true" : undefined}
         aria-describedby={describedBy}
         className={inputClasses}
