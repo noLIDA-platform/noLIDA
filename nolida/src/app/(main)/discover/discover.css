@@ -1,0 +1,21 @@
+/* /discover — one centred column. Slightly wider than the feed (600px) because
+   a result row is a summary rather than a conversation, and the people grid
+   needs room for two columns. */
+
+.discover-page {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) 0 var(--space-6);
+}
+
+.discover-page > * {
+  width: 100%;
+  max-width: 800px;
+  padding-inline: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .discover-page {
+    padding-top: var(--space-4);
+  }
+}

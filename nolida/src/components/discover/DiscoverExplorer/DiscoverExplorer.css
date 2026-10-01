@@ -1,0 +1,66 @@
+/* DiscoverExplorer — the /discover screen. */
+
+.discover {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.discover__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: var(--space-3) 0;
+  background-color: var(--color-bg);
+}
+
+.discover__results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.discover__count {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.discover__load-more {
+  display: flex;
+  justify-content: center;
+}
+
+.discover__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-6) 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.discover__empty {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+}
+
+/* People get two columns once there is room; posts stay one-per-row because a
+   post body needs the width to be readable. */
+.discover__people {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .discover__people {
+    grid-template-columns: 1fr 1fr;
+  }
+}

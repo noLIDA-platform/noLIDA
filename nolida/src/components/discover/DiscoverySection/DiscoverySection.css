@@ -1,0 +1,78 @@
+/* DiscoverySection — a heading and a row of results. */
+
+.discovery-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.discovery-section__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.discovery-section__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.discovery-section__subtitle {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.discovery-section__see-all {
+  flex-shrink: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.discovery-section__see-all:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Horizontal scroll on a phone — the natural gesture, and it keeps a section to
+   one row instead of pushing everything below it off the screen. */
+.discovery-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (max-width: 767px) {
+  .discovery-section__body {
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-2);
+    margin-inline: calc(var(--space-4) * -1);
+    padding-inline: var(--space-4);
+  }
+
+  .discovery-section__body > * {
+    flex: 0 0 84%;
+    scroll-snap-align: start;
+  }
+}
+
+@media (min-width: 768px) {
+  /* Two columns for the people grid, one for the post lists. The caller sets
+     the row class; this just gives the band room to breathe. */
+  .discovery-section__body--people {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+}

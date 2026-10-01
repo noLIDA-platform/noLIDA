@@ -1,15 +1,50 @@
 import type { Metadata } from "next";
-import { Search } from "lucide-react";
-import { PagePlaceholder } from "@/components/app/PagePlaceholder/PagePlaceholder";
+import { redirect } from "next/navigation";
+import { DiscoverExplorer } from "@/components/discover/DiscoverExplorer/DiscoverExplorer";
+import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
+import "./discover.css";
 
-export const metadata: Metadata = { title: "Discover" };
+export const metadata: Metadata = {
+  title: "Discover",
+  description: "Search posts and people, or browse what is trending.",
+};
 
-export default function DiscoverPage() {
+/**
+ * `/discover` — search, and something to look at before you search.
+ *
+ * A Server Component on purpose. The page reads the session and `?q=` and hands
+ * both to the client island below. That is what makes the desktop top bar's
+ * plain GET form work end to end: submitting it navigates to `/discover?q=…`,
+ * and this page turns that query into real results on the first render rather
+ * than after a hydration round-trip.
+ *
+ * The session is re-read here even though `(main)/layout.tsx` already refused
+ * anyone without one — the viewer's id is needed by every follow button, and a
+ * page that renders someone's identity must not rely on a parent having done
+ * its job.
+ */
+export default async function DiscoverPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string | string[] }>;
+}) {
+  const session = await getCurrentSessionUser();
+  if (!session) redirect("/");
+
+  const params = await searchParams;
+  // A repeated `?q=a&q=b` is not a search; take the first and move on.
+  const raw = Array.isArray(params.q) ? params.q[0] : params.q;
+  const initialQuery = typeof raw === "string" ? raw : "";
+
   return (
-    <PagePlaceholder
-      icon={Search}
-      title="Discover"
-      description="Search and browse services, businesses and people near you. The search index and category filters are built in a later phase, so the top bar's search field leads here in the meantime."
-    />
+    <div className="discover-page">
+      {/* Keyed by the query so submitting the top bar form while already on
+          /discover re-runs the search instead of leaving stale results. */}
+      <DiscoverExplorer
+        key={initialQuery}
+        viewerId={session.user.id}
+        initialQuery={initialQuery}
+      />
+    </div>
   );
 }

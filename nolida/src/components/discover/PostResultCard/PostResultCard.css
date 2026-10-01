@@ -1,0 +1,88 @@
+/* PostResultCard — one row in a result list. The whole card is the link. */
+
+.post-result {
+  /* Removes the card's own padding: the inner link supplies it, so the
+     clickable area covers the entire surface. */
+  padding: 0;
+  overflow: hidden;
+}
+
+.post-result__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: inherit;
+  text-decoration: none;
+}
+
+.post-result__link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.post-result__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.post-result__identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.post-result__name {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.post-result__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+/* Three-line clamp. `line-clamp` is the standard spelling and
+   `-webkit-line-clamp` is kept for engines that shipped the prefixed one
+   first; the two values agree, so whichever the browser understands wins. The
+   fallback for an engine that understands neither is an unclamped paragraph,
+   which is not a failure — just longer. */
+.post-result__body {
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  overflow-wrap: anywhere;
+}
+
+.post-result__location {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.post-result__counts {
+  display: flex;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.post-result__count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}

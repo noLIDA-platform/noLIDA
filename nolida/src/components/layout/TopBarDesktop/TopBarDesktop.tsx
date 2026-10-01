@@ -34,7 +34,7 @@ export function TopBarDesktop({
           <input
             type="search"
             name="q"
-            placeholder="Search services, businesses, people"
+            placeholder="Search posts and people"
             aria-label="Search noLIDA"
             className="app-topbar__field"
           />

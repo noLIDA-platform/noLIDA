@@ -2,6 +2,7 @@ import type { PoolClient } from "pg";
 import { query } from "@/lib/db/client";
 import type { PostRow, PostWithAuthor } from "@/lib/feed/types";
 import { decodeCursor, encodeCursor } from "./cursor";
+import { VISIBLE_TO_VIEWER } from "./visibility";
 
 type Db = Pick<PoolClient, "query">;
 
@@ -27,29 +28,6 @@ const SELECT_WITH_AUTHOR = `
   JOIN users u ON u.id = p.user_id
   LEFT JOIN profiles pr ON pr.user_id = u.id
 `;
-
-/**
- * Who may see a post, as a predicate over the alias `p`.
- *
- * `$1` is always the viewer's id. PUBLIC is visible to anyone; FOLLOWERS needs
- * the viewer to follow the author; PRIVATE is only ever the author's own. The
- * `p.user_id = $1` arm means an author always sees their own posts, whatever
- * the visibility — otherwise posting privately would look like a failed post.
- *
- * Enforced in SQL, never by filtering afterwards: a post the viewer may not see
- * must not be loaded at all.
- */
-const VISIBLE_TO_VIEWER = `(
-  p.visibility = 'PUBLIC'
-  OR p.user_id = $1
-  OR (
-    p.visibility = 'FOLLOWERS'
-    AND EXISTS (
-      SELECT 1 FROM follows f
-      WHERE f.follower_id = $1 AND f.following_id = p.user_id
-    )
-  )
-)`;
 
 const RETURNING = `
   RETURNING id, user_id, business_id, type, body, location, category_id,

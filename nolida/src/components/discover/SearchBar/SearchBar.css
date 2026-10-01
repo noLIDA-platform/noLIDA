@@ -1,0 +1,54 @@
+/* SearchBar — the Input primitive with an icon and a clear button laid over it. */
+
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar__icon {
+  position: absolute;
+  left: var(--space-3);
+  display: inline-flex;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* Room for the icon on the left and the clear button on the right, so text
+   never runs underneath either. */
+.search-bar .ui-input {
+  padding-left: calc(var(--space-3) * 2 + 18px);
+  padding-right: calc(var(--space-3) * 2 + 16px);
+}
+
+/* Chrome ships its own clear affordance on type="search". Two of them, in
+   different places, is worse than one. */
+.search-bar .ui-input::-webkit-search-cancel-button {
+  display: none;
+  appearance: none;
+}
+
+.search-bar__clear {
+  position: absolute;
+  right: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.search-bar__clear:hover {
+  background-color: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+.search-bar__clear:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

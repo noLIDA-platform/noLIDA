@@ -35,6 +35,9 @@ export interface InputProps {
    * one.
    */
   ariaLabel?: string;
+  /** For inputs that act on Enter, or need to react on losing focus. */
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   className?: string;
 }
 
@@ -55,6 +58,8 @@ export function Input({
   autoFocus = false,
   maxLength,
   ariaLabel,
+  onBlur,
+  onKeyDown,
   className,
 }: InputProps): React.JSX.Element {
   const generatedId = React.useId();
@@ -93,6 +98,8 @@ export function Input({
         value={value}
         defaultValue={defaultValue}
         onChange={onChange}
+        onBlur={onBlur}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         disabled={disabled}
         autoComplete={autoComplete}

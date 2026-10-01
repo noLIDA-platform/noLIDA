@@ -67,9 +67,10 @@
 - Phase 4: complete (auth screens wired to the API; HTTP end-to-end green — see `docs/PHASE-4.md` and `docs/AUTH-UI.md`)
 - Phase 4B: complete (auth screens, layout and orientation — see `docs/PHASE-4B.md`)
 - Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
-- Phase 5B: in progress (feed, posts, comments, interactions — see `docs/FEED.md`)
+- Phase 5B: complete (feed, posts, comments, interactions — see `docs/FEED.md`)
 - Phase 5C: not started (profile editing and live account settings, deferred out of 5B)
-- Phase 6+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
+- Phase 6: complete (search and discovery — see `docs/SEARCH.md`)
+- Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -104,6 +105,25 @@
 - Media uploads (photos/videos) are NOT enabled yet — deferred until Cloudinary is configured. The composer shows disabled buttons rather than hiding them or faking an upload.
 - `/home` and `/create` share one `PostComposer`. `/favorites` renders the saved feed. `/post/[id]` is signed-in only — a genuinely public post page is a separate decision.
 - Feed types and constants live in `src/lib/feed/` (`constants.ts`, `types.ts`), which must stay importable from Client Components.
+
+## Search and Discovery (Phase 6)
+- Search is Postgres full-text + trigram for now. `search.repo.ts` is the only file that knows how; a Meilisearch/Typesense swap replaces it and `search.service.ts` without touching a component or a route.
+- FTS configuration is `simple`, deliberately: no stemmer, no English stopword list, because those break Nigerian names and languages. Do not "improve" it to `english`.
+- Fuzzy post matching uses `<%` (WORD similarity), never `%`. `%` scores two strings whole, so one typo inside a long body scores ~0.18 and never matches.
+- **Operand order is load-bearing: needle first — `$2 <% p.body`.** `p.body <% $2` scores the whole post against a short word and matches nothing, with no error to show for it.
+- `pg_trgm.word_similarity_threshold` stays at the 0.6 default. Do not lower it in a migration — it is database-wide and every future `<%` query inherits it. Measured trade-offs are in `docs/SEARCH.md`.
+- User text is never concatenated into SQL. It goes through `websearch_to_tsquery('simple', $n)`.
+- Search reuses `VISIBLE_TO_VIEWER` from `repositories/visibility.ts`, the same predicate `posts.repo.ts` uses. Never filter visibility after loading a page, and never let `counts` exceed what the viewer may see.
+- Search paginates by OFFSET, capped at 500 — not by the feed's `(created_at, id)` cursor, because results merge two tables and relevance order has no stable key. `nextCursor` is the next offset as a string; "Load more" appends.
+- Business search exists in the types and the repository but is NOT exposed by the public route, which accepts `all | post | user` only. Do not surface the filter before Phase 8 — it would return an empty list that looks broken.
+- `/discover` is a Server Component that reads `?q=` and renders the `DiscoverExplorer` client island. The page passes `key={initialQuery}` so a top-bar submit while already on `/discover` re-runs the search instead of leaving stale results.
+- `TopBarDesktop` stays a plain GET form to `/discover`. Never rebuild it as a JS-driven search box.
+- Search requests carry a token so a late response cannot overwrite a newer one. Typing is debounced; Enter and clear flush immediately.
+- `is_following` is computed per viewer in the same query as the results. A person card without it would always offer "Follow" for someone you already follow, and there would be no way to unfollow.
+- Follow is optimistic and reverted on failure — same rule as likes.
+- `/profile/[id]` is a minimal read-only view, signed-in only, inside `(main)`. The visitor's own profile redirects to `/profile`. An unknown account and a suspended account both 404.
+- Run `npm run test:search` AND `npm run test:feed`. They share the visibility predicate; a change to one can break the other.
+- Where `-webkit-line-clamp` is used, declare standard `line-clamp` alongside it.
 
 ## Design System (Phase 1)
 - All colors come from CSS variables in `styles/tokens.css` or `styles/tokens-ui.css`. Never hardcode.
