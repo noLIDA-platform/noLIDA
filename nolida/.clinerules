@@ -72,6 +72,7 @@
 - Phase 5B: complete (feed, posts, comments, interactions — see `docs/FEED.md`)
 - Phase 5C: not started (profile editing and live account settings, deferred out of 5B)
 - Phase 6: complete (search and discovery — see `docs/SEARCH.md`)
+- Phase 7: complete (business authorization and submissions flow — authorization codes, business drafts, submissions, admin approval, and seeded admin)
 - Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
 
 ## Auth UI (Phase 4) — locked rules
