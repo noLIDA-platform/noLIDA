@@ -62,6 +62,7 @@ export function ForgotPasswordForm({
       // The code itself went out by email/SMS. `/reset-password` collects that
       // code together with the new password and is what consumes it — routing
       // through /verify first would spend the code before it can be used.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- deliberate full load; the reset screen consumes the code fresh
       window.location.assign(
         `/reset-password?identifier=${encodeURIComponent(parsed.data.identifier)}`,
       );

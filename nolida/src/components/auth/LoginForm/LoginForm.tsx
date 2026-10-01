@@ -32,7 +32,7 @@ type FieldErrors = Partial<Record<"identifier" | "password", string>>;
 export interface LoginFormProps {
   /**
    * Absolute or app-relative path to send the user to after a successful
-   * sign-in. The `/home` route is Phase 7 and 404s until then.
+   * sign-in. Defaults to `/home`, which renders the signed-in app shell.
    */
   redirectTo?: string;
   /**
@@ -101,6 +101,8 @@ function LoginFormInner({
         return;
       }
 
+      // A full document load, not router.push: the first request after a login
+      // must re-render the shell on the server with the new session cookie.
       window.location.assign(redirectTo);
     } catch {
       setFormError("Something went wrong. Please try again.");

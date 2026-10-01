@@ -1,0 +1,8 @@
+/* TopBarMobile — layout specifics only.
+   `.app-topbar` and `.app-icon-button` come from AppShell.css. */
+
+@media (min-width: 1024px) {
+  .app-topbar--mobile {
+    display: none;
+  }
+}

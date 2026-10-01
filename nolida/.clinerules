@@ -66,7 +66,8 @@
 - Phase 3: complete (database + auth backend — migrations, repositories, services, routes)
 - Phase 4: complete (auth screens wired to the API; HTTP end-to-end green — see `docs/PHASE-4.md` and `docs/AUTH-UI.md`)
 - Phase 4B: complete (auth screens, layout and orientation — see `docs/PHASE-4B.md`)
-- Phase 5: not started (profile and account settings, first session-gated page)
+- Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
+- Phase 5B: not started (profile editing and live account settings)
 - Phase 6+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
 
 ## Auth UI (Phase 4) — locked rules
@@ -76,8 +77,17 @@
 - Auth forms call `apiFetch` from `@/lib/client/api` and render `error.message`; never surface a raw response or a caught exception.
 - Client zod rules are a courtesy. Never relax a server rule to match a form.
 - A query-string `identifier` is prefill only. It must never stand in for the OTP check.
-- `/home` is Phase 7: a successful sign-in or verify navigating there and hitting a 404 is expected, along with the four accepted `no-location-assign-relative-destination` warnings.
+- `/home` is real since Phase 5A: sign-in and verify land on the app shell. Post-auth navigation is a full document load on purpose — the shell must render on the server with the new cookie — so every post-auth `window.location` carries an explicit `no-location-assign-relative-destination` exemption with its reason.
 - Money vocabulary is locked by `docs/PRODUCT.md`: plan, subscription, wallet, earnings, virtual card, fintail, eligibility.
+
+## App Shell (Phase 5A)
+- Every signed-in screen lives in `src/app/(main)/`. The session guard is the `redirect()` in `(main)/layout.tsx`; never move it into individual pages, and never render a signed-in screen outside the group.
+- `/` sends a visitor who already holds a live session to `/home`.
+- Navigation destinations are declared once in `src/components/layout/navigation.ts`. Never hardcode a second copy of a bar's links.
+- Screens that are not built yet render `PagePlaceholder` and state their scope. Never fake data on a placeholder — especially balances, counts and badges. Badges render only above zero.
+- Sign out goes only through `POST /api/auth/logout`; the client neither reads nor writes the cookie.
+- Server Components read the session cookie via `readSessionToken()` (`src/lib/server/auth/session-cookie.ts`); Route Handlers keep using `readSessionCookie(request)`.
+- The theme switch in the profile drawer stays disabled until a theme preference can actually be saved.
 
 ## Design System (Phase 1)
 - All colors come from CSS variables in `styles/tokens.css` or `styles/tokens-ui.css`. Never hardcode.

@@ -141,6 +141,9 @@ export function SignupForm({
         return;
       }
 
+      // A full document load, not a push: `/verify` is a fresh OTP screen and
+      // must not inherit any state the signup form was holding.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- deliberate full load; `/verify` must mount on a clean slate
       window.location.assign(
         `/verify?identifier=${encodeURIComponent(identifier)}&purpose=REGISTER`,
       );

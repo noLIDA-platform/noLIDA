@@ -120,6 +120,7 @@ export function ResetPasswordForm({
 
       // `/` reads `?reset=1` and shows a "password reset, please log in"
       // banner. Full navigation also drops any stale client state.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- deliberate full load; `/` must read ?reset=1 with fresh state
       window.location.assign("/?reset=1");
     } catch {
       setFormError("Something went wrong. Please try again.");

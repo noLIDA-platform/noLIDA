@@ -282,7 +282,7 @@ export async function login(input: {
       input.fingerprint
     );
     if (!known) riskLevel = "MEDIUM";
-    // Phase 7 will add location + impossible-travel checks.
+    // A later phase will add location + impossible-travel checks.
     const device = await devicesRepo.upsert({
       userId: user.id,
       fingerprint: input.fingerprint,

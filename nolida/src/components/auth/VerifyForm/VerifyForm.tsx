@@ -149,8 +149,10 @@ function VerifyFormInner({
         return;
       }
 
-      // Verification leaves a session cookie behind; `/home` is Phase 7 and
-      // 404s until then, so this is a full navigation rather than a push.
+      // Verification leaves a session cookie behind, so this is a full document
+      // load rather than a push: the shell must render with that cookie, and a
+      // fresh load discards any client cache built while signed out.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- deliberate full load; the shell must render with the new cookie
       window.location.assign("/home");
     } catch {
       setFormError("Something went wrong. Please try again.");

@@ -64,9 +64,9 @@ requires an `Idempotency-Key`. These are locked rules, not preferences
 | 2 | brand assets, logo, marketing site | done | `docs/PHASE-2.md`, `docs/BRAND.md`, `docs/MARKETING.md` |
 | 3 | auth backend: migrations, OTP, sessions | done | `docs/AUTH.md`, `docs/DATABASE.md` |
 | 4 | auth screens + API wiring + HTTP end-to-end | **done** | `docs/PHASE-4B.md` (screens), `docs/PHASE-4.md` (wiring), `docs/AUTH-UI.md` |
-| 5 | profile and account settings; the first session-gated page | next | — |
+| 5 | first session-gated screens: app shell, `/home`, `/profile`, settings index | **5A done**; 5B (profile editing, live settings) next | `docs/PHASE-5A.md` |
 | 6 | fintail adapter, wallet funding, balance reads | not started | — |
-| 7 | `/home` and the app shell; replaces the 404 landing after sign-in | not started | — |
+| 7 | publishing, posts and the activity that fills `/home` | re-scoped — the shell and `/home` landed in Phase 5A | — |
 | 8 | plans, subscriptions, the eligibility rule, Termii OTP delivery | not started | — |
 | 9 | business dashboard and virtual-card issuance | not started | — |
 | 10 | hardening: Redis rate limits, observability, launch checks | not started | — |
@@ -75,6 +75,11 @@ Phase 4 was carried out in two steps because the screens were built before the
 routes existed: the slice that shipped the frontend was tracked as **4B**, and
 the slice that wired it to the backend closed it. Both records stay, and each
 says honestly what it did and did not prove.
+
+Phase 5 is sliced the same way: **5A** built the frame and every destination —
+the session gate, `/home`, `/profile` and the settings index — so the slices
+that follow drop real content into screens that already exist and already have
+a home in the navigation.
 
 ## Not decided yet
 

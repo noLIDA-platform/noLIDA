@@ -3,7 +3,8 @@
 The screens people sign up, sign in, and recover their account with. Layout,
 orientation and accessibility live in `docs/PHASE-4B.md`; the Route Handlers and
 tables live in `docs/AUTH.md`; what Phase 4 specifically changed and verified is
-in `docs/PHASE-4.md`. This file is the reference for **what the screens do**.
+in `docs/PHASE-4.md`; the signed-in shell these flows now land in is
+`docs/PHASE-5A.md`. This file is the reference for **what the screens do**.
 
 ## Screens
 
@@ -27,8 +28,8 @@ those links and old bookmarks keep working.
    `POST /api/auth/register` with `{ email | phone, password }`.
 3. `201` → `/verify?identifier=…&purpose=REGISTER`.
 4. `POST /api/auth/verify-otp` with `{ identifier, code, purpose }`. Success
-   leaves a `nolida_session` cookie behind, and the form navigates to `/home` —
-   which 404s until Phase 7.
+   leaves a `nolida_session` cookie behind, and the form navigates to `/home`,
+   which renders the signed-in app shell (Phase 5A).
    `EMAIL_TAKEN` / `PHONE_TAKEN` at step 2 surface as an inline alert.
 
 ### Sign in
@@ -57,8 +58,10 @@ identifier+IP) and links back to the reset page. There is no resend endpoint, so
 no screen pretends there is one.
 
 ### Sign out
-`POST /api/auth/logout` revokes and clears the cookie. There is no sign-out
-control yet: the signed-in surface (`/home`) is Phase 7.
+`POST /api/auth/logout` revokes the session and clears the cookie. The control
+lives in the profile drawer, opened from the avatar in either top bar;
+`signOut()` in `src/lib/client/auth.ts` calls the route and then takes a full
+document load back to `/`. The client never touches the cookie itself.
 
 ## Field schema
 
@@ -148,8 +151,8 @@ Manual pass worth doing before each phase boundary:
 
 1. `/signup` with a fresh email → a too-short password shows under the field.
 2. Complete signup, read the code from the dev terminal, enter it wrong once
-   (error appears, form stays usable), then right → navigates to `/home` (a 404
-   is expected until Phase 7).
+   (error appears, form stays usable), then right → the app shell loads at
+   `/home`.
 3. Log in with the same credentials → `GET /api/auth/session` in devtools shows
    the user.
 4. `/forgot-password` → lands on `/reset-password?identifier=…`; submit a stale
@@ -163,9 +166,11 @@ Manual pass worth doing before each phase boundary:
 
 ## Known gaps
 
-- `/home` is Phase 7, so a successful sign-in lands on a 404 and there is no
-  sign-out control. Four accepted ESLint `no-location-assign-relative-destination`
-  warnings mark exactly the places to revisit.
+- Phase 5A closed the `/home` gap: sign-in and verification land on the app
+  shell, and Sign Out sits in the profile drawer. Every post-auth navigation
+  carries an explicit `no-location-assign-relative-destination` exemption: after
+  an auth transition the app deliberately takes a full document load so the
+  shell re-renders on the server with the new cookie (`docs/PHASE-5A.md`).
 - No resend for REGISTER codes — restart signup, which is what `/verify` links.
 - Social sign-in buttons render disabled with an explanation; no provider
   credentials exist.

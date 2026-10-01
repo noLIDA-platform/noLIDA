@@ -1,0 +1,37 @@
+/* (main) route group — page frame shared by every signed-in screen.
+   `.mp-*` — main page. Imported once by (main)/layout.tsx, so pages and the
+   components that fill them (PagePlaceholder, SettingsMenu) can rely on it. */
+
+.mp-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.mp-title {
+  color: var(--color-text);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--leading-tight);
+}
+
+@media (min-width: 768px) {
+  .mp-title {
+    font-size: var(--text-2xl);
+  }
+}
+
+.mp-eyebrow {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+/* Bordered surface behind an EmptyState or page body. Used by placeholders and
+   by the home dashboard, so it belongs to the group rather than to either. */
+.mp-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+}
