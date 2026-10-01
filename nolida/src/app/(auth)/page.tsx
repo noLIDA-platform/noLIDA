@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { AuthSplitShell } from "@/components/layout/AuthSplitShell/AuthSplitShell";
 import { HeroBlock } from "@/components/marketing/HeroBlock/HeroBlock";
 import { LoginForm } from "@/components/auth/LoginForm/LoginForm";
+import { HomeMobileClient } from "@/components/auth/HomeMobileClient/HomeMobileClient";
 import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
+import "./home.css";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -29,20 +31,30 @@ export default async function LoginPage() {
   if (await getCurrentSessionUser()) redirect("/home");
 
   return (
-    <AuthSplitShell
-      orientation="form-right"
-      beneathStack={
-        <HeroBlock
-          eyebrow="Nigeria's all-in-one platform"
-          title="Discover, request, book, and pay — all in one place."
-          subtitle="Find what you need, offer what you do, and get paid — without leaving the app."
-          primaryCta={{ label: "Create account", href: "/signup" }}
-          secondaryCta={{ label: "How it works", href: "/how-it-works" }}
-          size="md"
-        />
-      }
-    >
-      <LoginForm headingLevel="h2" redirectTo="/home" />
-    </AuthSplitShell>
+    <>
+      {/* Mobile (<768px): Noise-inspired welcome screen. */}
+      <div className="home-mobile-wrapper">
+        <HomeMobileClient />
+      </div>
+
+      {/* Desktop (>=768px): existing split layout — unchanged. */}
+      <div className="home-desktop-wrapper">
+        <AuthSplitShell
+          orientation="form-right"
+          beneathStack={
+            <HeroBlock
+              eyebrow="Nigeria's all-in-one platform"
+              title="Discover, request, book, and pay — all in one place."
+              subtitle="Find what you need, offer what you do, and get paid — without leaving the app."
+              primaryCta={{ label: "Create account", href: "/signup" }}
+              secondaryCta={{ label: "How it works", href: "/how-it-works" }}
+              size="md"
+            />
+          }
+        >
+          <LoginForm headingLevel="h2" redirectTo="/home" />
+        </AuthSplitShell>
+      </div>
+    </>
   );
 }

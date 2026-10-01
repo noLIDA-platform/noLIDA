@@ -1,0 +1,55 @@
+/* Home (/) — mobile/desktop wrapper split (Phase 4C).
+ *
+ * Viewport switching is CSS media queries only, never JavaScript: the mobile
+ * welcome and the desktop split both render, and exactly one is visible.
+ * `display: none` removes the hidden variant from the tab order and the
+ * accessibility tree, so only one view is ever interactive.
+ *
+ * Scoped to `/` by importing this file only from `src/app/(auth)/page.tsx` —
+ * `/signup`, `/verify` and the rest of (auth) share the layout but never see
+ * these rules.
+ */
+
+.home-mobile-wrapper {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.home-desktop-wrapper {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .home-mobile-wrapper {
+    display: none;
+  }
+
+  .home-desktop-wrapper {
+    display: block;
+  }
+}
+
+/* Hide the SlimTopBar while the mobile welcome canvas (View A) is active so
+ * the navy runs edge to edge — the true Noise canvas. The selector unmatches
+ * the moment "Sign in" switches to View B, so the bar returns on the login
+ * view exactly as specced. Scoped to this page via `.home-mobile--welcome`,
+ * which exists nowhere else in (auth).
+ *
+ * Solid `--color-primary` CTA on navy is the deliberate brand-moment
+ * exception here: `inverse` (white) would read as a secondary control, and
+ * this screen needs one unmistakable primary action — the same reasoning
+ * that puts solid-CTAs-on-gradient in the desktop HeroBlock.
+ */
+@supports selector(:has(*)) {
+  @media (max-width: 767px) {
+    .auth-shell:has(.home-mobile--welcome) > .slim-top-bar {
+      display: none;
+    }
+
+    .auth-shell:has(.home-mobile--welcome) .home-mobile--welcome {
+      min-height: 100dvh;
+    }
+  }
+}

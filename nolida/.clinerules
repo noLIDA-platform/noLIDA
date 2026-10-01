@@ -66,6 +66,7 @@
 - Phase 3: complete (database + auth backend — migrations, repositories, services, routes)
 - Phase 4: complete (auth screens wired to the API; HTTP end-to-end green — see `docs/PHASE-4.md` and `docs/AUTH-UI.md`)
 - Phase 4B: complete (auth screens, layout and orientation — see `docs/PHASE-4B.md`)
+- Phase 4C: complete (noise-inspired mobile welcome on `/` — see `Home Page — Mobile Welcome` below)
 - Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
 - Phase 5B: complete (feed, posts, comments, interactions — see `docs/FEED.md`)
 - Phase 5C: not started (profile editing and live account settings, deferred out of 5B)
@@ -79,6 +80,17 @@
 - Auth forms call `apiFetch` from `@/lib/client/api` and render `error.message`; never surface a raw response or a caught exception.
 - Client zod rules are a courtesy. Never relax a server rule to match a form.
 - A query-string `identifier` is prefill only. It must never stand in for the OTP check.
+
+## Home Page — Mobile Welcome (Phase 4C)
+- On mobile (< 768px), `/` shows a Noise-inspired welcome screen: dark
+  navy canvas, large centered logo, short headline, one primary action,
+  one secondary sign-in link.
+- NO feature lists, NO icon grids, NO hero paragraphs on mobile.
+- Desktop (>= 768px) always shows the split layout — unchanged.
+- View switch is client state (useState), not a route change.
+- CSS media queries control which view renders — never JavaScript.
+- The SlimTopBar hides while the welcome canvas is active so the navy runs
+  edge to edge; it returns on the login view.
 - `/home` is real since Phase 5A: sign-in and verify land on the app shell. Post-auth navigation is a full document load on purpose — the shell must render on the server with the new cookie — so every post-auth `window.location` carries an explicit `no-location-assign-relative-destination` exemption with its reason.
 - Money vocabulary is locked by `docs/PRODUCT.md`: plan, subscription, wallet, earnings, virtual card, fintail, eligibility.
 

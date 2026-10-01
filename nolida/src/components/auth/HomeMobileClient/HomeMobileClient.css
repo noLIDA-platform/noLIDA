@@ -1,0 +1,205 @@
+/* HomeMobileClient — Noise-inspired mobile welcome (Phase 4C).
+ *
+ * View A ("welcome") is a full-bleed navy canvas; View B ("login") is the
+ * standard themed surface carrying LoginForm. This component is only ever
+ * visible below 768px — `src/app/(auth)/home.css` hides the whole wrapper
+ * on desktop.
+ */
+
+.home-mobile {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.home-mobile__view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  outline: none;
+}
+
+/* VIEW A — welcome canvas.
+ * Navy is the fixed brand value, identical in light and dark mode, so this
+ * view needs no theme override. Height is the dynamic viewport minus the
+ * SlimTopBar when it is visible; home.css upgrades this to full-bleed 100dvh
+ * where `:has()` can hide the bar. */
+.home-mobile--welcome {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--color-navy);
+  color: #ffffff;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-7) var(--space-5) var(--space-6);
+  min-height: calc(100dvh - var(--auth-chrome-h, 0px));
+}
+
+/* True radial halo built from the brand tokens at low opacity — softer than
+ * painting the linear `--color-gradient` on a circle, which would read as a
+ * directional smear once blurred. Decorative only. */
+.home-mobile__glow {
+  position: absolute;
+  top: 16%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+      circle at 35% 35%,
+      color-mix(in srgb, var(--color-accent-cyan) 30%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 60% 55%,
+      color-mix(in srgb, var(--color-primary) 42%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 65% 70%,
+      color-mix(in srgb, var(--color-accent-magenta) 28%, transparent) 0%,
+      transparent 55%
+    );
+  opacity: 0.35;
+  filter: blur(60px);
+}
+
+/* Centre zone: takes the free space and centres its children, so the logo
+ * and copy sit in the middle of the screen while the actions pin below. */
+.home-mobile__content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.home-mobile__logo {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-6);
+}
+
+.home-mobile__headline {
+  position: relative;
+  z-index: 1;
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+  max-width: 18ch;
+  margin: 0 auto var(--space-3);
+  color: #ffffff;
+}
+
+.home-mobile__subtitle {
+  position: relative;
+  z-index: 1;
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.home-mobile__actions {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-inline: auto;
+  padding-bottom: var(--space-2);
+}
+
+/* Solid indigo CTA — the deliberate brand-moment exception to the
+ * inverse-only-on-navy rule (documented in home.css): white-on-navy would
+ * read as a secondary control, while this screen needs one unmistakable
+ * primary action. */
+.home-mobile__primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  padding-inline: var(--space-5);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+.home-mobile__primary:hover {
+  opacity: 0.9;
+}
+
+.home-mobile__primary:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
+.home-mobile__secondary {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  padding: var(--space-3);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.home-mobile__secondary:hover {
+  color: #ffffff;
+}
+
+.home-mobile__secondary:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* VIEW B — themed login surface. */
+.home-mobile--login {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  padding: var(--space-5) var(--space-5) var(--space-7);
+  align-items: stretch;
+}
+
+.home-mobile__back {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  padding: var(--space-3) var(--space-2);
+  margin: 0 0 var(--space-4) calc(-1 * var(--space-2));
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.home-mobile__back:hover {
+  color: var(--color-text);
+}
+
+.home-mobile__back:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
