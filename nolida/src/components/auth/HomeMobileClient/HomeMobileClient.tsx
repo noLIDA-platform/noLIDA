@@ -88,6 +88,32 @@ export function HomeMobileClient({
         aria-label="Welcome to noLIDA"
         className="home-mobile__view home-mobile--welcome"
       >
+        <div className="home-mobile__collage" aria-hidden="true">
+          <img
+            src="/images/login-1.png"
+            alt=""
+            className="home-mobile__collage-img home-mobile__collage-img--1"
+          />
+          <img
+            src="/images/login-2.png"
+            alt=""
+            className="home-mobile__collage-img home-mobile__collage-img--2"
+          />
+          <img
+            src="/images/login-3.png"
+            alt=""
+            className="home-mobile__collage-img home-mobile__collage-img--3"
+          />
+          <img
+            src="/images/login-4.png"
+            alt=""
+            className="home-mobile__collage-img home-mobile__collage-img--4"
+          />
+        </div>
+        <div className="home-mobile__overlay" aria-hidden="true" />
+        <Link href="/explore" className="home-mobile__explore">
+          Explore noLIDA →
+        </Link>
         <div className="home-mobile__glow" aria-hidden="true" />
         <div className="home-mobile__content">
           <Image

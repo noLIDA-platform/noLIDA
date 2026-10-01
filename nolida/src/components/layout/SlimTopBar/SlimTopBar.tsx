@@ -10,6 +10,7 @@ interface NavItem {
 }
 
 const NAV_LINKS: readonly NavItem[] = [
+  { label: "Explore", href: "/explore" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "For Business", href: "/for-business" },
   { label: "Pricing", href: "/pricing" },

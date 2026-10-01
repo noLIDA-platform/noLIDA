@@ -67,6 +67,7 @@
 - Phase 4: complete (auth screens wired to the API; HTTP end-to-end green — see `docs/PHASE-4.md` and `docs/AUTH-UI.md`)
 - Phase 4B: complete (auth screens, layout and orientation — see `docs/PHASE-4B.md`)
 - Phase 4C: complete (noise-inspired mobile welcome on `/` — see `Home Page — Mobile Welcome` below)
+- Phase 4D: complete (marketing `/explore` page and mobile welcome collage — see `Explore Page (Phase 4D)` and `Mobile Welcome Collage (Phase 4D)` below)
 - Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
 - Phase 5B: complete (feed, posts, comments, interactions — see `docs/FEED.md`)
 - Phase 5C: not started (profile editing and live account settings, deferred out of 5B)
@@ -93,6 +94,23 @@
   edge to edge; it returns on the login view.
 - `/home` is real since Phase 5A: sign-in and verify land on the app shell. Post-auth navigation is a full document load on purpose — the shell must render on the server with the new cookie — so every post-auth `window.location` carries an explicit `no-location-assign-relative-destination` exemption with its reason.
 - Money vocabulary is locked by `docs/PRODUCT.md`: plan, subscription, wallet, earnings, virtual card, fintail, eligibility.
+
+## Explore Page (Phase 4D)
+- /explore is a single scrollable marketing page.
+- It lives in (marketing) so it uses SiteHeader + SiteFooter.
+- It reuses existing marketing section components. Do not create new
+  section components for it.
+- Reachable from: mobile welcome screen (top-right "Explore noLIDA →"),
+  desktop SlimTopBar, desktop SiteHeader.
+
+## Mobile Welcome Collage (Phase 4D)
+- The mobile welcome screen has a blurred collage of the four login
+  images behind the content.
+- Images are heavily blurred (40px) at low opacity (0.18) so they
+  read as ambient texture.
+- A dark gradient overlay sits between the collage and the content.
+- Animation: 24s slow drift. Respects prefers-reduced-motion.
+- The "Explore noLIDA →" link sits top-right.
 
 ## App Shell (Phase 5A)
 - Every signed-in screen lives in `src/app/(main)/`. The session guard is the `redirect()` in `(main)/layout.tsx`; never move it into individual pages, and never render a signed-in screen outside the group.

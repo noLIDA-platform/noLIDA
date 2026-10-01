@@ -47,6 +47,16 @@ Both use the marketing components below; neither reaches into `src/lib/server`.
 `/design` is **dev-only** and deliberately lives outside the marketing group.
 It is never linked from any page or from the header or footer.
 
+## /explore page
+A single scrollable page that consolidates all marketing content:
+hero, features, steps, for-business, trust, contact, final CTA.
+Lives in (marketing) so it uses SiteHeader + SiteFooter.
+
+## Mobile welcome collage
+The mobile welcome screen at / has a blurred collage of the four
+login images behind the content, with a dark gradient overlay and
+a 24s drift animation. Top-right has an "Explore noLIDA →" link.
+
 ### Placeholder policy
 
 `/terms` and `/privacy` carry an explicit "Placeholder — not legal text"
