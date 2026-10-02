@@ -1,6 +1,8 @@
 "use client";
 
+import { useCallback, useRef, useState } from "react";
 import { AvatarButton } from "@/components/layout/AvatarButton/AvatarButton";
+import { DesktopAvatarMenu } from "@/components/layout/DesktopAvatarMenu/DesktopAvatarMenu";
 import { NotificationButton } from "@/components/layout/NotificationButton/NotificationButton";
 import { CartButton } from "@/components/layout/CartButton/CartButton";
 import type { TopBarProps } from "@/components/layout/TopBarMobile/TopBarMobile";
@@ -16,10 +18,13 @@ import "./TopBarDesktop.css";
  */
 export function TopBarDesktop({
   user,
-  onProfileClick,
-  profileExpanded,
+  ownsBusiness,
   className,
 }: TopBarProps): React.JSX.Element {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const avatarRef = useRef<HTMLButtonElement>(null);
+  const toggleMenu = useCallback(() => setMenuOpen((open) => !open), []);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
   const classes = ["app-topbar", "app-topbar--desktop", className ?? ""]
     .filter(Boolean)
     .join(" ");
@@ -42,11 +47,20 @@ export function TopBarDesktop({
           <CartButton />
           <AvatarButton
             user={user}
-            onClick={onProfileClick}
-            expanded={profileExpanded}
+            onClick={toggleMenu}
+            isOpen={menuOpen}
+            popupType="menu"
+            buttonRef={avatarRef}
           />
         </div>
       </div>
+      <DesktopAvatarMenu
+        user={user}
+        ownsBusiness={ownsBusiness}
+        isOpen={menuOpen}
+        onClose={closeMenu}
+        triggerRef={avatarRef}
+      />
     </header>
   );
 }

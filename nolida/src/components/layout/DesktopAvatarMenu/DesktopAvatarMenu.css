@@ -1,0 +1,124 @@
+.desktop-avatar-menu {
+  position: absolute;
+  top: 64px;
+  right: var(--space-5);
+  z-index: 50;
+  display: grid;
+  width: 260px;
+  max-height: min(80vh, 560px);
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-lg);
+  animation: desktop-avatar-menu-enter 150ms ease-out both;
+}
+
+.desktop-avatar-menu__identity {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.desktop-avatar-menu__identity .ui-avatar {
+  width: 40px;
+  height: 40px;
+}
+
+.desktop-avatar-menu__user-text {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.desktop-avatar-menu__name {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desktop-avatar-menu__handle {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desktop-avatar-menu__edit {
+  grid-column: 2;
+  width: fit-content;
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  text-decoration: none;
+}
+
+.desktop-avatar-menu__edit:hover {
+  text-decoration: underline;
+}
+
+.desktop-avatar-menu__edit:focus-visible,
+.desktop-avatar-menu__item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.desktop-avatar-menu__sections {
+  border-top: 1px solid var(--color-border);
+}
+
+.desktop-avatar-menu__section {
+  display: grid;
+  padding: var(--space-2) 0;
+}
+
+.desktop-avatar-menu__section + .desktop-avatar-menu__section {
+  border-top: 1px solid var(--color-border);
+}
+
+.desktop-avatar-menu__item {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.desktop-avatar-menu__item:hover {
+  background: var(--color-bg-subtle);
+}
+
+.desktop-avatar-menu__footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.desktop-avatar-menu__footer .ui-button {
+  justify-content: flex-start;
+  gap: var(--space-3);
+}
+
+@keyframes desktop-avatar-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desktop-avatar-menu {
+    animation: none;
+  }
+}

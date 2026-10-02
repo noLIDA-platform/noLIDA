@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/brand/Logo/Logo";
 import { Icon } from "@/components/ui/Icon/Icon";
-import { SIDEBAR_NAV } from "@/components/layout/navigation";
+import { SIDEBAR_ITEMS } from "@/lib/nav/items";
+import { resolveNavIcon } from "@/lib/nav/icon-map";
 import "./DesktopSidebar.css";
 
 /**
@@ -15,8 +16,10 @@ import "./DesktopSidebar.css";
  * small screens.
  */
 export function DesktopSidebar({
+  ownsBusiness,
   className,
 }: {
+  ownsBusiness: boolean;
   className?: string;
 }): React.JSX.Element {
   const pathname = usePathname();
@@ -35,7 +38,7 @@ export function DesktopSidebar({
 
       <nav className="app-sidebar__nav" aria-label="Sidebar">
         <ul className="app-sidebar__list">
-          {SIDEBAR_NAV.map((item) => {
+          {SIDEBAR_ITEMS.filter((item) => !item.ownerOnly || ownsBusiness).map((item) => {
             const active = isActive(item.href);
 
             return (
@@ -50,7 +53,7 @@ export function DesktopSidebar({
                     .filter(Boolean)
                     .join(" ")}
                 >
-                  <Icon as={item.icon} size={20} />
+                  <Icon as={resolveNavIcon(item.icon)} size={20} />
                   <span>{item.label}</span>
                 </Link>
               </li>

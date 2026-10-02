@@ -1,9 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
 import { TopBarMobile } from "@/components/layout/TopBarMobile/TopBarMobile";
 import { TopBarDesktop } from "@/components/layout/TopBarDesktop/TopBarDesktop";
-import { ProfileDrawer } from "@/components/layout/ProfileDrawer/ProfileDrawer";
 import type { ShellUser } from "@/lib/client/shell-user";
 
 /**
@@ -18,27 +16,15 @@ import type { ShellUser } from "@/lib/client/shell-user";
  */
 export function AppShellChrome({
   user,
+  ownsBusiness,
 }: {
   user: ShellUser;
+  ownsBusiness: boolean;
 }): React.JSX.Element {
-  const [profileOpen, setProfileOpen] = useState(false);
-
-  const openProfile = useCallback(() => setProfileOpen(true), []);
-  const closeProfile = useCallback(() => setProfileOpen(false), []);
-
   return (
     <>
-      <TopBarMobile
-        user={user}
-        onProfileClick={openProfile}
-        profileExpanded={profileOpen}
-      />
-      <TopBarDesktop
-        user={user}
-        onProfileClick={openProfile}
-        profileExpanded={profileOpen}
-      />
-      <ProfileDrawer user={user} open={profileOpen} onClose={closeProfile} />
+      <TopBarMobile user={user} ownsBusiness={ownsBusiness} />
+      <TopBarDesktop user={user} ownsBusiness={ownsBusiness} />
     </>
   );
 }

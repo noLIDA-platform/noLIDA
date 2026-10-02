@@ -5,39 +5,28 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
-import { DRAWER_SECTIONS } from "@/components/layout/navigation";
+import { MOBILE_DRAWER_SECTIONS } from "@/lib/nav/items";
+import { resolveNavIcon } from "@/lib/nav/icon-map";
 import { initialsOf, type ShellUser } from "@/lib/client/shell-user";
 import { signOut } from "@/lib/client/auth";
-import "./ProfileDrawer.css";
+import "./MobileProfileDrawer.css";
 
-export interface ProfileDrawerProps {
+export interface MobileProfileDrawerProps {
   user: ShellUser;
   open: boolean;
   onClose: () => void;
+  ownsBusiness: boolean;
 }
 
 const FOCUSABLE = "a[href], button:not([disabled])";
+const SECTION_TITLES = ["Activity", "Growth", "Business", "Account"];
 
-/**
- * Right-side profile drawer.
- *
- * Opens from the avatar in either top bar and carries the account destinations,
- * the theme row and Sign Out. The drawer renders only while open, so nothing in
- * it is focusable when hidden.
- *
- * While open it locks page scrolling, moves focus to the first control, traps
- * Tab inside the panel and closes on Escape — the same contract `SiteHeader`'s
- * mobile menu already sets, so the app behaves like the marketing site.
- *
- * The theme row is present but disabled: no theme preference is stored or
- * applied anywhere yet, and a toggle that silently does nothing is worse than
- * one that is visibly unavailable.
- */
-export function ProfileDrawer({
+export function MobileProfileDrawer({
   user,
   open,
   onClose,
-}: ProfileDrawerProps): React.JSX.Element | null {
+  ownsBusiness,
+}: MobileProfileDrawerProps): React.JSX.Element | null {
   const panelRef = useRef<HTMLDivElement>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
@@ -94,7 +83,6 @@ export function ProfileDrawer({
     try {
       await signOut();
     } finally {
-      // Only reached if the redirect never happens, e.g. an offline request.
       setIsSigningOut(false);
     }
   };
@@ -134,6 +122,9 @@ export function ProfileDrawer({
               {user.handle ? (
                 <span className="app-drawer__handle">{user.handle}</span>
               ) : null}
+              <Link href="/settings/account" className="app-drawer__edit" onClick={onClose}>
+                Edit profile
+              </Link>
             </span>
           </div>
 
@@ -147,23 +138,29 @@ export function ProfileDrawer({
           </button>
         </div>
         <div className="app-drawer__body" onClick={onClose}>
-          {DRAWER_SECTIONS.map((section) => (
-            <section key={section.title} className="app-drawer__section">
-              <h2 className="app-drawer__section-title">{section.title}</h2>
-              <nav aria-label={section.title}>
-                <ul className="app-drawer__list">
-                  {section.items.map((item) => (
-                    <li key={item.href}>
-                      <Link href={item.href} className="app-drawer__link">
-                        <Icon as={item.icon} size={18} />
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </section>
-          ))}
+          {MOBILE_DRAWER_SECTIONS.map((section, sectionIndex) => {
+            const items = section.filter((item) => !item.ownerOnly || ownsBusiness);
+            if (items.length === 0) return null;
+            const title = SECTION_TITLES[sectionIndex] ?? "More";
+
+            return (
+              <section key={title} className="app-drawer__section">
+                <h2 className="app-drawer__section-title">{title}</h2>
+                <nav aria-label={title}>
+                  <ul className="app-drawer__list">
+                    {items.map((item) => (
+                      <li key={item.href}>
+                        <Link href={item.href} className="app-drawer__link">
+                          <Icon as={resolveNavIcon(item.icon)} size={18} />
+                          <span>{item.label}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              </section>
+            );
+          })}
         </div>
 
         <div className="app-drawer__footer">

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell/AppShell";
 import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
+import { getMyBusiness } from "@/lib/server/services/business.service";
 import { toShellUser } from "@/lib/client/shell-user";
 import "./pages.css";
 
@@ -29,6 +30,12 @@ export default async function MainLayout({
 }) {
   const session = await getCurrentSessionUser();
   if (!session) redirect("/");
+  const business = await getMyBusiness(session.user.id);
+  const ownsBusiness = business?.status === "APPROVED";
 
-  return <AppShell user={toShellUser(session)}>{children}</AppShell>;
+  return (
+    <AppShell user={toShellUser(session)} ownsBusiness={ownsBusiness}>
+      {children}
+    </AppShell>
+  );
 }

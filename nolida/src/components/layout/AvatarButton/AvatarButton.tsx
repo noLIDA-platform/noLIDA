@@ -5,10 +5,12 @@ import "./AvatarButton.css";
 
 export interface AvatarButtonProps {
   user: ShellUser;
-  /** Opens the profile drawer. */
+  /** Invoked to open or close the menu controlled by the parent. */
   onClick: () => void;
-  /** Whether the drawer this button controls is currently open. */
-  expanded: boolean;
+  /** Whether the menu this button controls is currently open. */
+  isOpen?: boolean;
+  popupType?: "menu" | "dialog";
+  buttonRef?: React.RefObject<HTMLButtonElement | null>;
   /** Larger circle for the drawer header. */
   size?: "md" | "lg";
   className?: string;
@@ -27,7 +29,9 @@ export interface AvatarButtonProps {
 export function AvatarButton({
   user,
   onClick,
-  expanded,
+  isOpen = false,
+  popupType = "menu",
+  buttonRef,
   size = "md",
   className,
 }: AvatarButtonProps): React.JSX.Element {
@@ -41,10 +45,11 @@ export function AvatarButton({
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={onClick}
-      aria-haspopup="dialog"
-      aria-expanded={expanded}
+      aria-haspopup={popupType}
+      aria-expanded={isOpen}
       aria-label="Profile and settings"
       className={classes}
     >

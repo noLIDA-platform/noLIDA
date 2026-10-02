@@ -76,6 +76,7 @@
 - Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
 - Phase 7B: complete (WhatsApp icon buttons with context-specific prefilled messages)
 - Phase 7C: complete (single desktop logo and authenticated headers for business pages)
+- Phase 7D: complete (shared navigation and desktop avatar dropdown)
 - Phase 8A: complete (seeded categories, owner-managed services and products)
 
 ## Auth UI (Phase 4) — locked rules
@@ -218,3 +219,11 @@
 - Public visibility requires the business to be APPROVED (Phase 8B).
 - Services have optional `price_min` and `price_max`; if only one is set, treat it as a fixed price. Products have one price.
 - Product stock is optional; `null` means unlimited. Product image uploads are deferred; the editor does not upload images.
+
+## Navigation Layout (Phase 7D)
+- Desktop uses `DesktopSidebar` for primary navigation and `DesktopAvatarMenu` for account/activity links; it does not open the full-height mobile drawer.
+- Mobile uses `TopBarMobile`, `MobileProfileDrawer`, and `MobileBottomNav`.
+- Sign out lives only in the desktop avatar menu and mobile profile drawer, never in the sidebar.
+- Profile is in the sidebar; do not add a duplicate View profile item to the desktop dropdown.
+- Navigation items come from `src/lib/nav/items.ts`; do not hardcode nav items inside components.
+- My Business appears only when the signed-in user owns an APPROVED business.

@@ -1,4 +1,4 @@
-/* ProfileDrawer — slides in from the right, same contract as `.site-drawer`. */
+/* Mobile profile drawer — preserves the existing slide-in panel design. */
 
 .app-drawer {
   position: fixed;
@@ -90,6 +90,18 @@
   font-size: var(--text-xs);
 }
 
+.app-drawer__edit {
+  width: fit-content;
+  margin-top: var(--space-1);
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  text-decoration: none;
+}
+
+.app-drawer__edit:hover {
+  text-decoration: underline;
+}
+
 .app-drawer__close {
   display: inline-flex;
   width: 36px;
@@ -110,7 +122,8 @@
 }
 
 .app-drawer__close:focus-visible,
-.app-drawer__link:focus-visible {
+.app-drawer__link:focus-visible,
+.app-drawer__edit:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
@@ -179,8 +192,6 @@
   font-weight: var(--weight-medium);
 }
 
-/* Disabled until a theme preference is stored and applied. `cursor: not-allowed`
-   plus the reduced opacity is the point — it must not look live. */
 .app-drawer__switch {
   display: inline-flex;
   width: 40px;
@@ -203,21 +214,13 @@
 }
 
 @keyframes app-drawer-slide {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(0);
-  }
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
 
 @keyframes app-drawer-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

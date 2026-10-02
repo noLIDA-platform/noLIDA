@@ -6,6 +6,7 @@ import "./AppShell.css";
 
 export interface AppShellProps {
   user: ShellUser;
+  ownsBusiness: boolean;
   children: React.ReactNode;
   className?: string;
 }
@@ -23,6 +24,7 @@ export interface AppShellProps {
  */
 export function AppShell({
   user,
+  ownsBusiness,
   children,
   className,
 }: AppShellProps): React.JSX.Element {
@@ -30,8 +32,8 @@ export function AppShell({
 
   return (
     <div className={classes}>
-      <DesktopSidebar />
-      <AppShellChrome user={user} />
+      <DesktopSidebar ownsBusiness={ownsBusiness} />
+      <AppShellChrome user={user} ownsBusiness={ownsBusiness} />
       <main className="app-shell__main">{children}</main>
       <MobileBottomNav />
     </div>
