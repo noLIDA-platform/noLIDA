@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { Logo } from "@/components/brand/Logo/Logo";
 import { AvatarButton } from "@/components/layout/AvatarButton/AvatarButton";
 import { NotificationButton } from "@/components/layout/NotificationButton/NotificationButton";
 import { CartButton } from "@/components/layout/CartButton/CartButton";
@@ -9,8 +7,7 @@ import type { TopBarProps } from "@/components/layout/TopBarMobile/TopBarMobile"
 import "./TopBarDesktop.css";
 
 /**
- * Top bar for desktop (≥1024px): search centred, account cluster right, logo
- * at the far edge.
+ * Top bar for desktop (≥1024px): search centred and account cluster right.
  *
  * The search field is a plain GET form to `/discover`, so it works without
  * JavaScript and without a client-side router call; `/discover` reads `?q=`.
@@ -48,9 +45,6 @@ export function TopBarDesktop({
             onClick={onProfileClick}
             expanded={profileExpanded}
           />
-          <Link href="/home" className="app-topbar__brand" aria-label="noLIDA home">
-            <Logo size="sm" />
-          </Link>
         </div>
       </div>
     </header>

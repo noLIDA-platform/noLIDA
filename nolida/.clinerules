@@ -75,6 +75,7 @@
 - Phase 7: complete (business authorization and submissions flow — authorization codes, business drafts, submissions, admin approval, and seeded admin)
 - Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
 - Phase 7B: complete (WhatsApp icon buttons with context-specific prefilled messages)
+- Phase 7C: complete (single desktop logo and authenticated headers for business pages)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -201,3 +202,10 @@
 - When the number is missing or invalid, render a disabled icon button with the tooltip `WhatsApp not configured`; never render a broken link.
 - Keep support button labels accessible through `aria-label`; visible text may sit beside the icon where the page needs context, but never inside the button.
 - User-content sharing to WhatsApp is distinct from support and may use its own share message.
+
+## Headers (Phase 7C)
+- Logged-in pages live under `src/app/(main)/` and use the `AppShell` from the `(main)` layout. They must NOT render their own header, logo, sidebar, or top bar.
+- Public marketing pages live under `src/app/(marketing)/` and use `SiteHeader` + `SiteFooter` from the `(marketing)` layout.
+- The desktop logo appears ONCE, in the `DesktopSidebar` top-left. `TopBarDesktop` does NOT render a logo.
+- The mobile logo appears once, in `TopBarMobile` top-left.
+- If a page has both a guest header and an app shell, that's a bug.
