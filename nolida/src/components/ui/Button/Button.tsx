@@ -24,6 +24,7 @@ export interface ButtonProps {
   type?: "button" | "submit" | "reset";
   as?: "button" | "link";
   href?: string;
+  ariaLabel?: string;
   onClick?: (
     event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
   ) => void;
@@ -40,6 +41,7 @@ export function Button({
   type = "button",
   as = "button",
   href,
+  ariaLabel,
   onClick,
   children,
   className,
@@ -77,6 +79,7 @@ export function Button({
       <Link
         href={href}
         className={classes}
+        aria-label={ariaLabel}
         aria-disabled={isDisabled ? "true" : undefined}
         aria-busy={loading ? "true" : undefined}
         onClick={handleLinkClick}
@@ -106,6 +109,7 @@ export function Button({
       aria-busy={loading ? "true" : undefined}
       onClick={handleButtonClick}
       className={classes}
+      aria-label={ariaLabel}
     >
       {loading ? (
         <>

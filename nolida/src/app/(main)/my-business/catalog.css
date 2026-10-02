@@ -1,0 +1,109 @@
+.business-catalog {
+  display: grid;
+  gap: var(--space-5);
+  width: 100%;
+}
+
+.business-catalog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.business-catalog__header h1 {
+  margin: 0;
+  font-size: var(--text-2xl);
+}
+
+.business-catalog__eyebrow {
+  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.business-catalog__list,
+.business-catalog__item {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.business-catalog__error {
+  margin: 0;
+  color: var(--color-error);
+}
+
+.business-catalog__confirmation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.business-catalog__confirmation span {
+  flex: 1;
+}
+
+.business-dashboard {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.business-dashboard h1 {
+  margin: 0;
+  font-size: var(--text-2xl);
+}
+
+.business-dashboard__intro {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.business-dashboard__cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-4);
+}
+
+.business-dashboard__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.business-dashboard__card {
+  display: grid;
+  min-height: 160px;
+  align-content: space-between;
+  gap: var(--space-4);
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.business-dashboard__link:hover .business-dashboard__card {
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.business-dashboard__link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-md);
+}
+
+.business-dashboard__icon {
+  color: var(--color-primary);
+}
+
+.business-dashboard__card h2 {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.business-dashboard__card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

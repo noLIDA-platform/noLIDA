@@ -21,7 +21,7 @@ export interface InputProps {
    */
   name?: string;
   autoComplete?: string;
-  inputMode?: "none" | "text" | "email" | "tel" | "url" | "numeric" | "search";
+  inputMode?: "none" | "text" | "decimal" | "email" | "tel" | "url" | "numeric" | "search";
   autoFocus?: boolean;
   /**
    * Hard cap enforced by the browser — a courtesy, not a rule. The server
@@ -29,6 +29,7 @@ export interface InputProps {
    * from silently disagreeing.
    */
   maxLength?: number;
+  required?: boolean;
   /**
    * Accessible name for fields that have no visible `label` — an icon-only
    * control in a toolbar, say. Prefer a visible `label` when there is room for
@@ -57,6 +58,7 @@ export function Input({
   inputMode,
   autoFocus = false,
   maxLength,
+  required = false,
   ariaLabel,
   onBlur,
   onKeyDown,
@@ -106,6 +108,7 @@ export function Input({
         inputMode={inputMode}
         autoFocus={autoFocus}
         maxLength={maxLength}
+        required={required}
         aria-label={ariaLabel}
         aria-invalid={error ? "true" : undefined}
         aria-describedby={describedBy}

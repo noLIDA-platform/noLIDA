@@ -76,6 +76,7 @@
 - Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
 - Phase 7B: complete (WhatsApp icon buttons with context-specific prefilled messages)
 - Phase 7C: complete (single desktop logo and authenticated headers for business pages)
+- Phase 8A: complete (seeded categories, owner-managed services and products)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -209,3 +210,11 @@
 - The desktop logo appears ONCE, in the `DesktopSidebar` top-left. `TopBarDesktop` does NOT render a logo.
 - The mobile logo appears once, in `TopBarMobile` top-left.
 - If a page has both a guest header and an app shell, that's a bug.
+
+## Catalog (Phase 8A)
+- Categories are a fixed seed list. Admins can add more in Phase 18.
+- Services and products belong to a business and are editable by its owner at any status.
+- Prices are stored in integer minor units (kobo for NGN); UI inputs accept major units and convert by multiplying by 100.
+- Public visibility requires the business to be APPROVED (Phase 8B).
+- Services have optional `price_min` and `price_max`; if only one is set, treat it as a fixed price. Products have one price.
+- Product stock is optional; `null` means unlimited. Product image uploads are deferred; the editor does not upload images.

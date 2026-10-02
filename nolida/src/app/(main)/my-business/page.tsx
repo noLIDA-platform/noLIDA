@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { Package, UserRound, Wrench } from "lucide-react";
 import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
-import { getMyBusiness, getSubmissionStatus } from "@/lib/server/services/business.service";
+import { getMyBusiness } from "@/lib/server/services/business.service";
+import { Card } from "@/components/ui/Card/Card";
+import { Icon } from "@/components/ui/Icon/Icon";
+import "./catalog.css";
 
 export const metadata: Metadata = { title: "My business" };
 
@@ -12,48 +17,38 @@ export default async function MyBusinessPage() {
   }
 
   const business = await getMyBusiness(session.user.id);
-  const status = business ? await getSubmissionStatus(session.user.id) : null;
+  if (!business) redirect("/list-your-business");
+  if (["DRAFT", "CHANGES_REQUESTED"].includes(business.status)) {
+    redirect("/my-business/submit");
+  }
+  if (business.status !== "APPROVED") redirect("/my-business/pending");
 
   return (
-    <main style={{ maxWidth: 960, margin: "0 auto", padding: "28px 20px 80px" }}>
-      <div style={{ display: "grid", gap: 12, marginBottom: 24 }}>
-        <p style={{ margin: 0, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6366F1", fontWeight: 700 }}>
-          My business
-        </p>
-        <h1 style={{ margin: 0, fontSize: "clamp(2rem, 3vw, 3rem)" }}>
-          {business?.name ?? "Create your business listing"}
-        </h1>
+    <main className="business-dashboard">
+      <div>
+        <h1>{business.name}</h1>
+        <p className="business-dashboard__intro">Manage your business catalog and profile.</p>
       </div>
-
-      <section style={{ display: "grid", gap: 16, padding: 24, borderRadius: 20, border: "1px solid rgba(99, 102, 241, 0.2)", background: "rgba(255,255,255,0.75)" }}>
-        {business ? (
-          <>
-            <p style={{ margin: 0, fontSize: 18 }}>
-              <strong>Status:</strong> {business.status}
-            </p>
-            <p style={{ margin: 0, color: "#475569", lineHeight: 1.7 }}>
-              {status?.submission
-                ? `Most recent submission: ${new Date(status.submission.submitted_at).toLocaleString()}`
-                : "No submission has been sent yet."}
-            </p>
-          </>
-        ) : (
-          <p style={{ margin: 0, color: "#475569", lineHeight: 1.7 }}>
-            You have not redeemed a business code or created a business yet. Start by listing your business and submitting it for review.
-          </p>
-        )}
-
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          <a href="/list-your-business" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "10px 16px", borderRadius: 12, background: "#6366F1", color: "#fff", fontWeight: 700, textDecoration: "none" }}>
-            {business ? "Update listing" : "Start listing"}
-          </a>
-          {business ? (
-            <a href="/my-business/submit" style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "10px 16px", borderRadius: 12, border: "1px solid rgba(99,102,241,0.3)", color: "#111827", background: "transparent", textDecoration: "none", fontWeight: 700 }}>
-              Submit details
-            </a>
-          ) : null}
-        </div>
-      </section>
+      <div className="business-dashboard__cards">
+        <Link className="business-dashboard__link" href="/my-business/services">
+          <Card className="business-dashboard__card">
+            <Icon as={Wrench} size={28} className="business-dashboard__icon" />
+            <div><h2>Services</h2><p>Manage the services you offer.</p></div>
+          </Card>
+        </Link>
+        <Link className="business-dashboard__link" href="/my-business/products">
+          <Card className="business-dashboard__card">
+            <Icon as={Package} size={28} className="business-dashboard__icon" />
+            <div><h2>Products</h2><p>Manage products and available stock.</p></div>
+          </Card>
+        </Link>
+        <Link className="business-dashboard__link" href="/my-business/pending">
+          <Card className="business-dashboard__card">
+            <Icon as={UserRound} size={28} className="business-dashboard__icon" />
+            <div><h2>Business profile</h2><p>Profile editing is coming in the next phase.</p></div>
+          </Card>
+        </Link>
+      </div>
     </main>
   );
 }
