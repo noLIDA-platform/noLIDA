@@ -1,0 +1,46 @@
+/* /my-business/profile — edit an approved business (Phase 8C). */
+
+.biz-profile-edit {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.biz-profile-edit__card {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.biz-profile-edit__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.biz-profile-edit__header h2 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
+}
+
+.biz-profile-edit__header p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.biz-profile-edit__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+}
+
+.biz-profile-edit__link:hover {
+  text-decoration: underline;
+}

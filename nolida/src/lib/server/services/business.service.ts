@@ -8,10 +8,51 @@ import * as approvalRecordsRepo from "@/lib/server/repositories/approvalRecords.
 import * as securityEventsRepo from "@/lib/server/repositories/securityEvents.repo";
 import { appendRandomSuffix, generateSlug } from "@/utils/slug";
 
+/**
+ * Statuses in which `updateBusiness` will write to the business row.
+ *
+ * DRAFT, PENDING_REVIEW and CHANGES_REQUESTED have always been here — those are
+ * the states a listing is edited in while it waits for or recovers from review.
+ *
+ * APPROVED joined the set in Phase 8C, because the dashboard now has a Profile
+ * page and an approved owner must be able to fix a typo in their phone number.
+ * Leaving it out would have made the new screen fail on its first save with
+ * "This business cannot be edited in its current state" — the form would look
+ * functional and reject every submission.
+ *
+ * Two things stay locked even for APPROVED, and neither is a status guard:
+ *
+ * - **Status is never client-writable.** `updateBusiness` writes only the
+ *   columns in `normalizeBusinessInput`; there is no `status` key to set, so
+ *   this cannot be used to approve, unapprove or suspend anything. Promotion
+ *   to APPROVED still happens only through `approveBusiness`, which requires
+ *   an admin and writes an `approval_records` row.
+ * - **Slug changes are not free.** A slug is a published URL; a brand-new one is
+ *   still resolved for uniqueness (`resolveUniqueSlug`), so editing cannot
+ *   collide with another business or break the unique index.
+ *
+ * PENDING_REVIEW remaining editable is deliberate too: an owner correcting a
+ * typo while waiting does not need to re-queue, and the submission that is
+ * already in review is a separate snapshot.
+ */
 const BUSINESS_STATUS_EDITABLE = new Set([
   "DRAFT",
   "PENDING_REVIEW",
   "CHANGES_REQUESTED",
+  "APPROVED",
+]);
+
+/**
+ * Statuses whose *submission* may still be (re-)queued.
+ *
+ * Narrower than `BUSINESS_STATUS_EDITABLE` on purpose: editing an approved
+ * profile does not re-enter review, but submitting one would undo the approval
+ * that made the public profile exist. `submitBusiness` checks this set.
+ */
+const BUSINESS_STATUS_SUBMITTABLE = new Set([
+  "DRAFT",
+  "CHANGES_REQUESTED",
+  "PENDING_REVIEW",
 ]);
 
 async function ensureAdmin(userId: string): Promise<void> {
@@ -201,6 +242,22 @@ export async function submitBusiness(userId: string, payload: Record<string, unk
   const business = await businessesRepo.findByOwner(userId);
   if (!business) {
     throw new AuthError("BUSINESS_NOT_FOUND", "No business was found for this account.");
+  }
+
+  // Guard added in Phase 8C. This function writes `status = 'PENDING_REVIEW'`
+  // directly, so calling it on an APPROVED business would pull a live public
+  // profile offline — the listing would vanish from /business/[slug] and from
+  // search the moment an owner hit "Submit" twice, or replayed a request.
+  //
+  // Re-queueing is only meaningful for a listing that is not currently live.
+  // An approved owner edits their profile in place instead; that path never
+  // reaches here (BusinessSubmissionForm `mode="edit"` returns before the
+  // submit call).
+  if (!BUSINESS_STATUS_SUBMITTABLE.has(business.status)) {
+    throw new AuthError(
+      "BUSINESS_NOT_SUBMITTABLE",
+      "This business is already live. Edit your profile instead of resubmitting.",
+    );
   }
 
   const submission = await withTransaction(async (client) => {

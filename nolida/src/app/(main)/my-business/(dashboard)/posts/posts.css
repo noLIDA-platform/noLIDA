@@ -1,0 +1,17 @@
+/* /my-business/posts — the owner's posts in the Phase 5B Feed (Phase 8C). */
+
+.business-posts {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.business-posts__header h1 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xl);
+}
+
+.business-posts__intro {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

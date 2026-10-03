@@ -1,0 +1,17 @@
+/* ComingSoonPanel — the shared body of every placeholder dashboard tab. */
+
+.coming-soon {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+}
+
+.coming-soon__phase {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}

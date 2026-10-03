@@ -1,0 +1,75 @@
+/* MyBusinessTabs — the /my-business section navigation (Phase 8C). */
+
+.my-biz-tabs {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.my-biz-tabs__list {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.my-biz-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border-bottom: 2px solid transparent;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.my-biz-tabs__tab:hover {
+  color: var(--color-text);
+}
+
+.my-biz-tabs__tab--active {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.my-biz-tabs__tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+/* The "soon" dot. Decoration only — the screen-reader text lives next to it
+   in the markup, because a dot is not an announcement. */
+.my-biz-tabs__soon {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: color-mix(in srgb, var(--color-text-muted) 60%, transparent);
+}
+
+/* A phone scrolls one row; a wide screen wraps so nothing is hidden behind a
+   "more" menu nobody would find. */
+@media (max-width: 767px) {
+  .my-biz-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .my-biz-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .my-biz-tabs__list {
+    width: max-content;
+    flex-wrap: nowrap;
+  }
+}
+
+@media (min-width: 768px) {
+  .my-biz-tabs__list {
+    flex-wrap: wrap;
+  }
+}

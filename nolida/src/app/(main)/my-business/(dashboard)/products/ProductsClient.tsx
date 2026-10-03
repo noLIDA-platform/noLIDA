@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button/Button";
 import { EmptyState } from "@/components/ui/EmptyState/EmptyState";
 import { ProductCard } from "@/components/business/ProductCard/ProductCard";
@@ -21,6 +22,7 @@ export function ProductsClient({
   initialProducts,
   categories,
 }: ProductsClientProps): React.JSX.Element {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState(initialProducts);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -29,6 +31,19 @@ export function ProductsClient({
   const editingProduct = editor?.kind === "edit"
     ? products.find((product) => product.id === editor.id)
     : undefined;
+
+  /**
+   * `/my-business/products?new=1` opens the create form on arrival — see the
+   * identical block in `ServicesClient` for why this is an effect and guarded
+   * by a ref rather than an initial state value.
+   */
+  const openedFromParam = useRef(false);
+  useEffect(() => {
+    if (openedFromParam.current) return;
+    if (searchParams.get("new") !== "1") return;
+    openedFromParam.current = true;
+    setEditor({ kind: "create" });
+  }, [searchParams]);
 
   function saveProduct(saved: BusinessProduct): void {
     setProducts((current) => {

@@ -79,6 +79,7 @@
 - Phase 7D: complete (shared navigation and desktop avatar dropdown)
 - Phase 8A: complete (seeded categories, owner-managed services and products)
 - Phase 8B: complete (public business profile, category listings, business search, post-approval redirect)
+- Phase 8C: complete (My Business dashboard — tab navigation, real overview, profile editing, placeholder sub-pages)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -226,7 +227,7 @@
 - Mobile uses `TopBarMobile`, `MobileProfileDrawer`, and `MobileBottomNav`.
 - Sign out lives only in the desktop avatar menu and mobile profile drawer, never in the sidebar.
 - Profile is in the sidebar; do not add a duplicate View profile item to the desktop dropdown.
-- Navigation items come from `src/lib/nav/items.ts`; do not hardcode nav items inside components.
+- Navigation items come from `src/lib/nav/items.ts`; do not hardcode nav items inside components. `MY_BUSINESS_TABS` (Phase 8C) is the dashboard's tab bar and lives there too.
 - My Business appears only when the signed-in user owns an APPROVED business.
 
 ## Public Business Profile (Phase 8B)
@@ -243,3 +244,23 @@
   - DRAFT / CHANGES_REQUESTED → /my-business/submit
   - Otherwise shows status UI with a 15s poller.
 - Reviews tab on the public profile is a placeholder until Phase 17.
+
+## My Business Dashboard (Phase 8C)
+- Dashboard lives at /my-business/* and requires an APPROVED business.
+- Non-approved businesses are redirected:
+  - DRAFT/CHANGES_REQUESTED → /my-business/submit
+  - PENDING_REVIEW/REJECTED/SUSPENDED → /my-business/pending
+- Dashboard navigation is a horizontal tab bar inside the main content
+  area, NOT a second sidebar.
+- Quick actions sit above the tabs.
+- Overview pulls real data from services and products.
+- Reviews, Bookings, Orders, Customers, Messages, Requests, Quotes,
+  Earnings, Payouts, Analytics, Promotions are placeholders until
+  their phases land.
+- The Posts tab reuses the existing Feed component filtered by user_id.
+- The dashboard layout lives at my-business/(dashboard)/layout.tsx. It MUST
+  stay in that route group: at my-business/layout.tsx it would also wrap
+  submit/ and pending/, whose own redirects target it — an infinite loop.
+- APPROVED businesses are editable in place (BUSINESS_STATUS_EDITABLE),
+  but still cannot be re-submitted for review (BUSINESS_STATUS_SUBMITTABLE).
+  Editing a live profile must never drop it back to PENDING_REVIEW.

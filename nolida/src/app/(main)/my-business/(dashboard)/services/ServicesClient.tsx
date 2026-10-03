@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button/Button";
 import { EmptyState } from "@/components/ui/EmptyState/EmptyState";
 import { ServiceCard } from "@/components/business/ServiceCard/ServiceCard";
@@ -21,6 +22,7 @@ export function ServicesClient({
   initialServices,
   categories,
 }: ServicesClientProps): React.JSX.Element {
+  const searchParams = useSearchParams();
   const [services, setServices] = useState(initialServices);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -29,6 +31,27 @@ export function ServicesClient({
   const editingService = editor?.kind === "edit"
     ? services.find((service) => service.id === editor.id)
     : undefined;
+
+  /**
+   * `/my-business/services?new=1` opens the create form on arrival.
+   *
+   * The QuickActions row links here, and an owner who clicks "Add service" and
+   * then has to click "Add service" again has been asked the same question
+   * twice.
+   *
+   * The read is in an effect rather than in `useState`'s initialiser on
+   * purpose: `useSearchParams` is populated before the first client render
+   * here, but seeding state from it would also run on the server (where it is
+   * empty), producing a hydration mismatch between "form open" and "form
+   * closed".
+   */
+  const openedFromParam = useRef(false);
+  useEffect(() => {
+    if (openedFromParam.current) return;
+    if (searchParams.get("new") !== "1") return;
+    openedFromParam.current = true;
+    setEditor({ kind: "create" });
+  }, [searchParams]);
 
   function saveService(saved: BusinessService): void {
     setServices((current) => {

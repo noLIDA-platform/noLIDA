@@ -3,19 +3,48 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function BusinessSubmissionForm() {
+export type BusinessFormMode = "submit" | "edit";
+
+export interface BusinessSubmissionFormProps {
+  /**
+   * `"submit"` (default) is the Phase 7 flow: save the draft, then queue it for
+   * review and go to the pending screen.
+   *
+   * `"edit"` is the Phase 8C dashboard flow for an already-APPROVED business:
+   * save the profile and stay put. No submission is queued, because re-entering
+   * review on every typo would mean an approved business could never be
+   * corrected without waiting on an admin again.
+   */
+  mode?: BusinessFormMode;
+  /** Prefill from the stored business; without it the form starts empty. */
+  initialValues?: {
+    name?: string | null;
+    category?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    website?: string | null;
+    location?: string | null;
+    description?: string | null;
+  };
+}
+
+export function BusinessSubmissionForm({
+  mode = "submit",
+  initialValues,
+}: BusinessSubmissionFormProps): React.JSX.Element {
   const router = useRouter();
   const [form, setForm] = useState({
-    name: "",
-    category: "",
-    phone: "",
-    email: "",
-    website: "",
-    location: "",
-    description: "",
+    name: initialValues?.name ?? "",
+    category: initialValues?.category ?? "",
+    phone: initialValues?.phone ?? "",
+    email: initialValues?.email ?? "",
+    website: initialValues?.website ?? "",
+    location: initialValues?.location ?? "",
+    description: initialValues?.description ?? "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   async function handleChange(
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -49,6 +78,14 @@ export function BusinessSubmissionForm() {
         throw new Error(savePayload?.error?.message ?? "Unable to save your business details.");
       }
 
+      // Edit mode stops here. The save above already persisted the change, and
+      // an approved business must not drop back into PENDING_REVIEW — the
+      // public profile stays live with the correction applied.
+      if (mode === "edit") {
+        setSaved(true);
+        return;
+      }
+
       const submitResponse = await fetch("/api/businesses/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -70,7 +107,9 @@ export function BusinessSubmissionForm() {
       const message =
         caughtError instanceof Error
           ? caughtError.message
-          : "Unable to submit your business for review.";
+          : mode === "edit"
+            ? "Unable to save your business profile."
+            : "Unable to submit your business for review.";
       setError(message);
     } finally {
       setIsSubmitting(false);
@@ -124,6 +163,12 @@ export function BusinessSubmissionForm() {
 
       {error ? <div style={{ color: "#DC2626", fontSize: 14 }}>{error}</div> : null}
 
+      {saved ? (
+        <div style={{ color: "#16a34a", fontSize: 14, fontWeight: 600 }}>
+          Saved. Your public profile is updated.
+        </div>
+      ) : null}
+
       <button
         type="submit"
         disabled={isSubmitting || !form.name.trim()}
@@ -138,7 +183,11 @@ export function BusinessSubmissionForm() {
           opacity: isSubmitting || !form.name.trim() ? 0.7 : 1,
         }}
       >
-        {isSubmitting ? "Submitting…" : "Submit for review"}
+        {isSubmitting
+          ? "Saving…"
+          : mode === "edit"
+            ? "Save changes"
+            : "Submit for review"}
       </button>
     </form>
   );

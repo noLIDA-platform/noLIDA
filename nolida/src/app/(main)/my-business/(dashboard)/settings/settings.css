@@ -1,0 +1,99 @@
+/* /my-business/settings — grouped settings index (Phase 8C). */
+
+.biz-settings {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.biz-settings__group {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.biz-settings__heading {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.biz-settings__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+  list-style: none;
+}
+
+.biz-settings__list > li + li {
+  border-top: 1px solid var(--color-border);
+}
+
+.biz-settings__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  color: inherit;
+  text-decoration: none;
+}
+
+.biz-settings__row:hover {
+  background-color: var(--color-bg-subtle);
+}
+
+.biz-settings__row:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+.biz-settings__row-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.biz-settings__row-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+}
+
+.biz-settings__row-description {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.biz-settings__chevron {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+.biz-settings__danger {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-error) 40%, transparent);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+}
+
+.biz-settings__danger-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.biz-settings__whatsapp {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
