@@ -83,6 +83,7 @@
 - Phase 8D: complete (mobile bottom-nav overflow fix, Analytics promoted and given real metrics, password eye toggle)
 - Phase 8E: complete (no horizontal scroll, content fills the viewport, page is not pannable or auto-zooming)
 - Phase 8F: complete (mobile stability — no panning, no dead space below content; loading boundaries for perceived speed)
+- Phase 8G: complete (viewport meta verified in rendered HTML; root overflow guard, `html` hidden / `body` clip)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -355,9 +356,14 @@
   page looks broken and needs a double-tap to recover. This is a
   FONT-SIZE bug, not a viewport bug — fix it at `.ui-input` /
   `.ui-textarea`.
-- Never set `maximumScale` or `userScalable: false` to stop that zoom.
-  Pinch zoom is a WCAG 1.4.4 requirement; disabling it locks out users
-  who need to magnify.
+- The viewport export lives in `src/app/layout.tsx` and NOWHERE ELSE.
+  Next.js reads `viewport` once, from the root; a `viewport` export in a
+  nested `(main)`/`(auth)` layout is dead code that looks active.
+- `maximumScale: 1` / `userScalable: false` ARE set (Phase 8G, product
+  instruction) to stop pinch zoom. Most modern mobile browsers ignore both
+  for accessibility reasons, so this is largely inert; where honoured it
+  costs WCAG 1.4.4. Do not treat them as the fix for anything — the real
+  auto-zoom bug was 14px inputs, fixed at `.ui-input`/`.ui-textarea`.
 
 ## Mobile Stability (Phase 8F)
 - html, body have `overflow-x: clip` and `width: 100%`. Never `hidden`

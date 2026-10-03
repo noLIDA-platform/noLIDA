@@ -35,23 +35,38 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Viewport meta, injected as `<meta name="viewport">` by Next.js.
+ *
+ * This export must live in the ROOT layout (`src/app/layout.tsx`) and nowhere
+ * else. Next.js reads it once, from the root, and ignores a `viewport` export in
+ * a nested layout — so a stray one in `(main)` or `(auth)` is dead code that
+ * looks like it is doing something. Phase 8G confirmed this is the only one.
+ *
+ * `viewportFit: "cover"` lets the bottom nav reach the screen edge on a notched
+ * device. It is safe only because `.app-bottom-nav` and the page headers add
+ * `env(safe-area-inset-*)` padding — without that pairing, cover-mode pushes
+ * content under the notch and home indicator.
+ *
+ * `maximumScale` / `userScalable: false` are set on product instruction, to stop
+ * the page zooming under a pinch. Two things worth knowing:
+ *
+ * 1. Most modern mobile browsers **ignore both** for accessibility reasons, so
+ *    on recent iOS/Android this is effectively inert.
+ * 2. Where they ARE honoured, they disable pinch zoom, which is a WCAG 1.4.4
+ *    requirement — a real cost for low-vision users.
+ *
+ * The "page jumps when I tap a field" symptom is a *separate* bug and is not
+ * fixed by this tag: it was iOS auto-zoom on inputs under 16px, corrected at
+ * `.ui-input` / `.ui-textarea` in `styles/`. Keep that fix if these ever go.
+ */
 export const viewport: Viewport = {
-  themeColor: "#0a0e27",
   width: "device-width",
   initialScale: 1,
-  /*
-   * `viewport-fit=cover` so the bottom nav can reach the screen edge on a
-   * notched device. It is safe here because both the nav and the page header
-   * already add `env(safe-area-inset-*)` padding — without that pairing,
-   * cover-mode would push content under the notch and home indicator.
-   *
-   * Deliberately NOT setting `maximumScale` or `userScalable: false`. Pinch
-   * zoom is a WCAG 1.4.4 requirement and disabling it locks out users who need
-   * to magnify. The "page zooms when I tap a field" complaint is caused by the
-   * 14px input font, not by the viewport scale, and is fixed at the font (see
-   * `.ui-input` in Input.css) where it actually belongs.
-   */
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
+  themeColor: "#0a0e27",
 };
 
 export default function RootLayout({
