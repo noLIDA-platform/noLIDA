@@ -64,6 +64,8 @@
        inside the page gutter now. */
     width: 100%;
     min-width: 0;
+    /* A deliberate horizontal swipe target — see `.my-biz-tabs`. */
+    touch-action: pan-x;
   }
 
   .discovery-section__body > * {

@@ -26,6 +26,10 @@
   /* Momentum scrolling on iOS. Not a fix — the native behaviour already
      scrolls — but without it a flick on a long tab strip stops dead. */
   -webkit-overflow-scrolling: touch;
+  /* The one place on the page where a horizontal swipe is *intended*. Stated
+     explicitly so a later "stop all panning" rule cannot accidentally take this
+     away along with the rubber-banding. */
+  touch-action: pan-x;
   scrollbar-width: none; /* Firefox */
 }
 

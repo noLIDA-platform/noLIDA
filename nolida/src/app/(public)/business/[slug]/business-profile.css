@@ -153,6 +153,8 @@
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
+  /* A deliberate horizontal swipe target — see `.my-biz-tabs`. */
+  touch-action: pan-x;
   -webkit-overflow-scrolling: touch;
   border-bottom: 1px solid var(--color-border);
   scrollbar-width: none;

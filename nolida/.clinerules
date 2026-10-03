@@ -81,7 +81,7 @@
 - Phase 8B: complete (public business profile, category listings, business search, post-approval redirect)
 - Phase 8C: complete (My Business dashboard — tab navigation, real overview, profile editing, placeholder sub-pages)
 - Phase 8D: complete (mobile bottom-nav overflow fix, Analytics promoted and given real metrics, password eye toggle)
-- Phase 8E: complete (horizontal overflow fixed on every mobile width)
+- Phase 8E: complete (no horizontal scroll, content fills the viewport, page is not pannable or auto-zooming)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -304,9 +304,11 @@
 
 ## Layout Overflow (Phase 8E)
 - No page in noLIDA causes horizontal scrolling on any mobile width.
-- html has `overflow-x: hidden` and `max-width: 100vw`; body has
-  `overflow-x: clip`. The split is deliberate: `hidden` on `html` would make
-  it a scroll container and break `position: sticky` on every top bar.
+- html and body BOTH use `overflow-x: clip` + `max-width`, never
+  `hidden`. `hidden` makes the element a scroll container, so the
+  document keeps a scrollport and can still be rubber-banded sideways —
+  the page moves under your finger with no scrollbar drawn. `clip`
+  removes the scrollport entirely and leaves `position: sticky` working.
 - Any horizontal scroll container (tab bars, quick actions) uses its
   own `overflow-x: auto` + `max-width: 100vw` + `min-width: 0`, never
   pushing the page.
@@ -321,3 +323,37 @@
 - Never use a negative `margin-inline` for full-bleed; use padding.
 - Never use JavaScript to detect or fix overflow — it is a CSS problem.
 - Test every new page at 375px width before considering it done.
+
+## Main Content Width (Phase 8E)
+- On mobile (< 1024px) the main content fills 100% of the viewport.
+  `.app-shell__main` is `width: 100%; max-width: 100vw;
+  margin-inline: 0; align-self: stretch`.
+- The 1080px reading column and its `margin-inline: auto` centring are
+  scoped to `@media (min-width: 1080px)`. Putting them in the base rule
+  made "fill the screen on a phone" an accident of arithmetic rather
+  than a stated rule.
+- On desktop the fixed DesktopSidebar is offset by PADDING on
+  `.app-shell` inside `@media (min-width: 1024px)` — never a margin on
+  the content, which would squeeze it by 260px on a phone.
+- `.app-shell` and the dashboard wrappers declare `align-items/align-self:
+  stretch` explicitly. A flex column whose items hug the left is exactly
+  the "content in 40% of the screen" symptom.
+- Content is centred by its OWN auto margins, never by
+  `justify-content: center` on the row around it.
+
+## Mobile Containment (Phase 8E)
+- The page is never pannable; see the `overflow-x: clip` rule above.
+- Deliberate horizontal scrollers (My Business tabs, quick actions,
+  filter pills, discovery rows, public profile tabs) declare
+  `touch-action: pan-x` so they keep their swipe. Everything else
+  inherits the page-level policy.
+- `body` uses `touch-action: manipulation`: removes double-tap-to-zoom
+  and tap-highlight without disabling pinch zoom.
+- Editable fields are NEVER under 16px. iOS Safari zooms the viewport
+  on focus for any input below 16px and stays zoomed after blur, so the
+  page looks broken and needs a double-tap to recover. This is a
+  FONT-SIZE bug, not a viewport bug — fix it at `.ui-input` /
+  `.ui-textarea`.
+- Never set `maximumScale` or `userScalable: false` to stop that zoom.
+  Pinch zoom is a WCAG 1.4.4 requirement; disabling it locks out users
+  who need to magnify.

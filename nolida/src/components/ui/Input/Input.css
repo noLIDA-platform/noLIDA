@@ -25,7 +25,20 @@
   width: 100%;
   padding: 0.625rem var(--space-3); /* ~10px 12px */
   font-family: inherit;
-  font-size: var(--text-sm);
+  /*
+   * 16px, NOT `var(--text-sm)`.
+   *
+   * iOS Safari zooms the viewport when a text field is focused and its computed
+   * font-size is under 16px, then leaves it zoomed after blur — the page looks
+   * "broken" and has to be double-tapped to get back. It is the single most
+   * common mobile form bug and it is a font-size bug, not a viewport bug.
+   *
+   * 16px is also the threshold that stops iOS scaling the text itself, so the
+   * field matches `--text-base` in size while everything around it stays on the
+   * type scale. Deliberately applied at all widths: clamping it to a mobile-only
+   * media query would reintroduce the bug at exactly the widths it happens on.
+   */
+  font-size: 1rem;
   line-height: var(--leading-normal);
   color: var(--color-text);
   background-color: var(--color-bg);

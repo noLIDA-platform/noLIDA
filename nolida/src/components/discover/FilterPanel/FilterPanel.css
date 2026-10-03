@@ -11,6 +11,10 @@
   align-items: center;
   gap: var(--space-2);
   overflow-x: auto;
+  overflow-y: hidden;
+  /* A deliberate horizontal swipe target — see `.my-biz-tabs`. Without this the
+     page-level `touch-action` policy could read the pill-row swipe as a pan. */
+  touch-action: pan-x;
   scrollbar-width: none;
   padding-bottom: var(--space-1);
 }

@@ -2,7 +2,9 @@
   width: 100%;
   padding: 0.625rem var(--space-3); /* ~10px 12px */
   font-family: inherit;
-  font-size: var(--text-sm);
+  /* 16px for the same reason as `.ui-input` — iOS auto-zooms on focus for any
+     editable field under 16px and stays zoomed after blur. */
+  font-size: 1rem;
   line-height: var(--leading-normal);
   color: var(--color-text);
   background-color: var(--color-bg);

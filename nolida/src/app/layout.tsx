@@ -39,6 +39,19 @@ export const viewport: Viewport = {
   themeColor: "#0a0e27",
   width: "device-width",
   initialScale: 1,
+  /*
+   * `viewport-fit=cover` so the bottom nav can reach the screen edge on a
+   * notched device. It is safe here because both the nav and the page header
+   * already add `env(safe-area-inset-*)` padding — without that pairing,
+   * cover-mode would push content under the notch and home indicator.
+   *
+   * Deliberately NOT setting `maximumScale` or `userScalable: false`. Pinch
+   * zoom is a WCAG 1.4.4 requirement and disabling it locks out users who need
+   * to magnify. The "page zooms when I tap a field" complaint is caused by the
+   * 14px input font, not by the viewport scale, and is fixed at the font (see
+   * `.ui-input` in Input.css) where it actually belongs.
+   */
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

@@ -20,6 +20,8 @@
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
+  /* A deliberate horizontal swipe target, like `.my-biz-tabs`. */
+  touch-action: pan-x;
   scrollbar-width: none; /* Firefox */
 }
 
