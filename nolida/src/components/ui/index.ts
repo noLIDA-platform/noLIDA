@@ -1,7 +1,11 @@
 // Primitive Components
 export * from "./Button/Button";
+// Input primitives
 export * from "./Input/Input";
 export * from "./Textarea/Textarea";
+// PasswordInput wraps Input; SensitiveValue masks numbers (Phase 8D).
+export * from "./PasswordInput/PasswordInput";
+export * from "./SensitiveValue/SensitiveValue";
 export * from "./Card/Card";
 export * from "./Badge/Badge";
 export * from "./Spinner/Spinner";

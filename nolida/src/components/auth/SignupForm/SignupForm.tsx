@@ -7,6 +7,7 @@ import { AuthPanel } from "@/components/auth/AuthPanel/AuthPanel";
 import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput/PasswordInput";
 import { apiFetch } from "@/lib/client/api";
 import "./SignupForm.css";
 
@@ -251,10 +252,9 @@ export function SignupForm({
           </button>
         </p>
 
-        <Input
+        <PasswordInput
           id="signup-password"
           label="Password"
-          type="password"
           autoComplete="new-password"
           hint="At least 8 characters."
           value={password}

@@ -1,0 +1,45 @@
+/*
+ * SensitiveValue — a maskable number with an eye toggle (Phase 8D).
+ *
+ * Currently unused: the wallet and earnings screens are placeholders. Built now
+ * so the toggle's markup and accessibility contract match `PasswordInput`
+ * exactly when those screens arrive.
+ *
+ * The 40×40 target and `type="button"` are not copy-paste from `PasswordInput`
+ * by accident — they are the same two rules (WCAG 2.5.8 target size, and
+ * never submitting the surrounding form by accident).
+ */
+
+.ui-sensitive {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.ui-sensitive__value {
+  font-variant-numeric: tabular-nums;
+}
+
+.ui-sensitive__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.ui-sensitive__toggle:hover {
+  color: var(--color-text);
+}
+
+.ui-sensitive__toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}

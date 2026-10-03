@@ -5,11 +5,18 @@
   gap: var(--space-2);
   overflow-x: auto;
   scrollbar-width: none;
-  /* Bleed to the edges on a phone so a scrolling row does not start and stop
-     inside an arbitrary inset. */
-  margin-inline: calc(var(--space-4) * -1);
-  padding-inline: var(--space-4);
   padding-bottom: var(--space-1);
+  /* Width and min-width are pinned to the parent's content box.
+     Phase 8C had a `margin-inline: calc(var(--space-4) * -1)` full-bleed trick
+     here, which made this element 2rem WIDER than its parent. On a 320px phone
+     the row reached 352px, the document became horizontally scrollable, and
+     because the bottom nav is `position: fixed` against the viewport it stopped
+     lining up with the screen — the "nav no longer fits" report.
+     Full bleed is not worth that: a scrolling row that starts at the page
+     gutter behaves perfectly well. `min-width: 0` lets the flex children scroll
+     inside instead of forcing the row itself wider. */
+  width: 100%;
+  min-width: 0;
 }
 
 .biz-quick-actions::-webkit-scrollbar {

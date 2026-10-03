@@ -57,8 +57,13 @@
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     padding-bottom: var(--space-2);
-    margin-inline: calc(var(--space-4) * -1);
-    padding-inline: var(--space-4);
+    /* Phase 8D: the `margin-inline: calc(var(--space-4) * -1)` full-bleed that
+       used to sit here made this row 2rem wider than its parent, so the
+       document overflowed horizontally on `/discover` and the fixed bottom nav
+       stopped lining up with the screen. The row still scrolls; it just stays
+       inside the page gutter now. */
+    width: 100%;
+    min-width: 0;
   }
 
   .discovery-section__body > * {

@@ -1,11 +1,43 @@
+/*
+ * Mobile bottom nav.
+ *
+ * Phase 8D: the sizing was already right in isolation — `position: fixed` with
+ * `left/right: 0` spans the viewport — but nothing *guaranteed* the viewport was
+ * as wide as the phone. A single page that overflowed made the document
+ * horizontally scrollable, and a fixed bar positioned against a scrollable
+ * document is exactly the "nav no longer fits the screen" symptom.
+ *
+ * The rules below make the bar independent of that:
+ *   - `width: 100%` is explicit, not inferred from `left/right`
+ *   - `max-width: 100vw` cannot exceed the viewport even if a page overflows
+ *   - `overflow: hidden` stops its own content from ever widening it
+ *   - `box-sizing: border-box` keeps the safe-area padding inside that width
+ *   - `flex: 1 1 0%` + `min-width: 0` give five equal columns at 320px
+ *
+ * Visual design (colours, radii, the filled Create button, icon sizes) is
+ * unchanged from Phase 7D. Only sizing and containment were touched.
+ */
+
 .app-bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 40;
+  /* Explicit width as well as left/right: 0. With both set, `width` is ignored
+     by the spec, but stating it keeps the intent readable and defends against
+     a future `width: max-content` edit. */
+  width: 100%;
+  /* The hard ceiling. Even on a document that overflows, the bar cannot be
+     wider than the screen. */
+  max-width: 100vw;
+  box-sizing: border-box;
+  /* Its own content must never widen it. */
+  overflow: hidden;
   padding: var(--space-2) var(--space-3);
-  padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom));
+  /* Notched devices: the home indicator sits below the bar, so the tap targets
+     need the inset added to stay above the gesture area. */
+  padding-bottom: calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--color-border);
   background-color: var(--color-bg);
 }
@@ -15,13 +47,21 @@
   align-items: stretch;
   justify-content: space-between;
   gap: var(--space-1);
+  /* `min-width: 0` on the flex container lets the items shrink below their
+     content width instead of establishing a min-content floor — this is what
+     stops five labels ("Discover", "Messages") from pushing the row past 320px. */
+  width: 100%;
+  min-width: 0;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .app-bottom-nav__item {
-  flex: 1;
+  /* `flex: 1` gives equal widths; `min-width: 0` is what actually allows an
+     item to shrink to its share at 320px. Without it a flex item's automatic
+     minimum size is its content, and the row overflows. */
+  flex: 1 1 0%;
   min-width: 0;
 }
 
@@ -31,6 +71,8 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
+  width: 100%;
+  min-width: 0;
   padding: var(--space-2) var(--space-1);
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
@@ -39,6 +81,16 @@
   line-height: var(--leading-none);
   text-decoration: none;
   transition: color var(--transition-fast), background-color var(--transition-fast);
+}
+
+/* A long label ("Discover") must clip or ellipsize rather than push the item
+   wider than its 20% share. `min-width: 0` above is what lets the overflow
+   happen at all; this decides what it does when it does. */
+.app-bottom-nav__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .app-bottom-nav__link:hover {

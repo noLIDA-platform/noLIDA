@@ -7,6 +7,7 @@ import { AuthPanel } from "@/components/auth/AuthPanel/AuthPanel";
 import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput/PasswordInput";
 import { apiFetch } from "@/lib/client/api";
 import "./ResetPasswordForm.css";
 
@@ -163,10 +164,9 @@ export function ResetPasswordForm({
           disabled={submitting}
         />
 
-        <Input
+        <PasswordInput
           id="reset-password"
           label="New password"
-          type="password"
           autoComplete="new-password"
           hint="At least 8 characters."
           value={password}
@@ -175,10 +175,9 @@ export function ResetPasswordForm({
           disabled={submitting}
         />
 
-        <Input
+        <PasswordInput
           id="reset-confirm-password"
           label="Confirm new password"
-          type="password"
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}

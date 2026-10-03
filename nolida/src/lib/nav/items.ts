@@ -67,17 +67,29 @@ export const MOBILE_BOTTOM_ITEMS: NavItem[] = [
 ];
 
 /**
- * The My Business dashboard's own navigation (Phase 8C).
+ * The My Business dashboard's own navigation (Phase 8D ordering).
  *
  * Declared here, beside `SIDEBAR_ITEMS`, because the rule that a destination is
  * listed in exactly one place applies to a tab bar just as much as to a
  * sidebar. `MyBusinessTabs` renders this; it hardcodes nothing.
  *
- * `placeholder: true` is what the tab uses to render the "soon" dot, and it is
- * also the honest label for eleven of these sixteen routes: only Overview,
- * Profile, Posts, Services and Products have real screens behind them today.
+ * `placeholder: true` is what the tab uses to render the "soon" dot. It is
+ * honest for eleven of these seventeen routes: only Overview, Analytics,
+ * Profile, Posts, Services, Products and Settings have real screens today.
  * A tab that quietly shows an empty page is a broken promise; a tab that says
  * "soon" is a roadmap.
+ *
+ * **Analytics is second, deliberately.** Phase 8D moved it up from the tail.
+ * The original order was "catalog first, everything else after", which buried
+ * the one page that answers "how is my business doing?" — the question an owner
+ * opens this dashboard to ask. Overview and Analytics are the two tabs that get
+ * checked daily; Profile is the third; the rest follow in workflow order
+ * (catalog → customers → money → settings).
+ *
+ * Analytics is listed here without `placeholder` even though it is still a
+ * partial page: since Phase 8D it renders four **real** metrics. Marking a tab
+ * "coming soon" when the numbers behind it are live would be its own kind of
+ * lie. Charts arrive in Phase 19; the tab badge will say so then.
  */
 export interface BusinessTabItem {
   label: string;
@@ -88,6 +100,7 @@ export interface BusinessTabItem {
 
 export const MY_BUSINESS_TABS: BusinessTabItem[] = [
   { label: "Overview", href: "/my-business" },
+  { label: "Analytics", href: "/my-business/analytics" },
   { label: "Profile", href: "/my-business/profile" },
   { label: "Posts", href: "/my-business/posts" },
   { label: "Services", href: "/my-business/services" },
@@ -101,7 +114,6 @@ export const MY_BUSINESS_TABS: BusinessTabItem[] = [
   { label: "Reviews", href: "/my-business/reviews", placeholder: true },
   { label: "Earnings", href: "/my-business/earnings", placeholder: true },
   { label: "Payouts", href: "/my-business/payouts", placeholder: true },
-  { label: "Analytics", href: "/my-business/analytics", placeholder: true },
   { label: "Promotions", href: "/my-business/promotions", placeholder: true },
   { label: "Settings", href: "/my-business/settings" },
 ];

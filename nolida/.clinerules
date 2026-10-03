@@ -80,6 +80,7 @@
 - Phase 8A: complete (seeded categories, owner-managed services and products)
 - Phase 8B: complete (public business profile, category listings, business search, post-approval redirect)
 - Phase 8C: complete (My Business dashboard — tab navigation, real overview, profile editing, placeholder sub-pages)
+- Phase 8D: complete (mobile bottom-nav overflow fix, Analytics promoted and given real metrics, password eye toggle)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -264,3 +265,38 @@
 - APPROVED businesses are editable in place (BUSINESS_STATUS_EDITABLE),
   but still cannot be re-submitted for review (BUSINESS_STATUS_SUBMITTABLE).
   Editing a live profile must never drop it back to PENDING_REVIEW.
+
+## Mobile Bottom Nav (Phase 8D)
+- The bottom nav must fit every phone width from 320px up.
+- 5 icons, equal spacing, no horizontal scroll.
+- Respects safe-area-inset-bottom on notched devices.
+- Any page that breaks the nav is fixed at the page level.
+- The nav is `position: fixed` against the viewport, so ANY page wider than
+  the viewport drags it out of alignment. Never use a negative
+  `margin-inline` on a full-width child of `.app-shell__main`; that was the
+  Phase 8D root cause (QuickActions, DiscoverySection).
+- `html`/`body` carry `overflow-x: clip` as a backstop — `clip`, never
+  `hidden`, because `hidden` on the root breaks `position: sticky`.
+
+## My Business Tabs (Phase 8D)
+- Analytics is the 2nd tab, right after Overview.
+- Analytics shows real metrics even as a partial page. Never a full
+  placeholder if data is available.
+- Analytics is NOT flagged `placeholder` in MY_BUSINESS_TABS while its
+  numbers are real. Charts arrive in Phase 19.
+
+## Password and Sensitive Inputs (Phase 8D)
+- Every password field uses <PasswordInput /> from
+  '@/components/ui/PasswordInput/PasswordInput'.
+- Never render <Input type="password" /> directly.
+- PasswordInput Omit's `type` from its props so a caller cannot opt out of
+  masking by accident.
+- For future wallet balances, use <SensitiveValue /> from
+  '@/components/ui/SensitiveValue/SensitiveValue' (built, intentionally unused
+  until the wallet phase).
+- Eye toggle icons: EyeIcon and EyeOffIcon from
+  '@/components/ui/Icons/EyeIcon' and '@/components/ui/Icons/EyeOffIcon'.
+  Inline SVG, not Lucide — `Icon` needs a LucideIcon, and these sit inside a
+  labelled button.
+- Toggle buttons have `type="button"` (a bare button inside a form submits it)
+  and an action-named aria-label plus aria-pressed.

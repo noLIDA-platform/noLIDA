@@ -8,6 +8,7 @@ import { AuthPanel } from "@/components/auth/AuthPanel/AuthPanel";
 import { Alert } from "@/components/ui/Alert/Alert";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput/PasswordInput";
 import { apiFetch } from "@/lib/client/api";
 import "./LoginForm.css";
 
@@ -144,10 +145,9 @@ function LoginFormInner({
         />
 
         <div className="login-form__password-row">
-          <Input
+          <PasswordInput
             id="login-password"
             label="Password"
-            type="password"
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}

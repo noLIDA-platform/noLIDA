@@ -1,0 +1,126 @@
+/* /my-business/analytics — partial but real (Phase 8D). */
+
+.biz-analytics {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.biz-analytics__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.biz-analytics__header h1 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-xl);
+}
+
+.biz-analytics__intro {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+/* ── Metric cards ────────────────────────────────────────────────── */
+
+.biz-analytics__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.biz-analytics__metric {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+}
+
+.biz-analytics__metric-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.biz-analytics__metric-value {
+  color: var(--color-primary);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.02em;
+}
+
+.biz-analytics__metric-note {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+/* ── Coming soon ──────────────────────────────────────────────────── */
+
+.biz-analytics__soon {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.biz-analytics__soon-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.biz-analytics__soon-head h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: var(--text-base);
+}
+
+.biz-analytics__soon-copy {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.biz-analytics__soon-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.biz-analytics__soon-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.biz-analytics__soon-list li > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-primary);
+}
+
+.biz-analytics__soon-list strong {
+  font-weight: var(--weight-bold);
+}
+
+.biz-analytics__soon-footnote {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}

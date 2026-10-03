@@ -15,6 +15,33 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/**
+ * A phone viewport is exactly as wide as the phone. Anything wider turns the
+ * whole page into a sideways-scrolling surface, which drags the *fixed* bottom
+ * nav with it — the nav is positioned against the viewport, so the moment the
+ * document is wider, the bar no longer lines up with the screen.
+ *
+ * `overflow-x: clip` on `html` bounds the damage to the element that caused it
+ * rather than making every page responsible for never overflowing. `clip` and
+ * not `hidden`: `hidden` on the root turns the element into a scroll container,
+ * so `position: sticky` descendants stop working against the viewport. `clip`
+ * has no scrollport, so sticky keeps working.
+ *
+ * Individual pages still fix their own overflow — this is the backstop that
+ * keeps one bad page from breaking the navigation everywhere.
+ */
+html {
+  overflow-x: clip;
+  /* `100%` rather than `100vw`: 100vw includes the classic scrollbar gutter on
+     desktop, which would itself introduce overflow. */
+  max-width: 100%;
+}
+
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 a {
   color: var(--color-primary);
   text-decoration: none;
