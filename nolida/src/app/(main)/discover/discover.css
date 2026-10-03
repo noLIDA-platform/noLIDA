@@ -4,7 +4,13 @@
 
 .discover-page {
   display: flex;
-  justify-content: center;
+  /* See `.feed-page`: the child centres itself with auto margins so the row
+     never has to distribute free space around a shrinkable item. */
+  justify-content: normal;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
   padding: var(--space-3) 0 var(--space-6);
 }
 
@@ -13,6 +19,7 @@
   max-width: 800px;
   /* Phase 8E: flex item in a row container — see `.feed-page__column`. */
   min-width: 0;
+  margin-inline: auto;
   padding-inline: var(--space-4);
 }
 

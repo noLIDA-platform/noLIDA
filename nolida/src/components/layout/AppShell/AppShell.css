@@ -12,14 +12,19 @@
   display: flex;
   min-height: 100dvh;
   flex-direction: column;
-  /* Phase 8E: the shell is the outermost flex column on every signed-in page, so
-     this is where a wide descendant's min-content width would otherwise stop. */
+  /* Stated explicitly rather than relying on the initial value. A flex column
+     whose items hug the left instead of stretching is exactly the "content sits
+     in 40% of the screen, rest is empty" symptom, and `align-items: stretch`
+     says "never" in the place a reader looks first. */
+  align-items: stretch;
   min-width: 0;
   background-color: var(--color-bg);
 }
 
 @media (min-width: 1024px) {
   .app-shell {
+    /* The sidebar is `position: fixed` (DesktopSidebar.css), so the shell is
+       padded rather than gridded and the content is *not* given a margin. */
     padding-left: var(--app-sidebar-width);
   }
 }
@@ -28,17 +33,27 @@
   display: flex;
   flex: 1;
   flex-direction: column;
+  /* Mobile first: fill the viewport exactly. No left offset (the sidebar is
+     `display: none` below 1024px), and no auto margins to eat free space. */
   width: 100%;
-  max-width: 1080px;
-  margin: 0 auto;
-  /* Phase 8E: `min-width: 0` on this flex item is what stops a wide descendant
-     (the My Business tab strip, a wide table, a long unbroken string) from
-     propagating its min-content width up through `.app-shell` and out to the
-     document. Every page inside the shell inherits the fix for free. */
+  max-width: 100vw;
   min-width: 0;
-  /* The bottom nav is fixed, so content needs room to scroll clear of it. */
+  margin-inline: 0;
+  /* Belt and braces with the parent's `align-items: stretch` — the item states
+     its own cross-axis size so no ancestor can leave it at content width. */
+  align-self: stretch;
   padding: var(--space-4) var(--space-4)
     calc(var(--app-bottom-nav-height) + var(--space-6));
+}
+
+/* Only past this width does the 1080px reading column actually bind. Centring
+   below it would be a no-op at best; doing it explicitly keeps "full width on a
+   phone" a property of the base rule rather than an accident of arithmetic. */
+@media (min-width: 1080px) {
+  .app-shell__main {
+    max-width: 1080px;
+    margin-inline: auto;
+  }
 }
 
 @media (min-width: 1024px) {

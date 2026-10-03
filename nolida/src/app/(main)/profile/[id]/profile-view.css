@@ -9,6 +9,8 @@
   /* Phase 8E: a long unbroken username or URL in the header must wrap rather
      than raise this column's min-content width past the viewport. */
   min-width: 0;
+  max-width: 100vw;
+  align-self: stretch;
   margin-inline: auto;
   padding: var(--space-4);
 }

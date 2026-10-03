@@ -20,9 +20,15 @@
    * its parent, and my own scroll containers handle their own overflow." The
    * result: only the tab bar and the pill row scroll, exactly like the spec
    * asks. The page itself never moves.
+   *
+   * `align-self: stretch` is stated for the same reason as on `.app-shell`:
+   * a dashboard column that hugs the left of its container is precisely the
+   * "content in 40% of the screen, rest empty" report, and it must not depend
+   * on an ancestor's initial value to be correct.
    */
   max-width: 100vw;
   min-width: 0;
+  align-self: stretch;
 }
 
 .my-business-layout__header {
@@ -63,5 +69,7 @@
   /* Same reasoning as the wrapper above: `children` (the Overview page, the
      Services list, …) must not be able to widen this column. */
   width: 100%;
+  max-width: 100vw;
   min-width: 0;
+  align-self: stretch;
 }

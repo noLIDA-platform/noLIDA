@@ -8,7 +8,16 @@
 
 .feed-page {
   display: flex;
-  justify-content: center;
+  /* The reading column is centred by centring the *content*, not the page: with
+     `justify-content: center` and a child that can shrink, the child can end up
+     narrower than the screen and sit off-centre. `stretch` removes the
+     free-space distribution that causes it; the column centres itself with its
+     own auto margins below. */
+  justify-content: normal;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
   padding: var(--space-4) 0;
 }
 
@@ -22,8 +31,9 @@
      minimum size is its min-content width. A post body with a long unbroken
      token (a URL, an @handle) raises that floor past 600px and widens the page.
      `min-width: 0` lets the column shrink to its max-width and wrap the text
-     instead. */
+     instead. `margin-inline: auto` centres it without `justify-content`. */
   min-width: 0;
+  margin-inline: auto;
 }
 
 @media (min-width: 768px) {
