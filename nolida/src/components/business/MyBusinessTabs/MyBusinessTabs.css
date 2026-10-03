@@ -1,7 +1,36 @@
-/* MyBusinessTabs — the /my-business section navigation (Phase 8C). */
+/* MyBusinessTabs — the /my-business section navigation (Phase 8E overflow fix). */
 
 .my-biz-tabs {
   border-bottom: 1px solid var(--color-border);
+  /*
+   * THE fix for this bar, and it is the same three lines every horizontal
+   * scroller needs in this app.
+   *
+   * `.my-biz-tabs` is a flex child of `.my-business-layout` (a flex column). A
+   * flex item's automatic minimum size is its **min-content** width — and for
+   * this element the min-content width is the full unwrapped width of seventeen
+   * tabs, roughly 1200px. So the box was allowed to *grow* to fit its content,
+   * and the `overflow-x: auto` never engaged: there was nothing to scroll
+   * because the element itself had already become the scroll surface.
+   *
+   * `min-width: 0` drops that floor, so the box is allowed to be as narrow as
+   * its parent. `width: 100%` states the intent. `max-width: 100vw` is the hard
+   * ceiling. With all three, the bar is exactly one screen wide and scrolls
+   * *inside itself*.
+   */
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* Momentum scrolling on iOS. Not a fix — the native behaviour already
+     scrolls — but without it a flick on a long tab strip stops dead. */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+
+.my-biz-tabs::-webkit-scrollbar {
+  display: none; /* Chrome / Safari */
 }
 
 .my-biz-tabs__list {
@@ -10,6 +39,44 @@
   margin: 0;
   padding: 0;
   list-style: none;
+  /* `min-width: 0` here too: this list is a flex child of the scroller, and
+     without it the list's own min-content floor re-introduces the blowout one
+     level down. */
+  min-width: 0;
+}
+
+/*
+ * On a phone the seventeen tabs scroll in one row. `width: max-content` lets the
+ * strip be as wide as it needs to be *inside* the scroller — that is what makes
+ * scrolling meaningful rather than the list being squeezed to 100% with the
+ * overflow clipped. `min-width: 100%` ensures it still fills the bar when the
+ * tabs happen to be narrower than the screen.
+ */
+@media (max-width: 767px) {
+  .my-biz-tabs__list {
+    width: max-content;
+    min-width: 100%;
+    flex-wrap: nowrap;
+    /* Inset the strip by the page gutter so the first and last tabs are not
+       jammed against the screen edge. Padding, not margin: a negative margin
+       here would widen the element past its parent again. */
+    padding-inline: var(--space-4);
+  }
+}
+
+/* A wide screen wraps instead of scrolling, so nothing hides behind a "more"
+   menu nobody would find. */
+@media (min-width: 768px) {
+  .my-biz-tabs__list {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}
+
+.my-biz-tabs__item {
+  /* Never shrink a tab: a half-width "Overview" is a worse outcome than a
+     scrollable strip, and it lets a long label wrap mid-word. */
+  flex-shrink: 0;
 }
 
 .my-biz-tabs__tab {
@@ -46,30 +113,7 @@
 .my-biz-tabs__soon {
   width: 5px;
   height: 5px;
+  flex-shrink: 0;
   border-radius: 50%;
   background-color: color-mix(in srgb, var(--color-text-muted) 60%, transparent);
-}
-
-/* A phone scrolls one row; a wide screen wraps so nothing is hidden behind a
-   "more" menu nobody would find. */
-@media (max-width: 767px) {
-  .my-biz-tabs {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .my-biz-tabs::-webkit-scrollbar {
-    display: none;
-  }
-
-  .my-biz-tabs__list {
-    width: max-content;
-    flex-wrap: nowrap;
-  }
-}
-
-@media (min-width: 768px) {
-  .my-biz-tabs__list {
-    flex-wrap: wrap;
-  }
 }

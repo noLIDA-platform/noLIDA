@@ -81,6 +81,7 @@
 - Phase 8B: complete (public business profile, category listings, business search, post-approval redirect)
 - Phase 8C: complete (My Business dashboard — tab navigation, real overview, profile editing, placeholder sub-pages)
 - Phase 8D: complete (mobile bottom-nav overflow fix, Analytics promoted and given real metrics, password eye toggle)
+- Phase 8E: complete (horizontal overflow fixed on every mobile width)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -300,3 +301,23 @@
   labelled button.
 - Toggle buttons have `type="button"` (a bare button inside a form submits it)
   and an action-named aria-label plus aria-pressed.
+
+## Layout Overflow (Phase 8E)
+- No page in noLIDA causes horizontal scrolling on any mobile width.
+- html has `overflow-x: hidden` and `max-width: 100vw`; body has
+  `overflow-x: clip`. The split is deliberate: `hidden` on `html` would make
+  it a scroll container and break `position: sticky` on every top bar.
+- Any horizontal scroll container (tab bars, quick actions) uses its
+  own `overflow-x: auto` + `max-width: 100vw` + `min-width: 0`, never
+  pushing the page.
+- The `min-width: 0` is the load-bearing half. A flex/grid item's automatic
+  minimum size is its MIN-CONTENT width, so a wide child (17 tabs, a long
+  unbroken URL) silently widens every ancestor up to the document. Adding
+  `overflow-x: auto` alone does NOT fix this — the box grows instead of
+  scrolling. Chain `min-width: 0` from the scroller up through every
+  flex/grid ancestor.
+- Grid and flex children that might blow out use `min-width: 0`, and grid
+  tracks use `minmax(0, 1fr)` rather than a bare `1fr`.
+- Never use a negative `margin-inline` for full-bleed; use padding.
+- Never use JavaScript to detect or fix overflow — it is a CSS problem.
+- Test every new page at 375px width before considering it done.

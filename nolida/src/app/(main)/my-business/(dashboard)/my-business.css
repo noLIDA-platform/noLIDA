@@ -1,20 +1,42 @@
-/* My Business dashboard shell (Phase 8C). */
+/* My Business dashboard shell (Phase 8C, overflow chain fixed in 8E). */
 
 .my-business-layout {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   width: 100%;
+  /*
+   * `min-width: 0` on BOTH wrappers, and this is the load-bearing part.
+   *
+   * `.my-business-layout` is a flex item of `.app-shell__main` (also a flex
+   * column), and `.app-shell__main` is a flex item of `.app-shell`. At every one
+   * of those levels the automatic minimum size is the child's **min-content**
+   * width. Below, that propagates up: a tab strip or a pill row wider than the
+   * screen makes its parent's min-content width wider than the screen, and that
+   * width propagates all the way to the document — which is exactly how
+   * seventeen tabs turned the whole page into a horizontal scroller.
+   *
+   * `min-width: 0` at each level says "this box is allowed to be as narrow as
+   * its parent, and my own scroll containers handle their own overflow." The
+   * result: only the tab bar and the pill row scroll, exactly like the spec
+   * asks. The page itself never moves.
+   */
+  max-width: 100vw;
+  min-width: 0;
 }
 
 .my-business-layout__header {
   display: grid;
   gap: var(--space-3);
+  /* Grid children default to `min-content` minimums; this drops that floor for
+     the QuickActions row nested below it. */
+  min-width: 0;
 }
 
 .my-business-layout__titles {
   display: grid;
   gap: var(--space-1);
+  min-width: 0;
 }
 
 .my-business-layout__title {
@@ -23,10 +45,14 @@
   letter-spacing: -0.02em;
 }
 
+/* A long business name must ellipsize rather than stretch the header. */
 .my-business-layout__subtitle {
   margin: 0;
+  overflow: hidden;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .my-business-layout__content {
@@ -34,4 +60,8 @@
   flex-direction: column;
   gap: var(--space-5);
   padding-top: var(--space-4);
+  /* Same reasoning as the wrapper above: `children` (the Overview page, the
+     Services list, …) must not be able to widen this column. */
+  width: 100%;
+  min-width: 0;
 }

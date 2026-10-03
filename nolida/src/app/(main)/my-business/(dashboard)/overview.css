@@ -3,6 +3,9 @@
 .biz-overview {
   display: grid;
   gap: var(--space-5);
+  /* Phase 8E: the Overview is a grid child of `.my-business-layout__content`,
+     so it inherits the same min-content floor problem without this. */
+  min-width: 0;
 }
 
 /* ── Business health ──────────────────────────────────────────────── */
@@ -13,16 +16,20 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
+  /* A very long business name must wrap inside the card, not widen it. */
+  min-width: 0;
 }
 
 .biz-health__main {
   display: grid;
   gap: var(--space-2);
   min-width: 0;
+  flex: 1 1 12rem;
 }
 
 .biz-health__name {
   margin: 0;
+  overflow-wrap: anywhere;
   font-size: var(--text-lg);
   letter-spacing: -0.01em;
 }
@@ -32,8 +39,11 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
+  min-width: 0;
 }
 
+/* A long owner-typed category or location is free text: break it rather than
+   let it push the card past the viewport. */
 .biz-health__category {
   padding: 2px 10px;
   border-radius: 999px;
@@ -41,20 +51,29 @@
   color: var(--color-primary);
   font-size: var(--text-xs);
   font-weight: var(--weight-bold);
+  overflow-wrap: anywhere;
 }
 
 .biz-health__location {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+  min-width: 0;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.biz-health__location svg {
+  flex-shrink: 0;
 }
 
 .biz-health__side {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-4);
+  min-width: 0;
 }
 
 .biz-health__link {
@@ -73,13 +92,29 @@
 
 /* ── Key metrics ──────────────────────────────────────────────────── */
 
+/*
+ * Phase 8E: explicit 2-up on a phone, 4-up from 768px.
+ *
+ * The old `repeat(auto-fit, minmax(min(100%, 170px), 1fr))` was already
+ * overflow-safe — the `min(100%, …)` was doing the work — but it gave an
+ * unpredictable column count (2 at 375px, 3 at some widths, a lonely orphan
+ * row at others). Two fixed columns on a phone is easier to scan and matches
+ * the Overview's four cards into a clean 2×2.
+ */
 .biz-metrics {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
   margin: 0;
   padding: 0;
   list-style: none;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .biz-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .biz-metric {
@@ -89,20 +124,31 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background-color: var(--color-bg);
+  /* `minmax(0, …)` above is the grid-level half of this; `min-width: 0` on the
+     card is the item-level half. Both are needed: the track stops growing at
+     zero, and the item stops overflowing inside its track. Without either, a
+     long label or a large number widens the whole grid. */
+  min-width: 0;
+  overflow: hidden;
 }
 
 .biz-metric__label {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
+  min-width: 0;
   color: var(--color-text-muted);
   font-size: var(--text-xs);
 }
 
 .biz-metric__value {
+  /* `₦0` and multi-digit counts must not push the card wide. */
+  min-width: 0;
+  overflow: hidden;
   font-size: var(--text-2xl);
   font-weight: var(--weight-extrabold);
   letter-spacing: -0.02em;
+  text-overflow: ellipsis;
 }
 
 /* A placeholder number must never be mistaken for a measured one. */
@@ -179,6 +225,9 @@
   padding: var(--space-2) 0;
   border-bottom: 1px dashed var(--color-border);
   font-size: var(--text-sm);
+  /* The label is long and the row has a fixed-width "Add"/"Fix" link at the
+     end; without this the row overflows rather than the label shrinking. */
+  min-width: 0;
 }
 
 .biz-task:last-child {
@@ -208,6 +257,9 @@
 .biz-task__label {
   flex: 1;
   min-width: 0;
+  /* "Write a description (at least 50 characters)" is the longest label here
+     and must wrap rather than push the "Fix" link off-screen. */
+  overflow-wrap: anywhere;
 }
 
 .biz-task--done .biz-task__label {

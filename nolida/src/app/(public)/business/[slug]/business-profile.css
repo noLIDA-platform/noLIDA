@@ -144,8 +144,22 @@
 .biz-tabs {
   display: flex;
   gap: var(--space-1);
+  /* Phase 8E: same fix as `.my-biz-tabs`. This strip is a flex item of
+     `.biz-profile__body` and its min-content width is the full unwrapped width
+     of four tabs; without `min-width: 0` it grows and drags the page sideways.
+     The row scrolls inside itself instead. */
+  width: 100%;
+  max-width: 100vw;
+  min-width: 0;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
   border-bottom: 1px solid var(--color-border);
+  scrollbar-width: none;
+}
+
+.biz-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .biz-tabs__tab {
@@ -159,6 +173,7 @@
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .biz-tabs__tab:hover {

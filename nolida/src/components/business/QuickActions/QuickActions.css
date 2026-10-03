@@ -1,30 +1,35 @@
-/* QuickActions — the row of pill links above the My Business tabs (Phase 8C). */
+/* QuickActions — the row of pill links above the My Business tabs (Phase 8E). */
 
 .biz-quick-actions {
   display: flex;
   gap: var(--space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
+  /* Padding, never a negative margin. Phase 8C had a
+     `margin-inline: calc(var(--space-4) * -1)` full-bleed trick here, which made
+     this element 32px WIDER than its parent and pushed the document sideways —
+     which in turn dragged the fixed bottom nav out of alignment. Phase 8D
+     removed the margin; Phase 8E completes the fix by making this a properly
+     contained scroller. */
   padding-bottom: var(--space-1);
-  /* Width and min-width are pinned to the parent's content box.
-     Phase 8C had a `margin-inline: calc(var(--space-4) * -1)` full-bleed trick
-     here, which made this element 2rem WIDER than its parent. On a 320px phone
-     the row reached 352px, the document became horizontally scrollable, and
-     because the bottom nav is `position: fixed` against the viewport it stopped
-     lining up with the screen — the "nav no longer fits" report.
-     Full bleed is not worth that: a scrolling row that starts at the page
-     gutter behaves perfectly well. `min-width: 0` lets the flex children scroll
-     inside instead of forcing the row itself wider. */
   width: 100%;
+  max-width: 100vw;
+  /* Same fix as `.my-biz-tabs`: this is a grid child of
+     `.my-business-layout__header`, and a grid item's automatic minimum size is
+     its min-content width — the full unwrapped width of seven pills. Without
+     `min-width: 0` the row grows instead of scrolling. */
   min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
 }
 
 .biz-quick-actions::-webkit-scrollbar {
-  display: none;
+  display: none; /* Chrome / Safari */
 }
 
 .biz-quick-actions__item {
   display: inline-flex;
+  /* Never shrink a pill below its label. */
   flex-shrink: 0;
   align-items: center;
   gap: var(--space-2);

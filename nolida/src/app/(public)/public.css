@@ -4,6 +4,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* Phase 8E: the outer flex column — see `.public-main`. */
+  min-width: 0;
 }
 
 .public-header {
@@ -38,6 +40,11 @@
   flex: 1;
   width: 100%;
   max-width: 1120px;
+  /* Phase 8E: same reasoning as `.app-shell__main`. This is a flex item of
+     `.public-shell`, so it needs `min-width: 0` to stop a wide descendant (the
+     profile tab strip, a long unbroken URL) from propagating its min-content
+     width out to the document. */
+  min-width: 0;
   margin: 0 auto;
   padding: var(--space-5) var(--space-4) var(--space-8);
 }

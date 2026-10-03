@@ -12,6 +12,9 @@
   display: flex;
   min-height: 100dvh;
   flex-direction: column;
+  /* Phase 8E: the shell is the outermost flex column on every signed-in page, so
+     this is where a wide descendant's min-content width would otherwise stop. */
+  min-width: 0;
   background-color: var(--color-bg);
 }
 
@@ -28,6 +31,11 @@
   width: 100%;
   max-width: 1080px;
   margin: 0 auto;
+  /* Phase 8E: `min-width: 0` on this flex item is what stops a wide descendant
+     (the My Business tab strip, a wide table, a long unbroken string) from
+     propagating its min-content width up through `.app-shell` and out to the
+     document. Every page inside the shell inherits the fix for free. */
+  min-width: 0;
   /* The bottom nav is fixed, so content needs room to scroll clear of it. */
   padding: var(--space-4) var(--space-4)
     calc(var(--app-bottom-nav-height) + var(--space-6));

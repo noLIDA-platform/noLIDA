@@ -11,6 +11,8 @@
 .discover-page > * {
   width: 100%;
   max-width: 800px;
+  /* Phase 8E: flex item in a row container — see `.feed-page__column`. */
+  min-width: 0;
   padding-inline: var(--space-4);
 }
 

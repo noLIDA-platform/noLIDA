@@ -6,8 +6,21 @@
   gap: var(--space-5);
   width: 100%;
   max-width: 600px;
+  /* Phase 8E: a long unbroken username or URL in the header must wrap rather
+     than raise this column's min-content width past the viewport. */
+  min-width: 0;
   margin-inline: auto;
   padding: var(--space-4);
+}
+
+.profile-view__name {
+  margin: 0;
+  /* A long unbroken display name is user input — break it inside the card. */
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
 }
 
 .profile-view__head {

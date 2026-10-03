@@ -16,25 +16,47 @@ body {
 }
 
 /**
+ * The root overflow guard (Phase 8D, extended in 8E).
+ *
+ * ## What it is for
+ *
  * A phone viewport is exactly as wide as the phone. Anything wider turns the
  * whole page into a sideways-scrolling surface, which drags the *fixed* bottom
- * nav with it — the nav is positioned against the viewport, so the moment the
- * document is wider, the bar no longer lines up with the screen.
+ * nav out of alignment — the nav is positioned against the viewport, so the
+ * moment the document is wider than the screen, the bar stops lining up with
+ * it.
  *
- * `overflow-x: clip` on `html` bounds the damage to the element that caused it
- * rather than making every page responsible for never overflowing. `clip` and
- * not `hidden`: `hidden` on the root turns the element into a scroll container,
- * so `position: sticky` descendants stop working against the viewport. `clip`
- * has no scrollport, so sticky keeps working.
+ * ## `hidden` on `html`, and what it costs
  *
- * Individual pages still fix their own overflow — this is the backstop that
- * keeps one bad page from breaking the navigation everywhere.
+ * Phase 8D used `clip` here specifically to protect `position: sticky`, and
+ * that reasoning still holds: `overflow: hidden` on the root element makes it a
+ * scroll container, so sticky descendants would resolve their sticky
+ * *containing block* against `html` instead of the viewport — which silently
+ * breaks every sticky header in the app (`.app-topbar`, the My Business tab
+ * rail, `.site-header`).
+ *
+ * Phase 8E asks for `overflow-x: hidden`, which is honoured, but the sticky
+ * regression is real and would be a bad trade. The resolution is to put the
+ * *scrollport* back on the root where it belongs and clip the overflow:
+ *
+ * - `html` gets `overflow-x: hidden`, which is what stops the document
+ *   scrolling sideways, and
+ * - `body` keeps `overflow-x: clip`, so nothing inside `body` can paint past
+ *   the viewport, while `body` — not `html` — stays the sticky containing
+ *   block that `html`'s scrollport would otherwise have displaced.
+ *
+ * Net effect matches the Phase 8E requirement (no horizontal page scroll, root
+ * capped at the viewport) without the sticky regression, and the real fixes
+ * still live on the offending elements below — this block is the backstop that
+ * stops one bad page from breaking navigation everywhere.
+ *
+ * `max-width: 100vw` is what the guard needs on `html`; `body` is capped at
+ * `100%` because `100vw` on `body` includes the classic desktop scrollbar
+ * gutter and would itself introduce overflow.
  */
 html {
-  overflow-x: clip;
-  /* `100%` rather than `100vw`: 100vw includes the classic scrollbar gutter on
-     desktop, which would itself introduce overflow. */
-  max-width: 100%;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
@@ -56,4 +78,23 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+/*
+ * Replaced media defaults (Phase 8E).
+ *
+ * `img, video, svg { max-width: 100% }` belongs with the rest of the reset, not
+ * bolted onto the media rules: an oversized asset — a product photo, a business
+ * cover, an icon with a hard-coded width — is the other half of every horizontal
+ * overflow this phase chased, and a max-width on the element is the only fix
+ * that does not need the element itself to know it is being constrained.
+ *
+ * `svg` is included deliberately. `width`/`height` attributes on an SVG give it
+ * a concrete intrinsic width that does *not* shrink the way `max-width` does on
+ * an image, so an oversized icon blows out a flex row on its own.
+ */
+img,
+video,
+svg {
+  max-width: 100%;
 }

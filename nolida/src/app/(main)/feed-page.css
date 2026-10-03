@@ -18,6 +18,12 @@
   gap: var(--space-4);
   width: 100%;
   max-width: 600px;
+  /* Phase 8E: this is a flex item in a **row** container, so its automatic
+     minimum size is its min-content width. A post body with a long unbroken
+     token (a URL, an @handle) raises that floor past 600px and widens the page.
+     `min-width: 0` lets the column shrink to its max-width and wrap the text
+     instead. */
+  min-width: 0;
 }
 
 @media (min-width: 768px) {
