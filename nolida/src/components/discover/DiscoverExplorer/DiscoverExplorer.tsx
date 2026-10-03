@@ -11,8 +11,10 @@ import { SearchBar } from "@/components/discover/SearchBar/SearchBar";
 import { FilterPanel } from "@/components/discover/FilterPanel/FilterPanel";
 import { PostResultCard } from "@/components/discover/PostResultCard/PostResultCard";
 import { UserResultCard } from "@/components/discover/UserResultCard/UserResultCard";
+import { PublicBusinessCard } from "@/components/business/PublicBusinessCard/PublicBusinessCard";
 import { DiscoverySection } from "@/components/discover/DiscoverySection/DiscoverySection";
 import { apiFetch } from "@/lib/client/api";
+import type { PublicBusiness } from "@/types/public-business";
 import type {
   DiscoveryData,
   SearchFilters,
@@ -25,6 +27,13 @@ export interface DiscoverExplorerProps {
   viewerId: string;
   /** `?q=` from the URL, so the desktop top bar's form lands on real results. */
   initialQuery?: string;
+  /**
+   * Approved businesses fetched on the server (Phase 8B). Rendered as the
+   * first discovery section when no search is active; a page prop rather
+   * than an `/api/discovery` field because the section must be the first
+   * thing on screen, not something a second round-trip paints in.
+   */
+  featuredBusinesses?: PublicBusiness[];
 }
 
 const EMPTY_FILTERS: SearchFilters = {
@@ -85,6 +94,7 @@ async function fetchPage(
 export function DiscoverExplorer({
   viewerId,
   initialQuery = "",
+  featuredBusinesses = [],
 }: DiscoverExplorerProps): React.JSX.Element {
   const [query, setQuery] = useState(initialQuery);
   const [filters, setFilters] = useState<SearchFilters>(EMPTY_FILTERS);
@@ -300,8 +310,16 @@ return (
         <>
           <p className="discover__count">
             {resultList.length} of{" "}
-            {results ? results.counts.posts + results.counts.users : resultList.length}{" "}
-            {results && results.counts.posts + results.counts.users === 1
+            {results
+              ? results.counts.posts +
+                results.counts.users +
+                results.counts.businesses
+              : resultList.length}{" "}
+            {results &&
+            results.counts.posts +
+              results.counts.users +
+              results.counts.businesses ===
+              1
               ? "result"
               : "results"}
           </p>
@@ -313,6 +331,8 @@ return (
                   <PostResultCard post={result} />
                 ) : result.type === "user" ? (
                   <UserResultCard user={result} viewerId={viewerId} />
+                ) : result.type === "business" ? (
+                  <PublicBusinessCard business={result} />
                 ) : null}
               </li>
             ))}
@@ -341,6 +361,22 @@ return (
 
       {!isLoading && !error && !hasQuery && discovery ? (
         <>
+          {/* First section, and only when there is something to show — an
+              empty grid is not a section, and DiscoverySection's own empty
+              check sees the wrapper div, not the mapped rows. */}
+          {featuredBusinesses.length > 0 ? (
+            <DiscoverySection
+              title="Featured businesses"
+              subtitle="Approved businesses on noLIDA"
+            >
+              <div className="discover__businesses">
+                {featuredBusinesses.map((business) => (
+                  <PublicBusinessCard key={business.id} business={business} />
+                ))}
+              </div>
+            </DiscoverySection>
+          ) : null}
+
           <DiscoverySection
             title="Trending now"
             subtitle="Most liked in the last seven days"

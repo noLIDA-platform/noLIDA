@@ -5,11 +5,15 @@ import { z } from "zod";
  *
  * Everything arrives as a query string, so everything arrives as text. `z`
  * coerces and bounds it here rather than trusting it further in.
+ *
+ * `business` joined the filter in Phase 8B, when businesses became real
+ * results. Before that the enum deliberately excluded it so the stub could
+ * not be reached from outside — see `docs/PUBLIC-BUSINESS.md`.
  */
 
 export const searchQuerySchema = z.object({
   q: z.string().trim().min(1).max(200),
-  type: z.enum(["all", "post", "user"]).optional().default("all"),
+  type: z.enum(["all", "post", "user", "business"]).optional().default("all"),
   location: z.string().trim().max(120).optional(),
   sortBy: z.enum(["relevance", "recent", "popular"]).optional().default("relevance"),
   limit: z.coerce.number().int().min(1).max(50).optional().default(20),

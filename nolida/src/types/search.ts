@@ -6,11 +6,9 @@
  * `result.type` and never guesses: a renderer that has to test "does this have
  * an author?" breaks the moment a third kind of result exists.
  *
- * `business` is here on purpose, and is **always empty** until Phase 8. Adding
- * it later is a data change, not an API change — the union already admits it,
- * so no client has to be rewritten when businesses become searchable.
- *
- * Client-safe: no server imports, so Client Components may depend on it.
+ * `business` became a real result in Phase 8B: `search.service.ts` merges
+ * APPROVED businesses with posts and people, and `counts.businesses` is a real
+ * count. Client-safe: no server imports, so Client Components may depend on it.
  */
 
 export type SearchResultType = "post" | "user" | "business";
@@ -70,15 +68,20 @@ export interface SearchUser {
 }
 
 /**
- * Placeholder for Phase 8.
+ * The slice of a business a result card needs.
  *
- * Declared so the contract admits businesses, never constructed today:
- * `search()` returns an empty business list and `counts.businesses` is always
- * 0. Keeping the shape honest now is cheaper than inventing it later.
+ * `slug` is carried because the card links to `/business/[slug]` — a result
+ * without it would render with nowhere to go. `rank` is normalised to 0–1
+ * for the same reason as posts and people: the three kinds are merged into
+ * one ordered list in `search.service.ts`.
+ *
+ * Only APPROVED businesses ever reach this shape; the repository filters
+ * by status in SQL, so no renderer has to remember to.
  */
 export interface SearchBusiness {
   type: "business";
   id: string;
+  slug: string;
   name: string;
   category: string | null;
   location: string | null;

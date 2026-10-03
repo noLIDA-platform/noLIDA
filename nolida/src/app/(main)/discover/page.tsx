@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { DiscoverExplorer } from "@/components/discover/DiscoverExplorer/DiscoverExplorer";
 import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
+import { listFeatured } from "@/lib/server/services/publicBusiness.service";
 import "./discover.css";
 
 export const metadata: Metadata = {
   title: "Discover",
-  description: "Search posts and people, or browse what is trending.",
+  description: "Search posts, people and businesses, or browse what is trending.",
 };
 
 /**
@@ -17,6 +18,11 @@ export const metadata: Metadata = {
  * plain GET form work end to end: submitting it navigates to `/discover?q=…`,
  * and this page turns that query into real results on the first render rather
  * than after a hydration round-trip.
+ *
+ * Since Phase 8B the page also fetches featured businesses here, on the
+ * server, and passes them down — the first discovery section a visitor sees
+ * (Phase 8B). Both reads run together so one round trip feeds the whole
+ * resting state of the page.
  *
  * The session is re-read here even though `(main)/layout.tsx` already refused
  * anyone without one — the viewer's id is needed by every follow button, and a
@@ -36,6 +42,8 @@ export default async function DiscoverPage({
   const raw = Array.isArray(params.q) ? params.q[0] : params.q;
   const initialQuery = typeof raw === "string" ? raw : "";
 
+  const featuredBusinesses = await listFeatured({ limit: 6 });
+
   return (
     <div className="discover-page">
       {/* Keyed by the query so submitting the top bar form while already on
@@ -44,6 +52,7 @@ export default async function DiscoverPage({
         key={initialQuery}
         viewerId={session.user.id}
         initialQuery={initialQuery}
+        featuredBusinesses={featuredBusinesses}
       />
     </div>
   );

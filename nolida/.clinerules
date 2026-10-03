@@ -78,6 +78,7 @@
 - Phase 7C: complete (single desktop logo and authenticated headers for business pages)
 - Phase 7D: complete (shared navigation and desktop avatar dropdown)
 - Phase 8A: complete (seeded categories, owner-managed services and products)
+- Phase 8B: complete (public business profile, category listings, business search, post-approval redirect)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -150,7 +151,7 @@
 - User text is never concatenated into SQL. It goes through `websearch_to_tsquery('simple', $n)`.
 - Search reuses `VISIBLE_TO_VIEWER` from `repositories/visibility.ts`, the same predicate `posts.repo.ts` uses. Never filter visibility after loading a page, and never let `counts` exceed what the viewer may see.
 - Search paginates by OFFSET, capped at 500 — not by the feed's `(created_at, id)` cursor, because results merge two tables and relevance order has no stable key. `nextCursor` is the next offset as a string; "Load more" appends.
-- Business search exists in the types and the repository but is NOT exposed by the public route, which accepts `all | post | user` only. Do not surface the filter before Phase 8 — it would return an empty list that looks broken.
+- Business search returns real results (Phase 8B). Businesses are no longer a stub; `type=business` is exposed by `/api/search` and the filter panel.
 - `/discover` is a Server Component that reads `?q=` and renders the `DiscoverExplorer` client island. The page passes `key={initialQuery}` so a top-bar submit while already on `/discover` re-runs the search instead of leaving stale results.
 - `TopBarDesktop` stays a plain GET form to `/discover`. Never rebuild it as a JS-driven search box.
 - Search requests carry a token so a late response cannot overwrite a newer one. Typing is debounced; Enter and clear flush immediately.
@@ -227,3 +228,18 @@
 - Profile is in the sidebar; do not add a duplicate View profile item to the desktop dropdown.
 - Navigation items come from `src/lib/nav/items.ts`; do not hardcode nav items inside components.
 - My Business appears only when the signed-in user owns an APPROVED business.
+
+## Public Business Profile (Phase 8B)
+- Public profile lives at /business/[slug].
+- Only APPROVED businesses are reachable. Any other status → 404.
+- Public pages do NOT use the app shell. They use the (public) layout
+  with a minimal header (wordmark + login/signup or back-to-app link)
+  and SiteFooter.
+- Category listings live at /categories/[slug].
+- Business search now returns real results (businesses are no longer
+  a stub).
+- /my-business/pending redirects automatically when status changes:
+  - APPROVED → /my-business
+  - DRAFT / CHANGES_REQUESTED → /my-business/submit
+  - Otherwise shows status UI with a 15s poller.
+- Reviews tab on the public profile is a placeholder until Phase 17.

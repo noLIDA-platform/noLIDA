@@ -59,6 +59,14 @@
   gap: var(--space-3);
 }
 
+/* Featured businesses: cards in a grid, not a scroll row — there are only a
+   handful and they should be comparable at a glance. */
+.discover__businesses {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-3);
+}
+
 @media (min-width: 768px) {
   .discover__people {
     grid-template-columns: 1fr 1fr;

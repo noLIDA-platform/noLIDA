@@ -14,11 +14,18 @@ export interface FilterPanelProps {
   onClear: () => void;
 }
 
-/** Businesses are deliberately absent: they are not searchable until Phase 8. */
+/**
+ * Type, sort and location filters for search results.
+ *
+ * Businesses joined the type pills in Phase 8B, when `search.service.ts`
+ * began returning real business results — before that this pill would have
+ * shown an empty list that looks broken, so it was deliberately absent.
+ */
 const TYPE_OPTIONS = [
   { value: "all", label: "All" },
   { value: "post", label: "Posts" },
   { value: "user", label: "People" },
+  { value: "business", label: "Businesses" },
 ] as const;
 
 const SORT_OPTIONS: readonly { value: SearchSort; label: string }[] = [

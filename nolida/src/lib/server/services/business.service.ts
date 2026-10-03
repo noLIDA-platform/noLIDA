@@ -239,6 +239,26 @@ export async function getSubmissionStatus(userId: string) {
   return { business, submission };
 }
 
+/**
+ * The status of one business, for the `/my-business/pending` poller.
+ *
+ * Ownership is verified here rather than trusted from the id in the URL: an
+ * id is not proof, and a caller that could poll any business could learn
+ * whether it was approved. `null` covers both "no such business" and "not
+ * yours", so the route answers NOT_FOUND for either — the endpoint never
+ * confirms that an id it was given exists.
+ */
+export async function getBusinessStatusForOwner(input: {
+  userId: string;
+  businessId: string;
+}): Promise<{ status: string; updated_at: string } | null> {
+  const business = await businessesRepo.findById(input.businessId);
+  if (!business || business.owner_user_id !== input.userId) {
+    return null;
+  }
+  return { status: business.status, updated_at: business.updated_at };
+}
+
 export async function approveBusiness(input: {
   adminUserId: string;
   businessId: string;

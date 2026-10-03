@@ -1,0 +1,320 @@
+/* /business/[slug] — public business profile (Phase 8B). */
+
+.biz-profile {
+  display: grid;
+  gap: var(--space-5);
+}
+
+/* ── Cover + identity ─────────────────────────────────────────────── */
+
+.biz-profile__cover {
+  display: flex;
+  align-items: flex-end;
+  min-height: 180px;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  /* Gradient band until real photos land (Cloudinary deferred). */
+  background: var(--color-gradient-hero);
+}
+
+.biz-profile__cover-name {
+  color: #fff;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 8px rgba(10, 14, 39, 0.45);
+}
+
+.biz-profile__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: -40px;
+}
+
+.biz-profile__avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border: 4px solid var(--color-bg);
+  border-radius: 50%;
+  background: var(--color-gradient);
+  color: #fff;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-extrabold);
+}
+
+.biz-profile__identity {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding-top: 44px;
+}
+
+.biz-profile__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.biz-profile__name {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  letter-spacing: -0.02em;
+}
+
+.biz-profile__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-success, #16a34a);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+
+.biz-profile__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.biz-profile__category {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+}
+
+.biz-profile__location {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.biz-profile__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin: var(--space-2) 0 0;
+}
+
+.biz-profile__stat {
+  display: grid;
+  gap: 2px;
+}
+
+.biz-profile__stat dt {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.biz-profile__stat dd {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-extrabold);
+}
+
+/* ── Body: tabs + sticky action rail ──────────────────────────────── */
+
+.biz-profile__body {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.biz-profile__catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-3);
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+
+.biz-tabs {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.biz-tabs__tab {
+  flex-shrink: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+}
+
+.biz-tabs__tab:hover {
+  color: var(--color-text);
+}
+
+.biz-tabs__tab--active {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.biz-tabs__tab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+.biz-tabs__panel {
+  min-height: 200px;
+}
+
+/* ── About tab ────────────────────────────────────────────────────── */
+
+.biz-about {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.biz-about__section h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-base);
+  letter-spacing: -0.01em;
+}
+
+.biz-about__description {
+  margin: 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.biz-about__description--muted,
+.biz-about__muted {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.biz-about__muted {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+
+.biz-about__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.biz-about__list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+}
+
+.biz-about__list a {
+  color: var(--color-primary);
+}
+
+.biz-about__location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.biz-about__areas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.biz-about__area-chip {
+  padding: 2px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background-color: var(--color-bg-subtle);
+  font-size: var(--text-xs);
+}
+
+.biz-about__hours {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.biz-about__hours-row {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-1) 0;
+  border-bottom: 1px dashed var(--color-border);
+  font-size: var(--text-sm);
+}
+
+.biz-about__hours-row dt {
+  color: var(--color-text-muted);
+}
+
+.biz-about__hours-row dd {
+  margin: 0;
+  font-weight: var(--weight-bold);
+}
+
+/* ── Action rail ──────────────────────────────────────────────────── */
+
+.biz-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.biz-actions__pending {
+  display: contents;
+}
+
+/* ── Layout: side rail on desktop, bottom bar on mobile ───────────── */
+
+@media (min-width: 900px) {
+  .biz-profile__body {
+    grid-template-columns: minmax(0, 1fr) 240px;
+    align-items: start;
+  }
+
+  .biz-actions {
+    position: sticky;
+    top: var(--space-5);
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 899px) {
+  /* Bottom action bar on a phone: pinned while the profile scrolls. */
+  .biz-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    padding: var(--space-3) 0;
+    background-color: var(--color-bg);
+    box-shadow: 0 -8px 16px color-mix(in srgb, var(--color-navy) 8%, transparent);
+  }
+}
+

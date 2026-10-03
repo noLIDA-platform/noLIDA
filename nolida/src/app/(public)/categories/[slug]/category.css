@@ -1,0 +1,66 @@
+/* /categories/[slug] — category listing (Phase 8B). */
+
+.cat-page {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.cat-page__header {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.cat-page__eyebrow {
+  margin: 0;
+  color: var(--color-primary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.cat-page__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  letter-spacing: -0.02em;
+}
+
+.cat-page__count {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.cat-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cat-page__more {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--space-2);
+}
+
+.cat-page__more-link {
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+}
+
+.cat-page__more-link:hover {
+  border-color: var(--color-primary);
+}
+
+.cat-page__more-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

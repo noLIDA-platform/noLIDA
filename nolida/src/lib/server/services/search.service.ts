@@ -1,4 +1,5 @@
 import * as searchRepo from "@/lib/server/repositories/search.repo";
+import * as publicBusinessesRepo from "@/lib/server/repositories/publicBusinesses.repo";
 import type {
   DiscoveryData,
   SearchPost,
@@ -7,6 +8,7 @@ import type {
   SearchResultType,
   SearchSort,
   SearchUser,
+  SearchBusiness,
 } from "@/types/search";
 
 /**
@@ -32,13 +34,12 @@ export interface SearchParams {
   viewerId: string;
   query: string;
   /**
-   * `"business"` is accepted and always returns nothing until Phase 8. It is
-   * in the type on purpose: the day businesses become searchable this is a
-   * data change, not a signature change, and nothing in between has to be
-   * rewritten to make room for it.
+   * Which kinds of result to return. `all` merges posts, people and
+   * businesses by rank; each specific type returns only that kind.
    *
-   * The route's schema still only accepts `all | post | user`, so the stub is
-   * unreachable from outside today — which is what keeps it honest.
+   * Businesses became real in Phase 8B (they were a stub in Phase 6), so the
+   * route's schema now accepts `business` too and the union member is
+   * constructed by `toBusiness` below.
    */
   type?: "all" | SearchResultType;
   location?: string | null;
@@ -101,21 +102,36 @@ function toUser(row: searchRepo.UserSearchRow): SearchUser {
   };
 }
 
-function emptyCounts(): SearchResponse["counts"] {
-  return { posts: 0, users: 0, businesses: 0 };
+function toBusiness(row: publicBusinessesRepo.BusinessSearchRow): SearchBusiness {
+  return {
+    type: "business",
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    category: row.category,
+    location: row.location,
+    rank: Number(row.rank) || 0,
+  };
 }
 
 /**
- * Searches posts and/or people.
+ * Searches posts, people and businesses.
  *
- * `type: "all"` merges the two kinds by `rank`. Because rank is normalised to
- * 0–1 on both sides (see `search.repo.ts`), the merge is meaningful — an
- * unnormalised merge would just stack whichever kind happened to return bigger
- * numbers. Ties keep each side's own ordering, because `Array.sort` is stable.
+ * `type: "all"` merges the three kinds by `rank`. Because rank is normalised
+ * to 0–1 on all three sides (see `search.repo.ts` and
+ * `publicBusinesses.repo.ts`), the merge is meaningful — an unnormalised
+ * merge would just stack whichever kind happened to return bigger numbers.
+ * Ties keep each side's own ordering, because `Array.sort` is stable.
  *
  * Offsets apply to the *merged* list, so each kind is fetched with
  * `limit + offset` rows and the slice is taken after the merge. Fetching only
  * `limit` per side would make page two wrong.
+ *
+ * Counts are always for all three kinds regardless of the `type` filter —
+ * that is what lets the UI show tabs with honest totals while rendering one.
+ * Business search is APPROVED-only by construction: `searchBusinesses`
+ * filters in SQL, so a draft business can never appear in `counts.businesses`
+ * either. A count that included hidden rows would be a leak with extra steps.
  */
 export async function search(params: SearchParams): Promise<SearchResponse> {
   const query = normaliseQuery(params.query);
@@ -125,59 +141,68 @@ export async function search(params: SearchParams): Promise<SearchResponse> {
   const location = params.location?.trim() ? params.location.trim() : null;
   const type = params.type ?? "all";
 
-  // Businesses arrive in Phase 8. Unreachable from the route today (its schema
-  // rejects `business`), so the zeros below are honest rather than a gap: there
-  // are no businesses to search yet.
-  if (type === "business") {
-    return { results: [], counts: emptyCounts(), nextCursor: null };
-  }
-
   const wantPosts = type === "all" || type === "post";
   const wantUsers = type === "all" || type === "user";
+  const wantBusinesses = type === "all" || type === "business";
   const fetch = limit + offset;
 
-  const [postRows, userRows, postCount, userCount] = await Promise.all([
-    wantPosts
-      ? searchRepo.searchPosts({
-          query,
-          viewerId: params.viewerId,
-          limit: fetch,
-          offset: 0,
-          sortBy,
-          location,
-        })
-      : Promise.resolve([]),
-    wantUsers
-      ? searchRepo.searchUsers({
-          query,
-          viewerId: params.viewerId,
-          limit: fetch,
-          offset: 0,
-        })
-      : Promise.resolve([]),
-    searchRepo.countPosts({ query, viewerId: params.viewerId, location }),
-    searchRepo.countUsers({ query }),
-  ]);
+  const [postRows, userRows, businessRows, postCount, userCount, businessCount] =
+    await Promise.all([
+      wantPosts
+        ? searchRepo.searchPosts({
+            query,
+            viewerId: params.viewerId,
+            limit: fetch,
+            offset: 0,
+            sortBy,
+            location,
+          })
+        : Promise.resolve([]),
+      wantUsers
+        ? searchRepo.searchUsers({
+            query,
+            viewerId: params.viewerId,
+            limit: fetch,
+            offset: 0,
+          })
+        : Promise.resolve([]),
+      wantBusinesses
+        ? publicBusinessesRepo.searchBusinesses({
+            query,
+            limit: fetch,
+            offset: 0,
+          })
+        : Promise.resolve([]),
+      searchRepo.countPosts({ query, viewerId: params.viewerId, location }),
+      searchRepo.countUsers({ query }),
+      publicBusinessesRepo.countBusinesses({ query }),
+    ]);
 
   const posts = postRows.map(toPost);
   const users = userRows.map(toUser);
+  const businesses = businessRows.map(toBusiness);
 
   let merged: SearchResult[];
   if (type === "post") {
     merged = posts.slice(offset, offset + limit);
   } else if (type === "user") {
     merged = users.slice(offset, offset + limit);
+  } else if (type === "business") {
+    merged = businesses.slice(offset, offset + limit);
   } else {
-    const combined = [...posts, ...users].sort((a, b) => b.rank - a.rank);
+    const combined = [...posts, ...users, ...businesses].sort(
+      (a, b) => b.rank - a.rank,
+    );
     merged = combined.slice(offset, offset + limit);
   }
 
   const nextOffset = offset + merged.length;
-  const hasMore = nextOffset < (postCount + userCount) && merged.length > 0;
+  const hasMore =
+    nextOffset < (postCount + userCount + businessCount) && merged.length > 0;
 
   return {
     results: merged,
-    counts: { posts: postCount, users: userCount, businesses: 0 },
+    counts: { posts: postCount, users: userCount, businesses: businessCount },
     nextCursor: hasMore ? String(nextOffset) : null,
   };
 }
