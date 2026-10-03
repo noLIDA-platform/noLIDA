@@ -82,6 +82,7 @@
 - Phase 8C: complete (My Business dashboard — tab navigation, real overview, profile editing, placeholder sub-pages)
 - Phase 8D: complete (mobile bottom-nav overflow fix, Analytics promoted and given real metrics, password eye toggle)
 - Phase 8E: complete (no horizontal scroll, content fills the viewport, page is not pannable or auto-zooming)
+- Phase 8F: complete (mobile stability — no panning, no dead space below content; loading boundaries for perceived speed)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -357,3 +358,37 @@
 - Never set `maximumScale` or `userScalable: false` to stop that zoom.
   Pinch zoom is a WCAG 1.4.4 requirement; disabling it locks out users
   who need to magnify.
+
+## Mobile Stability (Phase 8F)
+- html, body have `overflow-x: clip` and `width: 100%`. Never `hidden`
+  — it makes the element a scroll container the page can still be
+  rubber-banded in.
+- No page scrolls horizontally on any mobile width.
+- Containers use `min-height: 100dvh`, NEVER `100vh`. `100vh` is the
+  tallest viewport on iOS (measured with chrome hidden), so it over-runs
+  and leaves dead space at the bottom.
+- `.app-shell__main` is `flex: 1 0 auto`, not `flex: 1` / `1 1 0%`. A
+  zero flex-basis stretched main to the full viewport BEFORE its padding
+  was added, so short pages got guaranteed dead space under the fixed
+  nav. Content determines height; the shell's `min-height` stretches.
+- The bottom nav height plus `env(safe-area-inset-bottom)` is accounted
+  for in main's `padding-bottom` — that is clearance for a fixed element,
+  not layout height.
+- Every horizontal scroller declares `overscroll-behavior-x: contain`.
+  Without it, a swipe that reaches the end of the strip chains the
+  remaining gesture to the document and the whole page slides sideways.
+- Viewport meta uses `viewportFit: "cover"`.
+
+## Perceived Speed (Phase 8F)
+- Every route under `(main)` has a `loading.tsx` rendering `PageLoader`.
+  A route uses its NEAREST loading boundary, so both the `(main)/` one
+  and per-route ones exist and the closer one wins.
+- `PageLoader` reuses the existing `Spinner` primitive. There is one
+  spinner, not two.
+- Nav Links use explicit `prefetch`.
+- The AppShell renders immediately — it does no `await` at all. Do not
+  add one. Notification/cart/message counts belong in a `<Suspense>`
+  island or a client component that fetches after mount; awaiting them
+  in `(main)/layout.tsx` delays the shell on EVERY navigation.
+- Navigation should feel instant; only real network slowness should
+  cause a visible wait.

@@ -22,6 +22,23 @@ export const dynamic = "force-dynamic";
  * the sign-in screen. `/home` is the default destination once they are back.
  * Nothing is rendered while the session is being looked up, so a slow database
  * shows Next.js's loading boundary rather than a flash of an empty shell.
+ *
+ * ## On "why is this slow" (Phase 8F)
+ *
+ * There are two reads here, and they are genuinely sequential: `getMyBusiness`
+ * cannot be called until the user id is known. That is one unavoidable
+ * round trip, not a mistake.
+ *
+ * What is *not* here is worth stating, because it is the usual cause of a slow
+ * shell: this layout does not fetch notification counts, cart counts, message
+ * counts, or any other badge number. If a future phase adds one, it must go
+ * into a `<Suspense>` island (or be fetched client-side after mount) rather
+ * than being awaited here — one more `await` in this file delays the sidebar
+ * and bottom nav on *every* navigation in the app, which is the difference
+ * between a tap that feels instant and one that feels broken.
+ *
+ * `ownsBusiness` is computed here rather than in each page precisely so that
+ * cost is paid once per navigation, not once per page.
  */
 export default async function MainLayout({
   children,

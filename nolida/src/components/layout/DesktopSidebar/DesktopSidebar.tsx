@@ -45,6 +45,10 @@ export function DesktopSidebar({
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  /* Phase 8F: explicit prefetch — same reasoning as
+                     MobileBottomNav. On desktop this is what makes a sidebar
+                     click feel instant. */
+                  prefetch
                   aria-current={active ? "page" : undefined}
                   className={[
                     "app-sidebar__link",

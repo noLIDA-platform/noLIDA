@@ -10,6 +10,13 @@
 
 .app-shell {
   display: flex;
+  /*
+   * `100dvh`, never `100vh` (Phase 8F). `100vh` is the *tallest* viewport on
+   * iOS — measured with the browser chrome hidden — so it over-runs the visible
+   * area by roughly the URL-bar height and leaves dead space at the bottom that
+   * only disappears when the bar collapses. `dvh` tracks the viewport as it
+   * actually is.
+   */
   min-height: 100dvh;
   flex-direction: column;
   /* Stated explicitly rather than relying on the initial value. A flex column
@@ -31,7 +38,18 @@
 
 .app-shell__main {
   display: flex;
-  flex: 1;
+  /*
+   * `flex: 1` (grow only) rather than `flex: 1 1 0%`.
+   *
+   * This is the Phase 8F fix for "extra space below the last content". With
+   * `flex: 1 1 0%` the item's flex *basis* is zero, so main is stretched to the
+   * full `100dvh` before its own padding was added — and the 92px
+   * `padding-bottom` below then sat as guaranteed dead space under short pages,
+   * under the fixed nav. With `flex-grow` and an `auto` basis, main is only as
+   * tall as its content plus padding, and the *shell's* `min-height` fills the
+   * remaining space instead. Content determines height; the shell stretches.
+   */
+  flex: 1 0 auto;
   flex-direction: column;
   /* Mobile first: fill the viewport exactly. No left offset (the sidebar is
      `display: none` below 1024px), and no auto margins to eat free space. */
@@ -42,8 +60,12 @@
   /* Belt and braces with the parent's `align-items: stretch` — the item states
      its own cross-axis size so no ancestor can leave it at content width. */
   align-self: stretch;
+  /* Room to scroll the last row clear of the fixed bottom nav, plus the
+     safe-area inset on a notched device. This is clearance for a fixed
+     element, not layout height: with `flex: 1 0 auto` above it adds exactly
+     this much past the last row and no more. */
   padding: var(--space-4) var(--space-4)
-    calc(var(--app-bottom-nav-height) + var(--space-6));
+    calc(var(--app-bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--space-4));
 }
 
 /* Only past this width does the 1080px reading column actually bind. Centring
@@ -57,6 +79,7 @@
 }
 
 @media (min-width: 1024px) {
+  /* Desktop has no bottom nav, so no clearance is needed. */
   .app-shell__main {
     padding: var(--space-6) var(--space-6) var(--space-8);
   }

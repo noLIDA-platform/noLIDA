@@ -39,6 +39,12 @@ export function MobileBottomNav({
             <li key={item.href} className="app-bottom-nav__item">
               <Link
                 href={item.href}
+                /* Phase 8F: explicit, though `true` is already the default.
+                   The bottom nav is permanently on screen, so Next.js already
+                   prefetches it on viewport entry. Stating it documents that
+                   the bar is deliberately eager — a tap should be a client
+                   transition, not a network request. */
+                prefetch
                 aria-current={active ? "page" : undefined}
                 className={[
                   "app-bottom-nav__link",

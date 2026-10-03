@@ -15,6 +15,8 @@
   /* A deliberate horizontal swipe target — see `.my-biz-tabs`. Without this the
      page-level `touch-action` policy could read the pill-row swipe as a pan. */
   touch-action: pan-x;
+  /* Chaining guard — see `.my-biz-tabs`. */
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   padding-bottom: var(--space-1);
 }

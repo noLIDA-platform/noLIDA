@@ -22,6 +22,8 @@
   -webkit-overflow-scrolling: touch;
   /* A deliberate horizontal swipe target, like `.my-biz-tabs`. */
   touch-action: pan-x;
+  /* Same chaining guard as `.my-biz-tabs` — see the note there. */
+  overscroll-behavior-x: contain;
   scrollbar-width: none; /* Firefox */
 }
 

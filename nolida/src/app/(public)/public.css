@@ -3,8 +3,11 @@
 .public-shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  /* Phase 8E: the outer flex column — see `.public-main`. */
+  /* `100dvh`, not `100vh` (Phase 8F). `100vh` is the tallest viewport on iOS
+     (measured with chrome hidden), so it over-runs the visible area and leaves
+     dead space below the footer. */
+  min-height: 100dvh;
+  /* The outer flex column — see `.public-main`. */
   min-width: 0;
 }
 

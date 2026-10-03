@@ -66,6 +66,8 @@
     min-width: 0;
     /* A deliberate horizontal swipe target — see `.my-biz-tabs`. */
     touch-action: pan-x;
+    /* Chaining guard — see `.my-biz-tabs`. */
+    overscroll-behavior-x: contain;
   }
 
   .discovery-section__body > * {

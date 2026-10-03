@@ -155,6 +155,8 @@
   overflow-y: hidden;
   /* A deliberate horizontal swipe target — see `.my-biz-tabs`. */
   touch-action: pan-x;
+  /* Chaining guard — see `.my-biz-tabs`. */
+  overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
   border-bottom: 1px solid var(--color-border);
   scrollbar-width: none;

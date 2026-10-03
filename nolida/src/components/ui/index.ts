@@ -15,5 +15,7 @@ export * from "./Link/Link";
 
 // Icon primitive (Lucide-backed)
 export * from "./Icon/Icon";
+// Loading boundary body used by every `loading.tsx` (Phase 8F).
+export * from "./PageLoader/PageLoader";
 export * from "./WhatsAppButton/WhatsAppButton";
 export * from "./WhatsAppButton/WhatsAppIcon";

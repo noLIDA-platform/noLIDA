@@ -30,6 +30,14 @@
      explicitly so a later "stop all panning" rule cannot accidentally take this
      away along with the rubber-banding. */
   touch-action: pan-x;
+  /*
+   * Stops the scroll *chaining* to the page when a swipe reaches either end of
+   * the strip (Phase 8F). Without `contain`, dragging past the last tab hands
+   * the remaining gesture to the document — which is what made the whole page
+   * appear to slide sideways. With it, the strip absorbs the gesture and the
+   * page never moves.
+   */
+  overscroll-behavior-x: contain;
   scrollbar-width: none; /* Firefox */
 }
 
