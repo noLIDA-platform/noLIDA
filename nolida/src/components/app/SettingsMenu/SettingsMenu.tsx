@@ -44,7 +44,10 @@ const GROUPS: readonly SettingsGroup[] = [
     title: "Account",
     rows: [
       {
-        href: "/profile",
+        // Was `/profile`, which is the read-only view of someone else — you
+        // cannot edit your own photo there. This row describes editing
+        // ("Name, username, bio and photo"), so it belongs on the edit screen.
+        href: "/settings/account",
         label: "Profile",
         description: "Name, username, bio and photo",
         icon: User,

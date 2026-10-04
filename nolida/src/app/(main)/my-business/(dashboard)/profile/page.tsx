@@ -69,6 +69,7 @@ export default async function MyBusinessProfilePage() {
             website: business.website,
             location: business.location,
             description: business.description,
+            photos: business.photos,
           }}
         />
       </Card>

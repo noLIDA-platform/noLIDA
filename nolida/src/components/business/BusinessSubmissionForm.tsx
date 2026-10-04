@@ -2,8 +2,73 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { X } from "lucide-react";
+import { ImageUploader } from "@/components/ui/ImageUploader/ImageUploader";
 
 export type BusinessFormMode = "submit" | "edit";
+
+/**
+ * A business's photo set: one cover, one logo, and a gallery strip.
+ *
+ * The `photos` COLUMN has always defaulted to `'[]'` and the service typed it
+ * `unknown[]`. This shape replaces the bare array, so `readBusinessPhotos`
+ * accepts BOTH: an old row really does hold `[]`, and an admin or script may
+ * still write the legacy form. Both are read, and everything is written in the
+ * new shape.
+ */
+export interface BusinessPhotos {
+  cover: string | null;
+  logo: string | null;
+  gallery: string[];
+}
+
+/** How many gallery images one business may carry. */
+export const BUSINESS_GALLERY_MAX = 8;
+
+/**
+ * Normalise whatever is in `businesses.photos` into the shape the UI renders.
+ *
+ * Tolerant by necessity: the column is JSONB with no CHECK, so it may be `null`,
+ * `[]`, an object from this phase, or an array of bare URL strings from before.
+ * Anything unrecognised becomes an empty photo set rather than a render crash.
+ */
+export function readBusinessPhotos(raw: unknown): BusinessPhotos {
+  const empty: BusinessPhotos = { cover: null, logo: null, gallery: [] };
+  if (typeof raw !== "object" || raw === null) return empty;
+
+  // Legacy shape: a bare array of URL strings, or of {url} objects.
+  if (Array.isArray(raw)) {
+    const gallery = raw
+      .map((entry) =>
+        typeof entry === "string"
+          ? entry
+          : typeof entry === "object" && entry !== null &&
+              typeof (entry as { url?: unknown }).url === "string"
+            ? (entry as { url: string }).url
+            : "",
+      )
+      .filter((url) => url.startsWith("https://"))
+      .slice(0, BUSINESS_GALLERY_MAX);
+    return { cover: null, logo: null, gallery };
+  }
+
+  const record = raw as Record<string, unknown>;
+  const str = (value: unknown): string | null =>
+    typeof value === "string" && value.startsWith("https://") ? value : null;
+
+  const gallery = Array.isArray(record.gallery)
+    ? record.gallery
+        .filter((entry): entry is string => typeof entry === "string")
+        .filter((url) => url.startsWith("https://"))
+        .slice(0, BUSINESS_GALLERY_MAX)
+    : [];
+
+  return {
+    cover: str(record.cover),
+    logo: str(record.logo),
+    gallery,
+  };
+}
 
 export interface BusinessSubmissionFormProps {
   /**
@@ -25,6 +90,8 @@ export interface BusinessSubmissionFormProps {
     website?: string | null;
     location?: string | null;
     description?: string | null;
+    /** Raw `businesses.photos`. Accepts the legacy array or the new object. */
+    photos?: unknown;
   };
 }
 
@@ -42,6 +109,12 @@ export function BusinessSubmissionForm({
     location: initialValues?.location ?? "",
     description: initialValues?.description ?? "",
   });
+  // Photos are separate state, not part of `form`, because they are not text
+  // inputs: they arrive from the uploader already uploaded, and `handleChange`
+  // would never touch them.
+  const [photos, setPhotos] = useState<BusinessPhotos>(() =>
+    readBusinessPhotos(initialValues?.photos),
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -70,6 +143,7 @@ export function BusinessSubmissionForm({
           website: form.website,
           location: form.location,
           description: form.description,
+          photos,
         }),
       });
 
@@ -160,6 +234,142 @@ export function BusinessSubmissionForm({
           />
         </label>
       </div>
+
+      <fieldset
+        style={{
+          display: "grid",
+          gap: 14,
+          padding: 18,
+          border: "1px solid rgba(99, 102, 241, 0.22)",
+          borderRadius: 14,
+          minWidth: 0,
+        }}
+      >
+        <legend style={{ fontWeight: 700, padding: "0 6px" }}>Photos</legend>
+
+        <p style={{ margin: 0, color: "#6B7280", fontSize: 13 }}>
+          Optional. A cover photo and a logo make your public page recognisable;
+          the gallery shows your work.
+        </p>
+
+        <div
+          style={{
+            display: "grid",
+            gap: 14,
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 260px), 1fr))",
+          }}
+        >
+          <div style={{ display: "grid", gap: 8, minWidth: 0 }}>
+            <span style={{ fontWeight: 600, fontSize: 14 }}>Cover photo</span>
+            <ImageUploader
+              value={photos.cover}
+              onChange={(url) => setPhotos((current) => ({ ...current, cover: url }))}
+              kind="image"
+              purpose="business"
+              aspect="wide"
+              label="Add a cover photo"
+            />
+          </div>
+
+          <div style={{ display: "grid", gap: 8, minWidth: 0 }}>
+            <span style={{ fontWeight: 600, fontSize: 14 }}>Logo</span>
+            <ImageUploader
+              value={photos.logo}
+              onChange={(url) => setPhotos((current) => ({ ...current, logo: url }))}
+              kind="image"
+              purpose="business"
+              aspect="square"
+              label="Add a logo"
+            />
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gap: 8, minWidth: 0 }}>
+          <span style={{ fontWeight: 600, fontSize: 14 }}>
+            Gallery ({photos.gallery.length}/{BUSINESS_GALLERY_MAX})
+          </span>
+
+          {photos.gallery.length > 0 ? (
+            <ul
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fill, minmax(0, 84px))",
+                gap: 8,
+                padding: 0,
+                margin: 0,
+                listStyle: "none",
+              }}
+            >
+              {photos.gallery.map((url, index) => (
+                <li
+                  key={`${url}-${index}`}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "1 / 1",
+                    overflow: "hidden",
+                    borderRadius: 10,
+                    minWidth: 0,
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt=""
+                    style={{ display: "block", width: "100%", height: "100%", objectFit: "cover" }}
+                    referrerPolicy="no-referrer"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPhotos((current) => ({
+                        ...current,
+                        gallery: current.gallery.filter((_, i) => i !== index),
+                      }))
+                    }
+                    aria-label={`Remove gallery image ${index + 1}`}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 24,
+                      height: 24,
+                      padding: 0,
+                      border: "none",
+                      borderRadius: 999,
+                      background: "rgba(0,0,0,0.65)",
+                      color: "#fff",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <X size={12} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+
+          {photos.gallery.length < BUSINESS_GALLERY_MAX ? (
+            <ImageUploader
+              value={null}
+              onChange={(url) => {
+                if (!url) return;
+                setPhotos((current) =>
+                  current.gallery.length >= BUSINESS_GALLERY_MAX
+                    ? current
+                    : { ...current, gallery: [...current.gallery, url] },
+                );
+              }}
+              kind="image"
+              purpose="business"
+              aspect="wide"
+              label="Add a gallery photo"
+            />
+          ) : null}
+        </div>
+      </fieldset>
 
       {error ? <div style={{ color: "#DC2626", fontSize: 14 }}>{error}</div> : null}
 

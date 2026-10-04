@@ -69,6 +69,9 @@ function validateServicePrices(input: {
   }
 }
 
+/** How many images one product may carry. Enforced here and in the zod schema. */
+export const PRODUCT_IMAGES_MAX = 5;
+
 function validateProduct(input: {
   price?: number;
   stock?: number | null;
@@ -80,8 +83,17 @@ function validateProduct(input: {
   if (input.stock != null && (!Number.isSafeInteger(input.stock) || input.stock < 0)) {
     throw new ServiceError("INVALID", "Stock must be a non-negative integer.");
   }
+  if (input.images && input.images.length > PRODUCT_IMAGES_MAX) {
+    throw new ServiceError(
+      "INVALID",
+      `A product can have at most ${PRODUCT_IMAGES_MAX} images.`,
+    );
+  }
   if (
     input.images?.some((image) => {
+      // https-only, same rule as post media: these URLs land in an `<img src>`,
+      // so a `javascript:` value here is a stored XSS on the public product page.
+      if (!image.startsWith("https://")) return true;
       try {
         const url = new URL(image);
         return !["http:", "https:"].includes(url.protocol);
@@ -90,7 +102,7 @@ function validateProduct(input: {
       }
     })
   ) {
-    throw new ServiceError("INVALID", "Product images must be valid HTTP or HTTPS URLs.");
+    throw new ServiceError("INVALID", "Product images must be valid https URLs.");
   }
 }
 

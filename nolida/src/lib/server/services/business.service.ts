@@ -62,6 +62,69 @@ async function ensureAdmin(userId: string): Promise<void> {
   }
 }
 
+/** How many gallery images one business may carry. Mirrors the editor. */
+const BUSINESS_GALLERY_MAX = 8;
+
+/** The canonical, empty photo set. What `photos` looks like when nothing is set. */
+const EMPTY_BUSINESS_PHOTOS = { cover: null, logo: null, gallery: [] };
+
+/**
+ * Validate and normalise `businesses.photos`.
+ *
+ * The column is JSONB that has always defaulted to `'[]'`, so this accepts three
+ * shapes and normalises all of them to the object form: nothing (`null` /
+ * `undefined`), the legacy bare array of URL strings, or the Phase 5C
+ * `{ cover, logo, gallery }`. Every row is READY to render afterwards, so the
+ * public profile never has to cope with a legacy array.
+ *
+ * https-only on every URL. These render as `<img src>` on the public business
+ * page, which anyone can reach, so a `javascript:` or `data:` value here is a
+ * stored XSS on an unauthenticated page. Anything that is not an https string is
+ * dropped rather than stored.
+ */
+function normalizeBusinessPhotos(raw: unknown): {
+  cover: string | null;
+  logo: string | null;
+  gallery: string[];
+} {
+  const empty = () => ({ ...EMPTY_BUSINESS_PHOTOS, gallery: [] as string[] });
+
+  const https = (value: unknown): string | null =>
+    typeof value === "string" && value.startsWith("https://") ? value : null;
+
+  if (raw === null || raw === undefined) return empty();
+
+  // Legacy: a bare array of URL strings (or of `{ url }` objects).
+  if (Array.isArray(raw)) {
+    const gallery = raw
+      .map((entry) =>
+        https(entry) ??
+        (typeof entry === "object" && entry !== null
+          ? https((entry as { url?: unknown }).url)
+          : null),
+      )
+      .filter((url): url is string => url !== null)
+      .slice(0, BUSINESS_GALLERY_MAX);
+    return { cover: null, logo: null, gallery };
+  }
+
+  if (typeof raw !== "object") return empty();
+
+  const record = raw as Record<string, unknown>;
+  const gallery = Array.isArray(record.gallery)
+    ? record.gallery
+        .map(https)
+        .filter((url): url is string => url !== null)
+        .slice(0, BUSINESS_GALLERY_MAX)
+    : [];
+
+  return {
+    cover: https(record.cover),
+    logo: https(record.logo),
+    gallery,
+  };
+}
+
 function normalizeBusinessInput(input: {
   name?: string;
   category?: string | null;
@@ -73,7 +136,7 @@ function normalizeBusinessInput(input: {
   socials?: Record<string, unknown> | null;
   hours?: Record<string, unknown> | null;
   serviceAreas?: unknown[] | null;
-  photos?: unknown[] | null;
+  photos?: unknown;
   slug?: string | null;
 }): {
   name?: string;
@@ -86,7 +149,7 @@ function normalizeBusinessInput(input: {
   socials?: Record<string, unknown> | null;
   serviceAreas?: unknown[] | null;
   hours?: Record<string, unknown> | null;
-  photos?: unknown[] | null;
+  photos?: unknown;
   slug?: string;
 } {
   return {
@@ -100,7 +163,7 @@ function normalizeBusinessInput(input: {
     socials: input.socials ?? {},
     serviceAreas: input.serviceAreas ?? [],
     hours: input.hours ?? {},
-    photos: input.photos ?? [],
+    photos: normalizeBusinessPhotos(input.photos),
     slug: input.slug?.trim() || undefined,
   };
 }
@@ -136,7 +199,7 @@ export async function createBusinessDraft(
     socials?: Record<string, unknown> | null;
     hours?: Record<string, unknown> | null;
     serviceAreas?: unknown[] | null;
-    photos?: unknown[] | null;
+    photos?: unknown;
     slug?: string | null;
   }
 ) {
@@ -168,7 +231,7 @@ export async function createBusinessDraft(
         location: (fields.location as string | null) ?? null,
         serviceAreas: fields.serviceAreas as unknown[] | null,
         hours: (fields.hours as Record<string, unknown> | null) ?? {},
-        photos: (fields.photos as unknown[] | null) ?? [],
+        photos: normalizeBusinessPhotos(fields.photos),
         status: "DRAFT",
       },
       client
@@ -204,7 +267,7 @@ export async function updateBusiness(
     socials?: Record<string, unknown> | null;
     hours?: Record<string, unknown> | null;
     serviceAreas?: unknown[] | null;
-    photos?: unknown[] | null;
+    photos?: unknown;
     slug?: string | null;
   }
 ) {

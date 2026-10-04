@@ -17,6 +17,75 @@
   background: var(--color-gradient-hero);
 }
 
+/* Real business photos (Phase 5C). The gradient and the initial both stay as
+   FALLBACKS — most businesses will not upload anything, and the page has to
+   look finished either way. */
+
+.biz-profile__cover {
+  position: relative;
+  overflow: hidden;
+}
+
+.biz-profile__cover-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Crop rather than squash: cover photos are arbitrary, the band is fixed. */
+  object-fit: cover;
+}
+
+.biz-profile__avatar-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* The initial only needs centring once a real logo is not filling the box. */
+.biz-profile__avatar--initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.biz-profile__gallery {
+  /* Containment: a deliberate horizontal scroller, so it owns its overflow
+     instead of pushing the page wider than the viewport (Phase 8E). */
+  max-width: 100vw;
+  min-width: 0;
+  overflow-x: auto;
+  /* Without this, a swipe that reaches the end of the strip chains the
+     remaining gesture to the document and the whole page slides sideways. */
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  /* A strip of square photos has no scrollbar to hint at; fade the edge. */
+  -webkit-overflow-scrolling: touch;
+}
+
+.biz-profile__gallery-row {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  margin: 0;
+  list-style: none;
+}
+
+.biz-profile__gallery-item {
+  flex: 0 0 auto;
+  width: 132px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.biz-profile__gallery-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .biz-profile__cover-name {
   color: #fff;
   font-size: clamp(1.25rem, 3vw, 2rem);

@@ -16,6 +16,7 @@ import { Avatar } from "@/components/ui/Avatar/Avatar";
 import { Card } from "@/components/ui/Card/Card";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { CommentSection } from "@/components/feed/CommentSection/CommentSection";
+import { PostMedia } from "@/components/feed/PostMedia/PostMedia";
 import { ShareMenu } from "@/components/feed/ShareMenu/ShareMenu";
 import { apiFetch } from "@/lib/client/api";
 import type { FeedViewer, PostWithViewerState } from "@/lib/feed/types";
@@ -239,6 +240,8 @@ return (
           </p>
         ) : null}
       </div>
+
+      <PostMedia media={post.media} />
 
       {actionError ? (
         <p className="post-card__error" role="alert">

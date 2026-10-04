@@ -70,7 +70,8 @@
 - Phase 4D: complete (marketing `/explore` page and mobile welcome collage — see `Explore Page (Phase 4D)` and `Mobile Welcome Collage (Phase 4D)` below)
 - Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
 - Phase 5B: complete (feed, posts, comments, interactions — see `docs/FEED.md`)
-- Phase 5C: not started (profile editing and live account settings, deferred out of 5B)
+- Phase 5C: complete (media and uploads — profile photo, post media, business
+  photos, product images, via Cloudinary; see "Media Uploads" below)
 - Phase 6: complete (search and discovery — see `docs/SEARCH.md`)
 - Phase 7: complete (business authorization and submissions flow — authorization codes, business drafts, submissions, admin approval, and seeded admin)
 - Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
@@ -468,3 +469,43 @@
 - `bypassEnabled` and `bypassEmails` are module-level constants read at
   import time, so changing either env var requires a dev server restart.
 - Never put a real personal email in a committed .env.example.
+
+## Media Uploads (Phase 5C)
+- All file uploads go through /api/upload (nodejs runtime, maxDuration 60).
+- Storage is Cloudinary. Provider is abstracted in
+  src/lib/server/adapters/storage/. Only cloudinary.adapter.ts may
+  import the cloudinary SDK, and only index.ts chooses the provider.
+- Uploads are SIGNED through our own API. Never add an unsigned upload
+  preset and never install next-cloudinary — both hand upload rights to
+  anyone with a browser and no session.
+- Only URLs are stored in the database. Never write a file to the server
+  filesystem.
+- Validation rules (file.validator.ts, server-side, always):
+  - Images: jpeg, png, webp, gif. Max 5MB.
+  - Videos: mp4, webm, mov. Max 50MB.
+  - Reject any filename containing .. / \\ or NUL.
+  - `sniffMimeType` reads magic bytes and MUST agree with both the
+    declared MIME and the extension. `File.type` is attacker-controlled.
+  - SVG is never allowed — it is inline script.
+- The client list in src/lib/client/upload.ts is a COURTESY copy and is
+  re-checked on the server. A Client Component may not import from
+  src/lib/server/, which is why the copy exists. Keep the two in step.
+- Every stored media URL must be https-only. `posts.media`,
+  `products.images`, `avatar_url` and `businesses.photos` all render into
+  an `src`, so a `javascript:` value is a stored XSS. Enforce it in the
+  service, not only in the zod schema.
+- Client-side uploads use <ImageUploader />. Never build a custom
+  uploader inline. It uses XMLHttpRequest because fetch cannot report
+  upload progress; the bar is real bytes capped at 90%.
+- Post media: up to 4 items (images + videos mixed). A post containing any
+  video drops the grid — a 9:16 clip in a grid cell is a postage stamp.
+- Product images: up to 5 items.
+- Business photos: 1 cover, 1 logo, up to 8 gallery, stored as
+  { cover, logo, gallery }. `businesses.photos` used to default to '[]',
+  so readers must tolerate the legacy bare array.
+- Replacing an avatar deletes the old asset via `publicIdFromUrl`, which
+  returns null for anything that is NOT one of our Cloudinary URLs — never
+  delete a file we do not own.
+- Cloudinary env vars must be set in .env.local and Vercel for uploads to
+  work. If missing, /api/upload returns 500 STORAGE_NOT_CONFIGURED.
+- See docs/MEDIA.md.

@@ -1,0 +1,102 @@
+/* PostMedia — a post's attachment grid.
+   `minmax(0, 1fr)` rather than a bare `1fr`: the images are runtime URLs of
+   unknown intrinsic width, and a bare track takes its min-content size and
+   pushes the card wider than the viewport. */
+
+.post-media {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
+  margin-top: var(--space-3);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+
+.post-media--1,
+.post-media--2 {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.post-media--3,
+.post-media--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* The lead image of a trio takes the whole first row. */
+.post-media__item--lead {
+  grid-column: 1 / -1;
+}
+
+/* A lone image gets a taller frame — 4:5 is the portrait-friendly default, and
+   it is what a phone photo actually is. */
+.post-media--1 .post-media__item {
+  aspect-ratio: 4 / 5;
+}
+
+.post-media--2 .post-media__item,
+.post-media--3 .post-media__item,
+.post-media--4 .post-media__item {
+  aspect-ratio: 1 / 1;
+}
+
+.post-media__item {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: var(--color-bg-subtle);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.post-media__img,
+.post-media__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-media__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  /* rgba rather than a token: this sits over unknown video content. */
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  /* A translucent disc needs this or it reads as a grey blob on dark video. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.post-media__item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* A video is always shown full width, whatever else is in the post: a 9:16 clip
+   in a grid cell is a postage stamp, and it is the one attachment a user most
+   wants to watch properly. */
+.post-media--has-video {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.post-media--has-video .post-media__item {
+  aspect-ratio: 16 / 9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-media__play {
+    transition: none;
+  }
+}

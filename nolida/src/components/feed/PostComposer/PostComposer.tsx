@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronDown,
@@ -10,16 +10,25 @@ import {
   MapPin,
   Users,
   Video,
+  X,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar/Avatar";
 import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { Input } from "@/components/ui/Input/Input";
+import { Spinner } from "@/components/ui/Spinner/Spinner";
 import { Textarea } from "@/components/ui/Textarea/Textarea";
 import { apiFetch } from "@/lib/client/api";
 import {
+  checkFileForUpload,
+  uploadMediaFile,
+  type UploadKind,
+} from "@/lib/client/upload";
+import {
   POST_BODY_MAX,
+  POST_MEDIA_MAX,
   VISIBILITY_LABELS,
+  type PostMediaItem,
   type Visibility,
 } from "@/lib/feed/constants";
 import type { FeedViewer, PostWithAuthor } from "@/lib/feed/types";
@@ -47,14 +56,13 @@ const VISIBILITY_OPTIONS: Visibility[] = ["PUBLIC", "FOLLOWERS", "PRIVATE"];
 /**
  * The composer. One component, used by `/home` and by `/create`.
  *
- * Media buttons are present but disabled. That is deliberate rather than an
- * omission: the control's *position* is a design decision already made, while
- * the thing behind it needs Cloudinary, which does not exist. A hidden button
- * would make the composer look finished when it is not; a disabled one shows
- * where photo and video will go and what is missing.
+ * Media is uploaded IMMEDIATELY when the file is chosen, not when the post is
+ * submitted. Uploading on submit would mean a 50MB video and a failed post leave
+ * the user with an asset at the provider that no row references — and a long
+ * upload freezing the Post button is a worse experience than an upload bar.
  *
- * The post joins the feed only once the server has it. Showing a post that
- * failed to save would leave a reader looking at something nobody else can see.
+ * The post joins the feed only once the server has it. Showing a post that failed
+ * to save would leave a reader looking at something nobody else can see.
  */
 export function PostComposer({
   viewer,
@@ -72,10 +80,58 @@ export function PostComposer({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [media, setMedia] = useState<PostMediaItem[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
   const trimmed = body.trim();
   const remaining = POST_BODY_MAX - body.length;
+  const mediaFull = media.length >= POST_MEDIA_MAX;
   const canSubmit =
     trimmed.length > 0 && trimmed.length <= POST_BODY_MAX && !submitting;
+
+  const addMedia = async (
+    file: File,
+    kind: UploadKind,
+  ): Promise<void> => {
+    setError(null);
+
+    if (media.length >= POST_MEDIA_MAX) {
+      setError(`A post can carry at most ${POST_MEDIA_MAX} photos or videos.`);
+      return;
+    }
+
+    const localError = checkFileForUpload(file, kind);
+    if (localError) {
+      setError(localError);
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const uploaded = await uploadMediaFile(file, kind, "post");
+      // Re-checked after the await: the user can add another file while this one
+      // is in flight, and appending unconditionally would quietly exceed the cap.
+      setMedia((current) =>
+        current.length >= POST_MEDIA_MAX
+          ? current
+          : [...current, { url: uploaded.url, type: kind }],
+      );
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "That upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeMedia = (index: number): void => {
+    // The asset itself is left at the provider. Nothing references it now, but a
+    // cleanup job can reclaim it later — deleting it here would be a round trip
+    // the user is waiting on for no visible benefit.
+    setMedia((current) => current.filter((_, i) => i !== index));
+  };
+
   const classes = [
     "post-composer",
     large ? "post-composer--large" : "",
@@ -90,6 +146,13 @@ export function PostComposer({
       return;
     }
 
+    // Refuses to send half a post: an upload still in flight would be left
+    // orphaned at the provider with no row referencing it.
+    if (uploading) {
+      setError("Wait for your upload to finish.");
+      return;
+    }
+
     setError(null);
     setSubmitting(true);
 
@@ -99,6 +162,9 @@ export function PostComposer({
         body: trimmed,
         visibility,
         location: location.trim() ? location.trim() : null,
+        // Omitted entirely when empty, so a text-only post stores exactly what it
+        // always did rather than an explicit empty array.
+        ...(media.length > 0 ? { media } : {}),
       },
     });
 
@@ -109,6 +175,9 @@ export function PostComposer({
     }
 
     setBody("");
+    setLocation("");
+    setShowLocation(false);
+    setMedia([]);
     setLocation("");
     setShowLocation(false);
     setVisibilityOpen(false);
@@ -136,6 +205,40 @@ return (
         />
       </div>
 
+      {media.length > 0 ? (
+        <div className="post-composer__media">
+          {media.map((item, index) => (
+            <div key={`${item.url}-${index}`} className="post-composer__media-item">
+              {item.type === "video" ? (
+                <video
+                  src={item.url}
+                  className="post-composer__media-file"
+                  muted
+                  playsInline
+                  preload="metadata"
+                />
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={item.url}
+                  alt=""
+                  className="post-composer__media-file"
+                  referrerPolicy="no-referrer"
+                />
+              )}
+              <button
+                type="button"
+                className="post-composer__media-remove"
+                onClick={() => removeMedia(index)}
+                aria-label={`Remove ${item.type} ${index + 1}`}
+              >
+                <X size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       {showLocation ? (
         <div className="post-composer__location">
           <Input
@@ -156,11 +259,50 @@ return (
 
       <div className="post-composer__footer">
         <div className="post-composer__tools">
+          {/* Hidden inputs rather than a button wrapping an input: the button is
+              the visible control, the input is only its mechanism. */}
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            className="post-composer__file-input"
+            onChange={(event) => {
+              const files = Array.from(event.target.files ?? []);
+              event.target.value = "";
+              // Sequential, not Promise.all: four 5MB uploads in parallel on a
+              // mobile connection is how you get four timeouts.
+              void (async () => {
+                for (const file of files) await addMedia(file, "image");
+              })();
+            }}
+          />
+          <input
+            ref={videoInputRef}
+            type="file"
+            accept="video/mp4,video/webm,video/quicktime"
+            multiple
+            className="post-composer__file-input"
+            onChange={(event) => {
+              const files = Array.from(event.target.files ?? []);
+              event.target.value = "";
+              void (async () => {
+                for (const file of files) await addMedia(file, "video");
+              })();
+            }}
+          />
+
           <button
             type="button"
             className="post-composer__tool"
-            disabled
-            title="Photo uploads arrive when Cloudinary is configured"
+            onClick={() => imageInputRef.current?.click()}
+            disabled={uploading || mediaFull}
+            title={
+              mediaFull
+                ? `A post can carry at most ${POST_MEDIA_MAX} items`
+                : "Add photos"
+            }
+            aria-label="Add photos"
           >
             <Icon as={ImageIcon} size={18} />
             <span>Photo</span>
@@ -168,12 +310,24 @@ return (
           <button
             type="button"
             className="post-composer__tool"
-            disabled
-            title="Video uploads arrive when Cloudinary is configured"
+            onClick={() => videoInputRef.current?.click()}
+            disabled={uploading || mediaFull}
+            title={
+              mediaFull
+                ? `A post can carry at most ${POST_MEDIA_MAX} items`
+                : "Add a video"
+            }
+            aria-label="Add a video"
           >
             <Icon as={Video} size={18} />
             <span>Video</span>
           </button>
+          {uploading ? (
+            <span className="post-composer__uploading">
+              <Spinner size="sm" />
+              <span>Uploading…</span>
+            </span>
+          ) : null}
           <button
             type="button"
             className={[

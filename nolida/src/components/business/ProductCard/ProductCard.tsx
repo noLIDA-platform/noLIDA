@@ -1,6 +1,6 @@
 "use client";
 
-import { Image, Pencil, Package, Trash2 } from "lucide-react";
+import { Package, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button/Button";
 import { Card } from "@/components/ui/Card/Card";
 import { Icon } from "@/components/ui/Icon/Icon";
@@ -23,6 +23,10 @@ export function ProductCard({
   onEdit,
   onDelete,
 }: ProductCardProps): React.JSX.Element {
+  // `images` is nullable for rows written before uploads existed, so the first
+  // entry needs both guards rather than an optional chain alone.
+  const firstImage = Array.isArray(product.images) ? product.images[0] : undefined;
+
   const stockLabel = product.stock == null
     ? "Unlimited stock"
     : product.stock === 0
@@ -31,8 +35,24 @@ export function ProductCard({
 
   return (
     <Card as="article" className="catalog-item product-card">
-      <div className="product-card__image" aria-hidden="true">
-        <Icon as={product.images?.[0] ? Image : Package} size={28} />
+      <div className="product-card__image">
+        {firstImage ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={firstImage}
+            alt=""
+            className="product-card__image-file"
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+        ) : (
+          // Not `aria-hidden` on the wrapper: the placeholder icon is decorative
+          // here, but the whole block is a labelled figure by association with the
+          // product name below it.
+          <span className="product-card__image-placeholder" aria-hidden="true">
+            <Icon as={Package} size={28} />
+          </span>
+        )}
       </div>
       <div className="catalog-item__body product-card__body">
         <div className="catalog-item__heading">

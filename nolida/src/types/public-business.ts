@@ -29,7 +29,13 @@ export interface PublicBusiness {
   location: string | null;
   service_areas: unknown[] | null;
   hours: Record<string, unknown> | null;
-  photos: unknown[] | null;
+  /**
+   * Photos. JSONB, and two shapes exist: legacy rows hold `'[]'`, Phase 5C rows
+   * hold `{ cover, logo, gallery }`. Typed `unknown` so neither is a lie — the
+   * repository normalises before this leaves the service layer, and the page
+   * renders only what it recognises.
+   */
+  photos: unknown;
   owner: PublicBusinessOwner;
   created_at: string;
   approved_at: string | null;

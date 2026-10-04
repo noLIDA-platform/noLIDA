@@ -17,7 +17,12 @@ export interface BusinessRow {
   location: string | null;
   service_areas: unknown[] | null;
   hours: Record<string, unknown> | null;
-  photos: unknown[] | null;
+  /**
+   * JSONB. Legacy rows hold `'[]'`; Phase 5C writes
+   * `{ cover, logo, gallery }`. Read it through `readBusinessPhotos` /
+   * `normalizeBusinessPhotos` rather than assuming a shape.
+   */
+  photos: unknown;
   status: string;
   status_reason: string | null;
   submitted_at: string | null;
@@ -65,7 +70,13 @@ export async function create(
     location?: string | null;
     serviceAreas?: unknown[] | null;
     hours?: Record<string, unknown> | null;
-    photos?: unknown[] | null;
+    /**
+   * `photos` is JSONB and has always held `'[]'`, but since Phase 5C it holds
+   * `{ cover, logo, gallery }`. Typed `unknown` rather than `unknown[]` so both
+   * shapes can be written; `normalizeBusinessPhotos` in the service is what
+   * decides which one reaches the column.
+   */
+  photos?: unknown;
     status?: string;
     submittedAt?: Date | string | null;
     approvedAt?: Date | string | null;

@@ -1,0 +1,105 @@
+/* MediaViewer — fullscreen lightbox. Fixed to the viewport so it covers the
+   nav, the bottom bar and the dynamic viewport insets. */
+
+.media-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* rgba, not a token: this is always a dark scrim over unknown content. */
+  background: rgba(0, 0, 0, 0.94);
+  /* Stop the swipe-through from turning into a page scroll. */
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+
+.media-viewer__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  /* Padding leaves room for the close button and the arrows. */
+  padding: var(--space-5);
+}
+
+.media-viewer__img,
+.media-viewer__video {
+  max-width: 100%;
+  max-height: 100%;
+  /* A 16:9 phone video should not render letterboxed to 4:3 in the viewer. */
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.media-viewer__close,
+.media-viewer__nav {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.media-viewer__close:hover,
+.media-viewer__nav:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.media-viewer__close:focus-visible,
+.media-viewer__nav:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.media-viewer__close {
+  top: calc(env(safe-area-inset-top) + var(--space-3));
+  right: var(--space-3);
+}
+
+.media-viewer__nav {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.media-viewer__nav--prev {
+  left: var(--space-3);
+}
+
+.media-viewer__nav--next {
+  right: var(--space-3);
+}
+
+.media-viewer__counter {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + var(--space-4));
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--text-sm);
+  /* Never centred with auto margins on the scroll container — it is absolutely
+     positioned against the overlay, so the transform is what centres it. */
+}
+
+/* On a phone the arrows sit low and the counter moves out of their way. */
+@media (max-width: 520px) {
+  .media-viewer__nav {
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom) + var(--space-6));
+    transform: none;
+  }
+
+  .media-viewer__counter {
+    bottom: calc(env(safe-area-inset-bottom) + var(--space-2));
+  }
+}

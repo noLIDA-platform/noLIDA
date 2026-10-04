@@ -8,7 +8,7 @@ import { createPostSchema } from "@/lib/server/validators/feed";
 
 export const runtime = "nodejs";
 
-/** Creates a post. Text only — media is deferred until Cloudinary exists. */
+/** Creates a post. Text, or text plus up to four photos and videos. */
 export async function POST(request: NextRequest) {
   const session = await getRequestSessionUser(request);
   if (!session) return fail("UNAUTHORIZED", "Sign in to continue.");
@@ -27,7 +27,13 @@ export async function POST(request: NextRequest) {
 
   const parsed = createPostSchema.safeParse(body);
   if (!parsed.success) {
-    return fail("VALIDATION_ERROR", "A post needs between 1 and 5000 characters.");
+    const first = parsed.error.issues[0];
+    // Prefer zod's own message: "A post needs between 1 and 5000 characters" is
+    // true of the body but useless when the caller sent six photos.
+    return fail(
+      "VALIDATION_ERROR",
+      first?.message ?? "A post needs between 1 and 5000 characters.",
+    );
   }
 
   try {
@@ -37,6 +43,7 @@ export async function POST(request: NextRequest) {
       type: parsed.data.type,
       location: parsed.data.location ?? null,
       visibility: parsed.data.visibility,
+      media: parsed.data.media,
     });
     return ok({ post }, 201);
   } catch (error) {

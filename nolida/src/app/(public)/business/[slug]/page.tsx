@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BadgeCheck, MapPin, Package, Star, Wrench } from "lucide-react";
 import { Icon } from "@/components/ui/Icon/Icon";
+import { readBusinessPhotos } from "@/components/business/BusinessSubmissionForm";
 import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
 import {
   getBySlug,
@@ -42,18 +43,46 @@ export default async function BusinessProfilePage({
 
   const stats = await getBusinessStats({ businessId: business.id });
 
+  // One normalisation, once. `readBusinessPhotos` tolerates the legacy `'[]'`
+  // and only ever returns https URLs, so nothing below renders a value that
+  // `normalizeBusinessPhotos` did not already vet.
+  const photos = readBusinessPhotos(business.photos);
+
   return (
     <article className="biz-profile">
-      {/* Cover placeholder: a gradient band until real photos land (deferred
-          with Cloudinary). The name is overlaid so the page still reads as a
-          storefront with no image at all. */}
-      <div className="biz-profile__cover" aria-hidden="true">
-        <span className="biz-profile__cover-name">{business.name}</span>
-      </div>
+      {/* The gradient is a FALLBACK, not a placeholder: a business with no cover
+          still gets a branded band and still reads as a storefront. */}
+      {photos.cover ? (
+        <div className="biz-profile__cover">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={photos.cover}
+            alt=""
+            className="biz-profile__cover-image"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      ) : (
+        <div className="biz-profile__cover" aria-hidden="true">
+          <span className="biz-profile__cover-name">{business.name}</span>
+        </div>
+      )}
 
       <header className="biz-profile__header">
-        <div className="biz-profile__avatar" aria-hidden="true">
-          {business.name.trim().charAt(0).toUpperCase()}
+        <div className={photos.logo ? "biz-profile__avatar" : "biz-profile__avatar biz-profile__avatar--initial"}>
+          {photos.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={photos.logo}
+              alt=""
+              className="biz-profile__avatar-image"
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <span aria-hidden="true">
+              {business.name.trim().charAt(0).toUpperCase()}
+            </span>
+          )}
         </div>
 
         <div className="biz-profile__identity">
@@ -106,6 +135,34 @@ export default async function BusinessProfilePage({
           </dl>
         </div>
       </header>
+
+      {/* Gallery. A deliberate horizontal scroller, so it declares its own overflow
+          rather than widening the page. Hidden entirely when empty — an empty
+          "Gallery" heading is worse than no gallery. */}
+      {photos.gallery.length > 0 ? (
+        <section
+          className="biz-profile__gallery"
+          aria-label={`${business.name} photos`}
+        >
+          <ul className="biz-profile__gallery-row">
+            {photos.gallery.map((url, index) => (
+              <li key={`${url}-${index}`} className="biz-profile__gallery-item">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={
+                    index === 0
+                      ? `${business.name} photo`
+                      : `${business.name} photo ${index + 1}`
+                  }
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <BusinessProfileClient
         business={business}

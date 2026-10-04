@@ -1,8 +1,11 @@
 import * as postsRepo from "@/lib/server/repositories/posts.repo";
 import {
   POST_BODY_MAX,
+  POST_MEDIA_MAX,
   POST_TYPES,
   VISIBILITIES,
+  parsePostMedia,
+  type PostMediaItem,
   type PostType,
   type Visibility,
 } from "@/lib/feed/constants";
@@ -52,17 +55,66 @@ function normaliseVisibility(
   return visibility as Visibility;
 }
 
+/**
+ * Validate a post's media array.
+ *
+ * Runs in the service as well as in the route schema, for the reason the rest of
+ * this file states: the repository is reachable from scripts, and a rule enforced
+ * only at the edge holds only at the edge.
+ *
+ * The https check is the security-relevant one. `posts.media` is rendered into
+ * `<img src>` and `<video src>` on every reader's page, so a `javascript:` URL
+ * written here is a stored XSS that fires for everyone who opens the post. The
+ * upload route is how media is MEANT to arrive; this guards the case where
+ * something calls the service directly with a hand-built URL.
+ */
+function normaliseMedia(
+  media: unknown,
+): PostMediaItem[] | undefined {
+  if (media === undefined || media === null) return undefined;
+
+  const items = parsePostMedia(media);
+  if (items.length === 0) {
+    throw new ServiceError(
+      "INVALID",
+      "Post media must be a list of https image or video links.",
+    );
+  }
+
+  if (items.length > POST_MEDIA_MAX) {
+    throw new ServiceError(
+      "INVALID",
+      `A post can carry at most ${POST_MEDIA_MAX} photos or videos.`,
+    );
+  }
+
+  // `parsePostMedia` silently drops malformed entries, so a caller that sent
+  // five entries where one was junk would get four back with no warning. Compare
+  // against the raw count so "you sent too many" is never reported as "you sent
+  // fewer than you thought".
+  if (Array.isArray(media) && media.length > items.length) {
+    throw new ServiceError(
+      "INVALID",
+      "Some of that post media could not be read.",
+    );
+  }
+
+  return items;
+}
+
 export async function createPost(input: {
   userId: string;
   body: string;
   type?: string;
   location?: string | null;
   visibility?: string;
+  media?: unknown;
 }): Promise<PostWithAuthor> {
   const body = normaliseBody(input.body);
   const type = normaliseType(input.type);
   const visibility = normaliseVisibility(input.visibility);
   const location = input.location?.trim() ? input.location.trim() : null;
+  const media = normaliseMedia(input.media);
 
   const created = await postsRepo.create({
     userId: input.userId,
@@ -70,6 +122,7 @@ export async function createPost(input: {
     type,
     location,
     visibility,
+    media,
   });
 
   const post = await postsRepo.findWithAuthorById(created.id);

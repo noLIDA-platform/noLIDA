@@ -41,7 +41,16 @@ export const createProductSchema = z.object({
   categoryId,
   price,
   stock: z.number().int().min(0).nullable().optional(),
-  images: z.array(z.url()).max(12).optional(),
+  // Five, matching `PRODUCT_IMAGES_MAX`. Was twelve; a product grid showing a
+  // dozen photos is a catalogue page, not a product.
+  images: z
+    .array(
+      z.url().max(2048).refine((value) => value.startsWith("https://"), {
+        message: "Product images must be https URLs.",
+      }),
+    )
+    .max(5)
+    .optional(),
 });
 
 export const updateProductSchema = createProductSchema
