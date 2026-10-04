@@ -3,7 +3,7 @@ import { SettingsMenu } from "@/components/app/SettingsMenu/SettingsMenu";
 
 export const metadata: Metadata = {
   title: "Settings",
-  description: "Account, money, preferences and support for your noLIDA account.",
+  description: "Account, money, preferences and support for your NOlida account.",
 };
 
 /**

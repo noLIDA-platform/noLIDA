@@ -64,6 +64,24 @@ export function resetCloudinaryConfig(): void {
   configured = false;
 }
 
+/**
+ * Guarantee an https URL on the way out.
+ *
+ * Cloudinary returns `url` as `http://res.cloudinary.com/...` on many accounts
+ * and `secure_url` as https. Every column we store this in is https-only, so
+ * the provider boundary is the right place to normalise — otherwise each of the
+ * four upload surfaces has to remember, and forgetting once surfaces as
+ * "Media must be an https URL" after a perfectly successful upload.
+ *
+ * A non-http(s) value is returned unchanged so a malformed provider response
+ * still fails loudly at the schema rather than being rewritten into something
+ * that merely looks valid.
+ */
+function toSecure(url: string | undefined): string {
+  if (!url) return "";
+  return url.startsWith("http://") ? `https://${url.slice(7)}` : url;
+}
+
 function toUploadResult(
   response: UploadApiResponse,
   fallbackType: "image" | "video",
@@ -71,7 +89,10 @@ function toUploadResult(
   const isImage = (response.resource_type ?? fallbackType) === "image";
   return {
     url: response.url,
-    secureUrl: response.secure_url ?? response.url,
+    // `secure_url` is the value to store. The `url` fallback is upgraded rather
+    // than passed through, so an account with a missing `secure_url` still
+    // produces an https asset instead of a validation error downstream.
+    secureUrl: toSecure(response.secure_url ?? response.url),
     publicId: response.public_id,
     width: response.width ?? null,
     height: response.height ?? null,

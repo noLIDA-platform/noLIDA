@@ -9,14 +9,14 @@ import "../pages.css";
 export const metadata: Metadata = {
   title: "How It Works",
   description:
-    "How noLIDA works for customers and for businesses — from finding a service to getting paid.",
+    "How NOlida works for customers and for businesses — from finding a service to getting paid.",
 };
 
 export default function HowItWorksPage() {
   return (
     <>
       <Hero
-        eyebrow="How noLIDA works"
+        eyebrow="How NOlida works"
         title="Post it, book it, pay it."
         subtitle="Two journeys, one app — depending on whether you need something done or you do the work."
       />
@@ -56,12 +56,12 @@ export default function HowItWorksPage() {
       <Section variant="subtle" padding="lg">
         <StepsSection
           title="For businesses"
-          subtitle="Five steps to get your business live on noLIDA."
+          subtitle="Five steps to get your business live on NOlida."
           steps={[
             {
               number: 1,
               title: "Contact us",
-              description: "Reach the noLIDA team and ask to be listed.",
+              description: "Reach the NOlida team and ask to be listed.",
             },
             {
               number: 2,

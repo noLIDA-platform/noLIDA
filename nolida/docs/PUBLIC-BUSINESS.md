@@ -20,8 +20,8 @@ that moves an owner off the "under review" screen the moment they are approved.
 *not* `(marketing)` (full nav + marketing chrome) and *not* `(main)`
 (session-gated app shell):
 
-- Header: noLIDA wordmark linking to `/` on the left. On the right, a
-  signed-in visitor gets "Back to noLIDA" → `/home`; a guest gets
+- Header: NOlida wordmark linking to `/` on the left. On the right, a
+  signed-in visitor gets "Back to NOlida" → `/home`; a guest gets
   "Log in" + "Sign up".
 - Footer: the existing `SiteFooter`, unchanged.
 

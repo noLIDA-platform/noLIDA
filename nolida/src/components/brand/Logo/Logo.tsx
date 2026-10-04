@@ -18,7 +18,7 @@ const ICON_PX: Record<LogoSize, number> = {
 };
 
 /**
- * noLIDA brand lockup: the app icon plus the "noLIDA" wordmark.
+ * NOlida brand lockup: the app icon plus the "NOlida" wordmark.
  * Server Component — no interactivity of its own. Wrap it in a Link when it
  * needs to navigate (see SiteHeader).
  */
@@ -44,7 +44,7 @@ export function Logo({
         height={iconPx}
         className="logo__icon"
       />
-      {showWordmark ? <span className="logo__wordmark">noLIDA</span> : null}
+      {showWordmark ? <span className="logo__wordmark">NOlida</span> : null}
     </span>
   );
 }

@@ -5,7 +5,7 @@ import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm/ForgotP
 
 export const metadata: Metadata = {
   title: "Forgot password",
-  description: "Request a noLIDA password reset link.",
+  description: "Request a NOlida password reset link.",
 };
 
 /**

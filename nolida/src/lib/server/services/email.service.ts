@@ -3,10 +3,10 @@ import { Resend } from "resend";
 export type OtpPurpose = "REGISTER" | "LOGIN" | "RESET" | "VERIFY_CONTACT";
 
 const SUBJECTS: Record<OtpPurpose, string> = {
-  REGISTER: "Verify your noLIDA account",
-  VERIFY_CONTACT: "Verify your noLIDA account",
-  RESET: "Reset your noLIDA password",
-  LOGIN: "Your noLIDA login code",
+  REGISTER: "Verify your NOlida account",
+  VERIFY_CONTACT: "Verify your NOlida account",
+  RESET: "Reset your NOlida password",
+  LOGIN: "Your NOlida login code",
 };
 
 function escapeHtml(value: string): string {
@@ -25,7 +25,7 @@ function buildHtml(code: string, purpose: OtpPurpose, expiryMinutes: number): st
       : "Use this code to verify it is really you. It expires soon.";
   return `<!doctype html>
 <html><body style="font-family:sans-serif;line-height:1.6;color:#111">
-<p style="font-weight:800;letter-spacing:-0.03em">noLIDA</p>
+<p style="font-weight:800;letter-spacing:-0.03em">NOlida</p>
 <p>${line}</p>
 <p style="font-family:monospace;font-size:2rem;font-weight:700;letter-spacing:0.2em">${safeCode}</p>
 <p style="color:#6b7280;font-size:0.875rem">Expires in ${expiryMinutes} minutes. If you did not request this, ignore this email.</p>

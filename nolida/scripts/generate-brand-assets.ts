@@ -1,6 +1,6 @@
 /**
  * scripts/generate-brand-assets.ts
- * Phase 2 — derive every brand asset from the noLIDA app icon.
+ * Phase 2 — derive every brand asset from the NOlida app icon.
  *
  * Usage: npm run generate:brand
  * Source: public/branding/logo-source.jpg
@@ -111,7 +111,7 @@ async function main(): Promise<void> {
   } catch {
     console.error(
       `[generate:brand] Source image not found:\n  ${SOURCE}\n` +
-        "Place the noLIDA app icon there as logo-source.jpg and re-run."
+        "Place the NOlida app icon there as logo-source.jpg and re-run."
     );
     process.exit(1);
   }

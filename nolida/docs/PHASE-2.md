@@ -7,7 +7,7 @@
 
 ## What Phase 2 did
 
-1. Re-derived every colour token from the noLIDA app icon
+1. Re-derived every colour token from the NOlida app icon
    (`public/branding/logo-source.jpg`) instead of the Phase 0 estimates, and
    added `--color-navy` / `--color-navy-subtle` as the icon's own background.
 2. Built a brand-asset generator (`scripts/generate-brand-assets.ts`, run via

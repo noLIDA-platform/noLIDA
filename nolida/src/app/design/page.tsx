@@ -38,7 +38,7 @@ import { Logo } from "@/components/brand/Logo/Logo";
 import "./page.css";
 
 export const metadata: Metadata = {
-  title: "Design System — noLIDA",
+  title: "Design System — NOlida",
   description: "Internal design primitives showcase and token verification",
   robots: { index: false, follow: false },
 };
@@ -59,7 +59,7 @@ export default function DesignPage(): React.JSX.Element {
         <header className="design-header">
           <h1 className="design-title">Design System & Primitives</h1>
           <p className="design-subtitle">
-            Phase 1 UI primitives for noLIDA — responsive, accessible, dark/light theme ready.
+            Phase 1 UI primitives for NOlida — responsive, accessible, dark/light theme ready.
           </p>
         </header>
 

@@ -171,7 +171,7 @@ navigation and nothing mutates.
 
 Actions whose destination is a placeholder use a dashed border and say so. An
 owner looking for Bookings should learn that it exists and is not ready —
-hiding it reads as "noLIDA has no bookings", which is a different and wrong
+hiding it reads as "NOlida has no bookings", which is a different and wrong
 claim.
 
 `Add Service` and `Add Product` link to `?new=1`, and `ServicesClient` /

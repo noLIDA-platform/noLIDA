@@ -12,7 +12,7 @@ import "../pages.css";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Simple, transparent pricing for noLIDA customers and businesses. 5% platform fee, 10% business commission.",
+    "Simple, transparent pricing for NOlida customers and businesses. 5% platform fee, 10% business commission.",
 };
 
 /** Worked example, using the service price the platform advertises. */
@@ -21,7 +21,7 @@ const EXAMPLE = [
   { label: "Customer pays (incl. 5% platform fee)", value: "₦105,000", total: false },
   { label: "Business commission (10% of service price)", value: "− ₦10,000", total: false },
   { label: "Business receives", value: "₦90,000", total: true },
-  { label: "noLIDA revenue", value: "₦15,000", total: true },
+  { label: "NOlida revenue", value: "₦15,000", total: true },
 ] as const;
 
 const FAQ = [
@@ -111,7 +111,7 @@ export default function PricingPage() {
           </Card>
           <p className="pg-card__text">
             The customer is charged once, at the moment of booking. From that
-            single payment, the business receives ₦90,000 and noLIDA retains
+            single payment, the business receives ₦90,000 and NOlida retains
             ₦15,000 as platform fee and commission.
           </p>
         </div>

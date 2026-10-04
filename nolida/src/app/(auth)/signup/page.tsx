@@ -6,7 +6,7 @@ import { SignupForm } from "@/components/auth/SignupForm/SignupForm";
 export const metadata: Metadata = {
   title: "Create account",
   description:
-    "Join noLIDA to discover, request, book, and pay — all in one place.",
+    "Join NOlida to discover, request, book, and pay — all in one place.",
 };
 
 /**

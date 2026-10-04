@@ -1,6 +1,6 @@
 # Phase 4B — Auth UI (frontend only)
 
-Phase 4B repurposes the noLIDA front door so that `/` **is** the sign-in screen,
+Phase 4B repurposes the NOlida front door so that `/` **is** the sign-in screen,
 and builds the auth user interface that Phase 4 was originally supposed to
 provide. It was **frontend only**: no session, no database writes, no password
 hashing. That wiring landed afterwards as Phase 4 — read `docs/PHASE-4.md` for

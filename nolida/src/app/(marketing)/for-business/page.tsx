@@ -12,7 +12,7 @@ import "../pages.css";
 export const metadata: Metadata = {
   title: "For Business",
   description:
-    "List your business on noLIDA, get more customers, manage bookings, and get paid on time.",
+    "List your business on NOlida, get more customers, manage bookings, and get paid on time.",
 };
 
 const WHY_POINTS: readonly { icon: React.ReactNode; title: string; text: string }[] = [
@@ -29,7 +29,7 @@ const WHY_POINTS: readonly { icon: React.ReactNode; title: string; text: string 
   {
     icon: <Icon as={Wallet} size={22} />,
     title: "Paid on time",
-    text: "Customers pay inside noLIDA, and payouts land in your wallet without chasing anyone.",
+    text: "Customers pay inside NOlida, and payouts land in your wallet without chasing anyone.",
   },
 ];
 
@@ -38,7 +38,7 @@ export default function ForBusinessPage() {
     <>
       <Hero
         eyebrow="For business"
-        title="Grow your business on noLIDA"
+        title="Grow your business on NOlida"
         subtitle="More customers, fewer no-shows, and a clear record of what you earned."
         primaryCta={{ label: "List your business", href: "/list-your-business" }}
         secondaryCta={{ label: "See how it works", href: "/how-it-works" }}
@@ -46,7 +46,7 @@ export default function ForBusinessPage() {
 
       <Section padding="lg">
         <SectionHeading
-          title="Why noLIDA"
+          title="Why NOlida"
           subtitle="Everything a small business needs, in one place."
         />
         <div className="pg-grid pg-grid--three">
@@ -70,7 +70,7 @@ export default function ForBusinessPage() {
             {
               number: 1,
               title: "Contact us",
-              description: "Message the noLIDA team and ask to be listed.",
+              description: "Message the NOlida team and ask to be listed.",
             },
             {
               number: 2,
@@ -129,7 +129,7 @@ export default function ForBusinessPage() {
             <WhatsAppButton
               inverse
               label="Ask about listing your business on WhatsApp"
-              message="Hi noLIDA, I want to list my business on noLIDA."
+              message="Hi NOlida, I want to list my business on NOlida."
             />
             <span>Message us about listing your business</span>
           </div>

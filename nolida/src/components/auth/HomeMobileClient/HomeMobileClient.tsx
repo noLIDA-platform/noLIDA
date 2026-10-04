@@ -64,7 +64,7 @@ export function HomeMobileClient({
         <section
           ref={loginRef}
           tabIndex={-1}
-          aria-label="Sign in to noLIDA"
+          aria-label="Sign in to NOlida"
           className="home-mobile__view home-mobile--login"
         >
           <button
@@ -86,7 +86,7 @@ export function HomeMobileClient({
       <section
         ref={welcomeRef}
         tabIndex={-1}
-        aria-label="Welcome to noLIDA"
+        aria-label="Welcome to NOlida"
         className="home-mobile__view home-mobile--welcome"
       >
         <div className="home-mobile__collage" aria-hidden="true">
@@ -113,13 +113,13 @@ export function HomeMobileClient({
         </div>
         <div className="home-mobile__overlay" aria-hidden="true" />
         <Link href="/explore" className="home-mobile__explore">
-          Explore noLIDA →
+          Explore NOlida →
         </Link>
         <div className="home-mobile__glow" aria-hidden="true" />
         <div className="home-mobile__content">
           <Image
             src="/branding/logo-app-icon-512.png"
-            alt="noLIDA"
+            alt="NOlida"
             width={512}
             height={512}
             className="home-mobile__logo"
@@ -146,8 +146,8 @@ export function HomeMobileClient({
         </div>
         <WhatsAppButton
           className="home-mobile__whatsapp"
-          label="Message noLIDA on WhatsApp"
-          message="Hi noLIDA, I have a question about the app."
+          label="Message NOlida on WhatsApp"
+          message="Hi NOlida, I have a question about the app."
         />
       </section>
     </div>

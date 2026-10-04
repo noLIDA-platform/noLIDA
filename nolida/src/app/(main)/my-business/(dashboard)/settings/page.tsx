@@ -104,7 +104,7 @@ export default async function MyBusinessSettingsPage() {
           <div className="biz-settings__danger-text">
             <p className="biz-settings__row-label">Unpublish business</p>
             <p className="biz-settings__row-description">
-              Removes your public profile from noLIDA. Contact support to do
+              Removes your public profile from NOlida. Contact support to do
               this — it takes your listing offline immediately.
             </p>
           </div>
@@ -132,8 +132,8 @@ export default async function MyBusinessSettingsPage() {
           </li>
           <li className="biz-settings__whatsapp">
             <WhatsAppButton
-              label="Get help with my business on noLIDA"
-              message="Hi noLIDA, I need help with my business on noLIDA."
+              label="Get help with my business on NOlida"
+              message="Hi NOlida, I need help with my business on NOlida."
             />
             <span className="biz-settings__row-description">
               Message us on WhatsApp about your business.

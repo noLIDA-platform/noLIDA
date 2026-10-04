@@ -49,7 +49,7 @@ export default function SiteFooter() {
           <p className="site-footer__tagline">
             Discover, request, book, and pay — all in one place.
           </p>
-          <p className="site-footer__copyright">© 2026 noLIDA</p>
+          <p className="site-footer__copyright">© 2026 NOlida</p>
         </div>
 
         {COLUMNS.map((column) => (
@@ -67,8 +67,8 @@ export default function SiteFooter() {
                 <li>
                   <WhatsAppButton
                     size="sm"
-                    label="Contact noLIDA on WhatsApp"
-                    message="Hi noLIDA, I have a question."
+                    label="Contact NOlida on WhatsApp"
+                    message="Hi NOlida, I have a question."
                   />
                 </li>
               ) : null}

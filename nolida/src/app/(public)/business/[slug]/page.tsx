@@ -13,7 +13,7 @@ import "./business-profile.css";
 
 export const metadata: Metadata = {
   title: "Business",
-  description: "Business profile on noLIDA.",
+  description: "Business profile on NOlida.",
 };
 
 /**

@@ -1,4 +1,4 @@
-# noLIDA — Copilot Instructions
+# NOlida — Copilot Instructions
 
 ## Stack (never deviate)
 - Next.js 16 (App Router)

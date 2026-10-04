@@ -10,7 +10,7 @@ export interface AuthPanelProps {
   headingLevel?: "h1" | "h2";
   subtitle?: string;
   children: React.ReactNode;
-  /** Rendered under a divider, e.g. a "New to noLIDA? Sign up" line. */
+  /** Rendered under a divider, e.g. a "New to NOlida? Sign up" line. */
   footer?: React.ReactNode;
   /** Set false to omit the "or continue with" divider and social buttons. */
   showSocial?: boolean;

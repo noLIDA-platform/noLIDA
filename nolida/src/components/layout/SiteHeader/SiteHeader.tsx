@@ -94,7 +94,7 @@ export default function SiteHeader() {
   return (
     <header className="site-header">
       <div className="site-header__inner">
-        <Link href="/" className="site-header__brand" aria-label="noLIDA home">
+        <Link href="/" className="site-header__brand" aria-label="NOlida home">
           <Logo size="md" />
         </Link>
 

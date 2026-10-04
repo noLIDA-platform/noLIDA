@@ -9,7 +9,7 @@ import "../pages.css";
 export const metadata: Metadata = {
   title: "Help Center",
   description:
-    "Answers to the questions noLIDA users ask most, plus direct contact with our team.",
+    "Answers to the questions NOlida users ask most, plus direct contact with our team.",
 };
 
 interface FaqGroup {
@@ -39,7 +39,7 @@ const FAQ_GROUPS: readonly FaqGroup[] = [
       {
         question: "How do I get my business listed?",
         answer:
-          "Contact the noLIDA team. We send you a business code, you submit your details, we review them, and your listing goes live.",
+          "Contact the NOlida team. We send you a business code, you submit your details, we review them, and your listing goes live.",
       },
       {
         question: "What does it cost to be listed?",
@@ -96,7 +96,7 @@ export default function HelpPage() {
             <WhatsAppButton
               inverse
               label="Get account help on WhatsApp"
-              message="Hi noLIDA, I need help with my account."
+              message="Hi NOlida, I need help with my account."
             />
             <span>Message our support team</span>
           </div>

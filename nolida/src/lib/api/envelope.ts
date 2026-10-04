@@ -1,6 +1,6 @@
 /**
  * Helpers for reading the `{ ok: true, data }` / `{ ok: false, error }`
- * response envelope that every noLIDA API route returns (see .clinerules).
+ * response envelope that every NOlida API route returns (see .clinerules).
  *
  * Client-safe and dependency-free: these run in the browser as part of the
  * auth forms, so they must never reach a server-only module.

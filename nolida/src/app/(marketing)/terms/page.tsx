@@ -9,13 +9,13 @@ import "../pages.css";
 export const metadata: Metadata = {
   title: "Terms of Service",
   description:
-    "The terms that will govern the use of noLIDA. This page is a placeholder until the final version is written.",
+    "The terms that will govern the use of NOlida. This page is a placeholder until the final version is written.",
 };
 
 const SECTIONS: readonly string[] = [
   "Acceptance of these terms",
   "Your account and eligibility",
-  "What you can and cannot do on noLIDA",
+  "What you can and cannot do on NOlida",
   "Requests, quotes, bookings, and cancellations",
   "Payments, fees, and refunds",
   "Ratings and reviews",
@@ -33,7 +33,7 @@ export default function TermsPage() {
       <Hero
         eyebrow="Legal"
         title="Terms of Service"
-        subtitle="The rules that will apply to everyone using noLIDA."
+        subtitle="The rules that will apply to everyone using NOlida."
       />
 
       <Section padding="lg">
@@ -49,7 +49,7 @@ export default function TermsPage() {
             <span>
               <strong>Placeholder — not legal text.</strong> This page is a
               structural draft only. The final Terms of Service will be written
-              and reviewed by a lawyer before noLIDA opens to the public. Until
+              and reviewed by a lawyer before NOlida opens to the public. Until
               then, nothing on this page is legally binding.
             </span>
           </p>

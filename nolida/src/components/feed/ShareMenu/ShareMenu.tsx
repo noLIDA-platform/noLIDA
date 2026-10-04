@@ -89,7 +89,7 @@ export function ShareMenu({
   const handleWhatsApp = async (): Promise<void> => {
     setBusy(true);
     try {
-      const text = encodeURIComponent(`Have a look at this on noLIDA: ${postUrl()}`);
+      const text = encodeURIComponent(`Have a look at this on NOlida: ${postUrl()}`);
       window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
       await recordShare("WHATSAPP");
       onClose();

@@ -143,7 +143,7 @@ export function AccountSettings({ profile }: AccountSettingsProps): React.JSX.El
               value={displayName}
               onChange={(event) => setDisplayName(event.target.value)}
               maxLength={80}
-              placeholder="How your name appears on noLIDA"
+              placeholder="How your name appears on NOlida"
             />
           </div>
 

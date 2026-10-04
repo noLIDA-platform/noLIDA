@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 /**
- * The `{ ok: true, data }` / `{ ok: false, error }` envelope every noLIDA route
+ * The `{ ok: true, data }` / `{ ok: false, error }` envelope every NOlida route
  * returns, in one place.
  *
  * `fail` maps a service's error code to a status itself, so a route handler

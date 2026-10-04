@@ -112,7 +112,7 @@ const GROUPS: readonly SettingsGroup[] = [
       {
         href: "/settings/help",
         label: "Help & support",
-        description: "Guides, safety and contacting noLIDA",
+        description: "Guides, safety and contacting NOlida",
         icon: LifeBuoy,
       },
       {

@@ -8,7 +8,7 @@ import "../../feed-page.css";
 
 export const metadata: Metadata = {
   title: "Post",
-  description: "A post on noLIDA.",
+  description: "A post on NOlida.",
 };
 
 /**

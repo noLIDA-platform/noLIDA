@@ -20,9 +20,9 @@ import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
 import "../pages.css";
 
 export const metadata: Metadata = {
-  title: "Explore noLIDA",
+  title: "Explore NOlida",
   description:
-    "Discover what you can do on noLIDA: find businesses, request services, book, pay, and grow a business in one app.",
+    "Discover what you can do on NOlida: find businesses, request services, book, pay, and grow a business in one app.",
 };
 
 const TRUST_ITEMS = [
@@ -47,16 +47,16 @@ export default function ExplorePage() {
   return (
     <>
       <Hero
-        eyebrow="Welcome to noLIDA"
+        eyebrow="Welcome to NOlida"
         title="Everything you need, in one app."
-        subtitle="noLIDA connects people and businesses across Nigeria. Discover services, request anything, book, and pay — all without leaving the app."
+        subtitle="NOlida connects people and businesses across Nigeria. Discover services, request anything, book, and pay — all without leaving the app."
         primaryCta={{ label: "Get started", href: "/signup" }}
         secondaryCta={{ label: "Sign in", href: "/login" }}
       />
 
       <Section padding="lg">
         <FeatureGrid
-          title="What you can do on noLIDA"
+          title="What you can do on NOlida"
           subtitle="One platform for the things you do every day."
           features={[
             {
@@ -73,7 +73,7 @@ export default function ExplorePage() {
             {
               icon: <Icon as={Check} size={22} />,
               title: "Book & Pay",
-              description: "Schedule a service. Pay securely inside noLIDA.",
+              description: "Schedule a service. Pay securely inside NOlida.",
             },
             {
               icon: <Icon as={Store} size={22} />,
@@ -87,7 +87,7 @@ export default function ExplorePage() {
 
       <Section variant="subtle" padding="lg">
         <StepsSection
-          title="How noLIDA works"
+          title="How NOlida works"
           subtitle="Four steps from idea to done."
           steps={[
             {
@@ -126,7 +126,7 @@ export default function ExplorePage() {
               gap: "var(--space-4)",
             }}
           >
-            <h2 style={{ margin: 0, color: "#ffffff" }}>Grow your business on noLIDA</h2>
+            <h2 style={{ margin: 0, color: "#ffffff" }}>Grow your business on NOlida</h2>
             <p
               style={{
                 margin: 0,
@@ -238,8 +238,8 @@ export default function ExplorePage() {
             }}
           >
             <WhatsAppButton
-              label="Ask noLIDA a question on WhatsApp"
-              message="Hi noLIDA, I have a question about noLIDA."
+              label="Ask NOlida a question on WhatsApp"
+              message="Hi NOlida, I have a question about NOlida."
             />
             <Button as="link" href="/help" variant="secondary" size="lg">
               Visit the Help Center
@@ -250,7 +250,7 @@ export default function ExplorePage() {
 
       <CtaSection
         title="Ready to get started?"
-        subtitle="Join noLIDA today. It's free."
+        subtitle="Join NOlida today. It's free."
         primaryCta={{ label: "Create account", href: "/signup" }}
         secondaryCta={{ label: "List your business", href: "/for-business" }}
       />

@@ -31,7 +31,7 @@ export function DesktopSidebar({
   return (
     <aside className={classes}>
       <div className="app-sidebar__brand">
-        <Link href="/home" aria-label="noLIDA home">
+        <Link href="/home" aria-label="NOlida home">
           <Logo size="md" />
         </Link>
       </div>

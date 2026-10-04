@@ -20,7 +20,7 @@ interface FannedCard {
 }
 
 /**
- * The four noLIDA product screenshots, fanned out like a hand of cards.
+ * The four NOlida product screenshots, fanned out like a hand of cards.
  *
  * Geometry lives in CSS: each card gets `--fan-index`, `--fan-rotate` and
  * `--fan-lift`, and the stylesheet derives `left` from the index against the

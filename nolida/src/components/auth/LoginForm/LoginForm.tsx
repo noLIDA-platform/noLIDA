@@ -15,7 +15,7 @@ import "./LoginForm.css";
 /**
  * Email-or-phone plus password.
  *
- * The identifier is not narrowed to an email pattern: noLIDA signs users in
+ * The identifier is not narrowed to an email pattern: NOlida signs users in
  * with whichever they registered, so the field only rejects obviously empty or
  * overlong input and leaves real format rejection to the server.
  */
@@ -121,7 +121,7 @@ function LoginFormInner({
     <AuthPanel
       title="Welcome back"
       headingLevel={headingLevel}
-      subtitle="Sign in to your noLIDA account."
+      subtitle="Sign in to your NOlida account."
       footer={
         <p>
           Don&apos;t have an account?{" "}

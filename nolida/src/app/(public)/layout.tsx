@@ -15,7 +15,7 @@ import "./public.css";
  * is smaller: the wordmark, a way in (or back), and the footer.
  *
  * The header is a Server Component that reads the session directly, so the
- * signed-in variant ("Back to noLIDA") is decided on the server. No client
+ * signed-in variant ("Back to NOlida") is decided on the server. No client
  * fetch, no flash of the wrong buttons.
  */
 export default async function PublicLayout({
@@ -29,14 +29,14 @@ export default async function PublicLayout({
     <div className="public-shell">
       <header className="public-header">
         <div className="public-header__inner">
-          <Link href="/" className="public-header__brand" aria-label="noLIDA home">
+          <Link href="/" className="public-header__brand" aria-label="NOlida home">
             <Logo size="sm" />
           </Link>
 
           <nav className="public-header__actions" aria-label="Account">
             {session ? (
               <Button as="link" href="/home" size="sm" variant="secondary">
-                Back to noLIDA
+                Back to NOlida
               </Button>
             ) : (
               <>

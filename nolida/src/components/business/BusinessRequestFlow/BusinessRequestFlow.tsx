@@ -174,7 +174,7 @@ export function BusinessRequestFlow(): React.JSX.Element {
 
   return (
     <div className="biz-request">
-      <h1 className="biz-request__title">List your business on noLIDA</h1>
+      <h1 className="biz-request__title">List your business on NOlida</h1>
       <p className="biz-request__lede">
         Tell us a few things about your business. You&apos;ll get an
         authorization code right away.

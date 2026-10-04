@@ -5,7 +5,7 @@ import { VerifyForm } from "@/components/auth/VerifyForm/VerifyForm";
 
 export const metadata: Metadata = {
   title: "Verify your account",
-  description: "Enter the verification code we sent you to activate noLIDA.",
+  description: "Enter the verification code we sent you to activate NOlida.",
 };
 
 /**

@@ -88,12 +88,12 @@ export default async function MyBusinessPendingPage() {
         {business?.status === "REJECTED" ? (
           <WhatsAppButton
             label="Get help with your rejected business submission on WhatsApp"
-            message="Hi noLIDA, I need help with my rejected business submission."
+            message="Hi NOlida, I need help with my rejected business submission."
           />
         ) : (
           <WhatsAppButton
             label="Get help with your business submission on WhatsApp"
-            message="Hi noLIDA, I need help with my business submission."
+            message="Hi NOlida, I need help with my business submission."
           />
         )}
       </section>

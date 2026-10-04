@@ -90,7 +90,11 @@ export function ImageUploader({
 
     try {
       const uploaded = await uploadMediaFile(file, kind, purpose, setProgress);
-      onChange(uploaded.url);
+      // `secureUrl`, never `url`. Cloudinary's `url` field is `http://` on many
+      // accounts while `secure_url` is always https, and every media schema in
+      // the app is https-only — passing `url` here was the Phase 5C.1 bug that
+      // reported "Media must be an https URL" after a perfectly good upload.
+      onChange(uploaded.secureUrl);
       setError(null);
     } catch (caught) {
       // The previous value is deliberately still in place: a failed upload must

@@ -1,4 +1,4 @@
-# noLIDA Marketing Site
+# NOlida Marketing Site
 
 Phase 2. The public, pre-launch site: eight pages, one layout, and a set of
 section components that future pages should compose rather than reinvent.
@@ -36,7 +36,7 @@ Both use the marketing components below; neither reaches into `src/lib/server`.
 | Route | Purpose | Key blocks |
 |---|---|---|
 | `/` | **Sign-in screen since Phase 4B.** Was the marketing landing page. | AuthSplitShell (FannedStack + HeroBlock), LoginForm |
-| `/about` | What noLIDA is and what we believe. | Hero, 5-paragraph prose, 3 belief cards, CtaSection |
+| `/about` | What NOlida is and what we believe. | Hero, 5-paragraph prose, 3 belief cards, CtaSection |
 | `/how-it-works` | Two journeys: for customers, and for businesses getting listed. | Hero, StepsSection ×2 (4 steps, 5 steps), navy recap, CtaSection to `/help` |
 | `/for-business` | The pitch for business owners, plus fees and how to get listed. | Hero, 3 "why" cards, 5-step listing flow, two fee cards, navy contact block |
 | `/pricing` | Transparent fee explanation with a worked example. | Hero, customer/business cards, ₦100,000 worked example, 5-question Accordion, CtaSection |
@@ -55,7 +55,7 @@ Lives in (marketing) so it uses SiteHeader + SiteFooter.
 ## Mobile welcome collage
 The mobile welcome screen at / has a blurred collage of the four
 login images behind the content, with a dark gradient overlay and
-a 24s drift animation. Top-right has an "Explore noLIDA →" link.
+a 24s drift animation. Top-right has an "Explore NOlida →" link.
 
 ### Placeholder policy
 
@@ -141,7 +141,7 @@ variants are unchanged, so `/design` renders exactly as before.
 ## Copywriting tone
 
 - **Plain and direct.** Short sentences. Say what something does, then stop.
-- **Nigeria-first.** Naira for prices, "noLIDA" never mis-spelled, no
+- **Nigeria-first.** Naira for prices, "NOlida" never mis-spelled, no
   import-from-abroad phrasing.
 - **Concrete over aspirational.** "Get paid on time" beats "unlock your
   potential". We have no users yet, so there are no invented testimonials,

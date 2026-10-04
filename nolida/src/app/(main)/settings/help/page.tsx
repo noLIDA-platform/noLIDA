@@ -18,7 +18,7 @@ export default function SettingsHelpPage() {
       title="Help & support"
       backHref="/settings"
       backLabel="Back to settings"
-      description="Guides, safety information and a way to reach the noLIDA team live on the public help centre. Account-specific support topics will be added here once there are support tickets to file against."
+      description="Guides, safety information and a way to reach the NOlida team live on the public help centre. Account-specific support topics will be added here once there are support tickets to file against."
       action={{ label: "Open the help centre", href: "/help" }}
     />
   );

@@ -5,7 +5,7 @@ credentials in `.env.local` / Vercel, and the Vercel deployment check.
 
 ## Goal
 
-Stand up the noLIDA foundation: a Next.js 16 App Router project with TypeScript
+Stand up the NOlida foundation: a Next.js 16 App Router project with TypeScript
 strict mode, React Compiler enabled, plain-CSS design tokens, a `pg` database
 client, and a live database health check — with no product features, no auth,
 and no database tables.
@@ -53,7 +53,7 @@ gradient `135deg cyan -> primary -> magenta`, hero gradient `#0E7490 -> #4338CA 
 error/sign-out `#DC2626`, success `#16A34A`, warning `#F59E0B`.
 
 ### Layout and home
-- `src/app/layout.tsx` — metadata (`noLIDA`, `%s · noLIDA` template), viewport/theme color
+- `src/app/layout.tsx` — metadata (`NOlida`, `%s · NOlida` template), viewport/theme color
   `#6366F1`, plain `<body>` (no font loaders, no utility classes)
 - `src/app/page.tsx` — inline-styled placeholder pointing at `/api/health`
 

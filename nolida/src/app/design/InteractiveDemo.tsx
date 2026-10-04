@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/Textarea/Textarea";
 export function InteractiveDemo(): React.JSX.Element {
   const [clickCount, setClickCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [textVal, setTextVal] = useState("Hello noLIDA");
+  const [textVal, setTextVal] = useState("Hello NOlida");
   const [areaVal, setAreaVal] = useState("Exploring the design primitives...");
 
   const handleSimulateLoad = () => {

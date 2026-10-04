@@ -34,7 +34,14 @@ export type UploadKind = "image" | "video";
 
 /** What one successful upload gives back. Mirrors the server's UploadResult. */
 export interface UploadedMedia {
+  /** Always https by the time a caller sees it — corrected on resolve. */
   url: string;
+  /**
+   * The provider's secure URL. `/api/upload` returns both fields; `secureUrl` is
+   * the one to store, because Cloudinary's plain `url` is `http://` on many
+   * accounts and every media column in the app is https-only.
+   */
+  secureUrl: string;
   publicId: string;
   width: number | null;
   height: number | null;
@@ -48,6 +55,24 @@ export interface UploadedMedia {
 export interface MediaItem {
   url: string;
   type: UploadKind;
+}
+
+/**
+ * Force an http(s) URL to https, returning anything else untouched.
+ *
+ * Cloudinary's `url` is `http://res.cloudinary.com/...` on many accounts while
+ * `secure_url` is always https. Four different surfaces upload through this
+ * file (avatar, post media, business photos, product images) and every one of
+ * their schemas is https-only, so a stray `http://` turns a successful upload
+ * into "Media must be an https URL" on Publish — the Phase 5C.1 report.
+ *
+ * A non-http(s) value is returned as-is rather than rewritten: `javascript:`
+ * must still fail loudly at the schema instead of being quietly turned into
+ * something that merely looks valid.
+ */
+export function toHttpsUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  return url.startsWith("http://") ? `https://${url.slice(7)}` : url;
 }
 
 export function clientMaxBytes(kind: UploadKind): number {
@@ -143,7 +168,14 @@ export function uploadMediaFile(
 
       if (body.ok && body.data) {
         onProgress?.(100);
-        resolve(body.data);
+        // Normalised here, once, for every caller: a component that reads
+        // `uploaded.url` instead of `uploaded.secureUrl` cannot go wrong.
+        const canonical =
+          body.data.secureUrl && body.data.secureUrl.length > 0
+            ? body.data.secureUrl
+            : body.data.url;
+        const secure = toHttpsUrl(canonical);
+        resolve({ ...body.data, url: secure, secureUrl: secure });
         return;
       }
 

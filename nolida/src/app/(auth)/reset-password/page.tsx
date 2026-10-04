@@ -5,7 +5,7 @@ import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm/ResetPass
 
 export const metadata: Metadata = {
   title: "Reset password",
-  description: "Choose a new password for your noLIDA account.",
+  description: "Choose a new password for your NOlida account.",
 };
 
 /**

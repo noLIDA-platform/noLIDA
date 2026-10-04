@@ -1,6 +1,6 @@
 # Media & Uploads (Phase 5C)
 
-Photos and videos across noLIDA. Files live at Cloudinary; **noLIDA stores only
+Photos and videos across NOlida. Files live at Cloudinary; **NOlida stores only
 URLs**. No file is ever written to the server filesystem or into Postgres.
 
 ---
@@ -162,6 +162,32 @@ entirely. That is a replacement for the architecture, not the next increment of
 the number. At this scale the buffered path is fine.
 
 ---
+
+## The secureUrl rule (Phase 5C.1)
+
+Cloudinary returns **two** URL fields for the same asset:
+
+| field | value |
+| ----- | ----- |
+| `url` | `http://res.cloudinary.com/...` on many accounts |
+| `secure_url` | always `https://` |
+
+`/api/upload` returns both (`url`, `secureUrl`). **Store `secureUrl`.** Every
+media schema is https-only, so reading the wrong field made a perfectly good
+upload fail at Publish with "Media must be an https URL" — the Phase 5C.1 bug,
+reported identically on posts, avatars, business photos and product images,
+because they all read `uploaded.url`.
+
+Three layers now stand between a provider `http://` and a user-visible error:
+
+1. `cloudinary.adapter.ts` — `toSecure()` upgrades `secure_url ?? url`.
+2. `lib/client/upload.ts` — `uploadMediaFile` resolves `url` **and** `secureUrl`
+   as https, so a caller that reads either one is correct.
+3. `ImageUploader` — uses `uploaded.secureUrl` explicitly.
+
+A non-`http(s)` value is deliberately left alone by `toSecure`, so a
+`javascript:` URL still fails loudly at the schema instead of being rewritten
+into something that merely looks valid.
 
 ## Security notes
 

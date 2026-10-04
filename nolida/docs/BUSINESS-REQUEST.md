@@ -1,6 +1,6 @@
 # Business Request Flow (Phase 7E)
 
-Phase 7 asked business owners to leave the app: message noLIDA on WhatsApp,
+Phase 7 asked business owners to leave the app: message NOlida on WhatsApp,
 wait for a human, receive a code, come back, type the code in. This phase puts
 the whole thing in-app. The user fills in a short form, the server does the
 work, and a code is on screen before they have put their phone down.
@@ -10,7 +10,7 @@ work, and a code is on screen before they have put their phone down.
 ```
 /list-your-business
    │
-   ├─ form      "List your business on noLIDA"
+   ├─ form      "List your business on NOlida"
    │              name · category · contact email · description
    │
    ├─ loading   spinner + "Generating your code…"  (≥ 3 seconds)

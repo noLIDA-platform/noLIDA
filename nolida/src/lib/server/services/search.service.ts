@@ -19,7 +19,7 @@ import type {
  * arithmetic; the routes and components only ever see the shapes in
  * `@/types/search`.
  *
- * That boundary is the whole point. When noLIDA outgrows Postgres full-text
+ * That boundary is the whole point. When NOlida outgrows Postgres full-text
  * search, this file and `search.repo.ts` are what get rewritten for
  * Meilisearch or Typesense — the API contract, the discriminated union and
  * every component survive untouched. Keep ranking logic on the repository side

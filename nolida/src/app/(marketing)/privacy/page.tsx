@@ -9,7 +9,7 @@ import "../pages.css";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
-    "The privacy practices that will apply to noLIDA. This page is a placeholder until the final version is written.",
+    "The privacy practices that will apply to NOlida. This page is a placeholder until the final version is written.",
 };
 
 const SECTIONS: readonly string[] = [
@@ -49,14 +49,14 @@ export default function PrivacyPage() {
             <span>
               <strong>Placeholder — not legal text.</strong> This page is a
               structural draft only. The final Privacy Policy will be written
-              and reviewed by a lawyer before noLIDA opens to the public. Until
+              and reviewed by a lawyer before NOlida opens to the public. Until
               then, nothing on this page is legally binding.
             </span>
           </p>
 
           <p>
             When the final version is published, it will appear here in full and
-            replace this placeholder. noLIDA is designed to collect the minimum
+            replace this placeholder. NOlida is designed to collect the minimum
             information needed to run a marketplace, but the specifics will be
             documented here.
           </p>

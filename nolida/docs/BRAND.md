@@ -1,14 +1,14 @@
-# noLIDA Brand Guide
+# NOlida Brand Guide
 
 Phase 2. Every colour, gradient, and logo rule below is derived from the
-noLIDA app icon at `public/branding/logo-source.jpg`. Nothing in the product
+NOlida app icon at `public/branding/logo-source.jpg`. Nothing in the product
 may introduce a colour that is not in `styles/tokens.css`.
 
 ---
 
 ## Brand story
 
-The noLIDA icon is a deep navy rounded square holding a stylised "N" built
+The NOlida icon is a deep navy rounded square holding a stylised "N" built
 from rounded bars, lit by a gradient that runs from bright cyan in the
 top-left, through indigo in the centre, to bright magenta in the bottom-right,
 with a small violet figure tucked inside it. The icon is the product in one
@@ -87,7 +87,7 @@ it needs to navigate — the component renders no anchor of its own.
 | `mono-light` | `--text-inverse` | Navy sections, the CTA band, hero |
 | `mono-dark` | `--color-navy` | On light brand-coloured backgrounds |
 
-The wordmark is **noLIDA** — lowercase "no", uppercase "LIDA" — set in the
+The wordmark is **NOlida** — capital N, capital O, lowercase "lida" — set in the
 sans stack at `--weight-extrabold` with `-0.03em` tracking. The icon gets
 `--radius-md` on its container so the corner softening matches the app tile.
 

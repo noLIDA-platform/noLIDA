@@ -6,7 +6,7 @@ import { toShellUser } from "@/lib/client/shell-user";
 
 export const metadata: Metadata = {
   title: "Profile",
-  description: "Your noLIDA name, verification status and account details.",
+  description: "Your NOlida name, verification status and account details.",
 };
 
 /**

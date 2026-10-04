@@ -13,7 +13,7 @@ import "./profile-view.css";
 
 export const metadata: Metadata = {
   title: "Profile",
-  description: "A noLIDA profile and their posts.",
+  description: "A NOlida profile and their posts.",
 };
 
 /**
