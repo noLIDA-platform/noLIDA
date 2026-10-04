@@ -85,6 +85,7 @@
 - Phase 8F: complete (mobile stability — no panning, no dead space below content; loading boundaries for perceived speed)
 - Phase 8G: complete (viewport meta verified in rendered HTML; root overflow guard, `html` hidden / `body` clip)
 - Phase 7E: complete (in-app business request flow — instant code, one transaction, no WhatsApp)
+- Phase 7F: complete (dev-only OTP bypass for signup; impossible in production)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -428,3 +429,25 @@
 - `/list-your-business` is `force-dynamic` — it reads a session and
   redirects on status. Prerendered, it would serve every visitor the
   same answer and bounce signed-in users past their own business.
+
+## Dev OTP Bypass (Phase 7F)
+- DEV_BYPASS_OTP=true in .env.local enables skipping OTP verification
+  during signup.
+- It ONLY works when NODE_ENV !== "production". The check is in
+  src/lib/server/auth/dev-bypass.ts and cannot be bypassed. Both
+  conditions must hold; NODE_ENV is set by the platform and is not
+  settable as an environment variable, so a stray DEV_BYPASS_OTP in
+  production still evaluates false.
+- Never set DEV_BYPASS_OTP in Vercel environment variables.
+- When the bypass is active, registration marks the contact verified
+  immediately, skips OTP generation AND the email send, logs a loud
+  console.warn, and writes `metadata: { devBypass: true }` on the
+  USER_REGISTERED security event — so affected accounts are findable in
+  the audit trail, not just in a terminal.
+- The signup page then calls /api/auth/login and goes to /home. It obeys
+  `verified` from the server response; the client never decides this.
+- When inactive, the normal OTP flow runs unchanged. No OTP code was
+  removed.
+- LoginForm shows "Account created. Please log in." for ?registered=1 —
+  the fallback when the account was made but the auto sign-in failed.
+- This is a developer convenience only.

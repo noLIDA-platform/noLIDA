@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { z } from "zod";
 import { withTransaction } from "@/lib/db/client";
+import { isDevOtpBypassEnabled } from "@/lib/server/auth/dev-bypass";
 import * as usersRepo from "@/lib/server/repositories/users.repo";
 import * as profilesRepo from "@/lib/server/repositories/profiles.repo";
 import * as sessionsRepo from "@/lib/server/repositories/sessions.repo";
@@ -141,13 +142,25 @@ async function verifyOtpRecord(input: {
   return { userId };
 }
 
+export interface RegisterResult {
+  userId: string;
+  identifier: string;
+  identifierType: "EMAIL" | "PHONE";
+  /**
+   * True only when the dev OTP bypass marked the contact verified inline.
+   * The signup page uses it to skip `/verify` and log the new user straight
+   * in. Always `false` in production — see `auth/dev-bypass.ts`.
+   */
+  verified: boolean;
+}
+
 export async function register(input: {
   email?: string;
   phone?: string;
   password: string;
   ip?: string;
   userAgent?: string;
-}): Promise<{ userId: string; identifier: string; identifierType: "EMAIL" | "PHONE" }> {
+}): Promise<RegisterResult> {
   if (!passwordSchema.safeParse(input.password).success) {
     throw new AuthError("WEAK_PASSWORD", "Password must be at least 8 characters.");
   }
@@ -197,6 +210,42 @@ export async function register(input: {
     throw error;
   }
 
+  // ── Dev OTP bypass (Phase 7F) ─────────────────────────────────────
+  //
+  // Placed after the user and profile exist but before any OTP row is
+  // written, so the bypass path generates and sends nothing at all. There is
+  // no half-state where a code was sent but never expected.
+  //
+  // `console.warn`, not `console.log`: it is a security-relevant event and
+  // should stand out in a terminal full of ordinary dev output. The message
+  // names the identifier so a developer can tell which account was created
+  // unverified.
+  if (isDevOtpBypassEnabled()) {
+    if (identifierType === "EMAIL") {
+      await usersRepo.markEmailVerified(userId);
+    } else {
+      await usersRepo.markPhoneVerified(userId);
+    }
+
+    await securityEventsRepo.log({
+      userId,
+      eventType: "USER_REGISTERED",
+      ipAddress: input.ip,
+      userAgent: input.userAgent,
+      // Recorded on the security event, not only in the terminal: if this
+      // flag is ever somehow live outside development, the audit trail says
+      // so, and an operator can find every affected account.
+      metadata: { identifierType, devBypass: true },
+    });
+
+    console.warn(
+      `⚠️  DEV OTP BYPASS ACTIVE — user registered without verification: ${identifier}`,
+    );
+
+    return { userId, identifier, identifierType, verified: true };
+  }
+
+  // ── Normal flow ───────────────────────────────────────────────────
   const code = generateOtp();
   await otpRepo.create({
     identifier,
@@ -217,10 +266,10 @@ export async function register(input: {
     eventType: "USER_REGISTERED",
     ipAddress: input.ip,
     userAgent: input.userAgent,
-    metadata: { identifierType },
+    metadata: { identifierType, devBypass: false },
   });
 
-  return { userId, identifier, identifierType };
+  return { userId, identifier, identifierType, verified: false };
 }
 
 export async function verifyOtp(input: {

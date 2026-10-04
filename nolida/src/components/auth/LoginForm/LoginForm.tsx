@@ -54,6 +54,10 @@ function LoginFormInner({
 }: LoginFormProps): React.JSX.Element {
   const searchParams = useSearchParams();
   const resetParam = searchParams.get("reset");
+  // Phase 7F: set by the signup page when the dev OTP bypass created the
+  // account but the automatic sign-in failed. Distinct from `reset`, which means
+  // a password was just changed.
+  const registeredParam = searchParams.get("registered");
   const [identifier, setIdentifier] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [errors, setErrors] = React.useState<FieldErrors>({});
@@ -61,6 +65,7 @@ function LoginFormInner({
   const [submitting, setSubmitting] = React.useState(false);
 
   const showResetBanner = resetParam === "1";
+  const showRegisteredBanner = registeredParam === "1";
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
@@ -128,6 +133,11 @@ function LoginFormInner({
         {showResetBanner ? (
           <Alert variant="success">
             Password reset. Please log in with your new password.
+          </Alert>
+        ) : null}
+        {showRegisteredBanner ? (
+          <Alert variant="success">
+            Account created. Please log in.
           </Alert>
         ) : null}
         {formError ? <Alert variant="error">{formError}</Alert> : null}

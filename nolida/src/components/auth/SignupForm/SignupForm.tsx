@@ -46,6 +46,13 @@ interface RegisterResponse {
   userId: string;
   identifier: string;
   identifierType: "EMAIL" | "PHONE";
+  /**
+   * True only when the dev OTP bypass (Phase 7F) verified the contact during
+   * registration. Always false in production. Optional here so an older
+   * deployed API — or a cached response — cannot break signup: `undefined`
+   * falls through to the normal OTP path.
+   */
+  verified?: boolean;
 }
 
 function methodOf(identifier: string, method: SignupMethod): boolean {
@@ -139,6 +146,39 @@ export function SignupForm({
 
       if (!result.ok) {
         setFormError(result.error.message);
+        return;
+      }
+
+      // ── Dev OTP bypass (Phase 7F) ───────────────────────────────────
+      //
+      // When `verified` is true the server already marked the contact
+      // verified and sent no code, so `/verify` would be a dead end. There is
+      // no session yet — registration does not log anyone in — so one is
+      // established here with the same credentials.
+      //
+      // This branch cannot fire in production: `register` only sets
+      // `verified` when `isDevOtpBypassEnabled()` is true, which requires
+      // NODE_ENV !== "production". The client does not decide this; it only
+      // obeys what the server said.
+      if (result.data.verified === true) {
+        const loginResult = await apiFetch<{ userId: string }>("/api/auth/login", {
+          method: "POST",
+          body,
+        });
+
+        if (loginResult.ok) {
+          // Full document load: `/home` renders the app shell, which must
+          // re-read the new session cookie server-side.
+          // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- deliberate full load; the shell must render server-side with the new cookie
+          window.location.assign("/home");
+          return;
+        }
+
+        // The account exists but the automatic sign-in did not work. Send
+        // them to the login screen with a note rather than leaving them on a
+        // form for an account they cannot recreate.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- deliberate full load
+        window.location.assign("/login?registered=1");
         return;
       }
 

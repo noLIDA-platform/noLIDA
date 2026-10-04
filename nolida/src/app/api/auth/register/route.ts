@@ -52,6 +52,10 @@ export async function POST(request: Request) {
       ip,
       userAgent: request.headers.get("user-agent") ?? undefined,
     });
+    // `result` is returned whole, so `verified` (set only by the dev OTP
+    // bypass) reaches the signup page without this route knowing what it
+    // means. The route stays a pass-through: it validates the body and maps
+    // errors, and nothing else.
     return NextResponse.json({ ok: true, data: result }, { status: 201 });
   } catch (error) {
     if (error instanceof AuthError) {
