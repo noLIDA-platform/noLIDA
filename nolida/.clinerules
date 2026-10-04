@@ -91,6 +91,8 @@
   "NOlida" throughout)
 - Phase 5C.2: complete (uploads go directly from the browser to Cloudinary; the
   server only issues signatures — see "Media Uploads (Phase 5C.2 update)" below)
+- Phase 5C.3: complete (media viewer — sliding track, swipe, fade in/out, focus
+  trap; see "Media Viewer (Phase 5C.3)" below)
 - Phase 6: complete (search and discovery — see `docs/SEARCH.md`)
 - Phase 7: complete (business authorization and submissions flow — authorization codes, business drafts, submissions, admin approval, and seeded admin)
 - Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
@@ -561,3 +563,40 @@
 - Only `purpose=post` may request `resourceType=video`.
 - Every signature writes UPLOAD_SIGNATURE_ISSUED to security_events.
   A failed audit write is logged, never allowed to deny an upload.
+
+## Media Viewer (Phase 5C.3)
+- The MediaViewer uses a horizontal track with `translate3d` for
+  navigation. Every item is in the DOM; only one is on screen.
+- THE PERCENTAGE IS THE TRICK: `-100%` resolves against the TRACK's
+  width, and each slide is `flex: 0 0 100%` of that same width, so
+  `-index * 100` lands exactly on one slide. Never switch a slide to a
+  fixed pixel width — the two must stay tied.
+- Rendering only the current item makes a slide impossible. There is
+  nothing to move, so the browser cuts instead.
+- Navigation does NOT wrap. The arrows disable at each end
+  (`disabled`, not inert) and a swipe at an end does nothing. A wrapped
+  carousel needs an infinite track, and teleporting from item 4 to item
+  1 is wrong for a screen reader.
+- Slide transition: 300ms cubic-bezier(0.4, 0, 0.2, 1).
+- Swipe threshold: 50px.
+- Fade-in on open (200ms), fade-out on close (180ms).
+- The close timer lives in the component; the fade is CSS. They must
+  stay in step: `CLOSE_ANIMATION_MS` and the keyframe duration.
+- Under reduced motion, the component skips the wait entirely
+  (`matchMedia`) as well as the CSS disabling the animation.
+- Body scroll is locked while open, and restored on close.
+- Respects prefers-reduced-motion — no animation when enabled.
+- Keyboard: ArrowLeft, ArrowRight, Escape. Escape routes through
+  `close()`, never straight to `onClose`, or the fade is cut at frame 0.
+- Focus is captured on open, TRAPPED inside the overlay, and restored
+  to the triggering thumbnail on unmount. The dialog alone does not
+  confine Tab; the handler cycles the close button and two arrows.
+- Only the visible slide is mounted as a player: `autoPlay` and
+  `controls` are withheld off-screen, and off-screen slides are
+  `aria-hidden`. Four clips playing behind each other is a wall of
+  noise.
+- Arrows stay visible on mobile. Hiding them below 768px removes the
+  only visible affordance; swipe is not discoverable. They move to the
+  bottom at 520px instead.
+- `content-visibility: auto` on a slide is load-bearing: without it, a
+  four-item track paints four fullscreen images for one being shown.

@@ -1,5 +1,5 @@
-/* MediaViewer — fullscreen lightbox. Fixed to the viewport so it covers the
-   nav, the bottom bar and the dynamic viewport insets. */
+/* MediaViewer — fullscreen lightbox with a sliding track. Fixed to the viewport
+   so it covers the nav, the bottom bar and the dynamic viewport insets. */
 
 .media-viewer {
   position: fixed;
@@ -13,16 +13,67 @@
   /* Stop the swipe-through from turning into a page scroll. */
   overscroll-behavior: contain;
   touch-action: none;
+  animation: media-viewer-fade-in var(--duration-base) ease-out;
 }
 
-.media-viewer__stage {
+@keyframes media-viewer-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* `forwards` so opacity stays at 0 for the 180ms the component waits before
+   handing control back to the parent. The class is applied by the closing state,
+   and the timer is only the hand-off — the animation is all CSS. */
+.media-viewer--closing {
+  animation: media-viewer-fade-out 180ms ease-in forwards;
+}
+
+@keyframes media-viewer-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.media-viewer__viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.media-viewer__track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* The transform changes on every frame of a swipe, so the strip gets its own
+     layer. Without it the browser repaints the whole overlay each frame. */
+  will-change: transform;
+}
+
+/* A percentage on the track's translate resolves against the TRACK's width, and
+   each slide is `flex: 0 0 100%` of that same width — so `-100%` is exactly one
+   slide. That coincidence is what makes `-index * 100` land on an item. */
+.media-viewer__slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  /* Padding leaves room for the close button and the arrows. */
+  /* Leaves room for the close button and the arrows. border-box is global, so
+     this padding does not widen the slide past its 100%. */
   padding: var(--space-5);
+  /* Keeps a four-item track costing roughly what one image costs: off-screen
+     slides are skipped by layout and paint until they come into range. */
+  content-visibility: auto;
 }
 
 .media-viewer__img,
@@ -32,6 +83,8 @@
   /* A 16:9 phone video should not render letterboxed to 4:3 in the viewer. */
   object-fit: contain;
   border-radius: var(--radius-sm);
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .media-viewer__close,
@@ -41,17 +94,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  /* 44px is the smallest comfortable touch target; 48 leaves a thumb some
+     margin without covering much of the photo. */
+  width: 48px;
+  height: 48px;
   border: none;
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
   cursor: pointer;
+  transition: background var(--transition-fast);
 }
 
 .media-viewer__close:hover,
-.media-viewer__nav:hover {
+.media-viewer__nav:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.24);
 }
 
@@ -59,6 +115,14 @@
 .media-viewer__nav:focus-visible {
   outline: 2px solid #ffffff;
   outline-offset: 2px;
+}
+
+/* A disabled arrow stays visible so the controls do not shift under the user's
+   finger, and fades so it reads as unavailable rather than missing. */
+.media-viewer__nav:disabled {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: not-allowed;
 }
 
 .media-viewer__close {
@@ -84,9 +148,14 @@
   bottom: calc(env(safe-area-inset-bottom) + var(--space-4));
   left: 50%;
   transform: translateX(-50%);
+  z-index: 2;
   margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.5);
   color: rgba(255, 255, 255, 0.85);
   font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
   /* Never centred with auto margins on the scroll container — it is absolutely
      positioned against the overlay, so the transform is what centres it. */
 }
@@ -101,5 +170,18 @@
 
   .media-viewer__counter {
     bottom: calc(env(safe-area-inset-bottom) + var(--space-2));
+  }
+}
+
+/* Motion sensitivity is an accessibility setting, not a preference, so this is
+   the one place `!important` earns its keep: the closing class has the same
+   specificity as the opening rule and would win purely on source order if a
+   later edit landed below this block. */
+@media (prefers-reduced-motion: reduce) {
+  .media-viewer,
+  .media-viewer--closing,
+  .media-viewer__track {
+    animation: none !important;
+    transition: none !important;
   }
 }
