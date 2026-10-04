@@ -1,0 +1,60 @@
+/* Shared by /profile and /user/[username] — one layout, two routes.
+   Lives beside the profile components rather than inside a route segment so both
+   pages reach it through the `@/` alias: a `../../` chain is fragile, and a
+   path containing a route-group `(main)` segment is not worth the gamble. */
+
+/* 935px is the width a three-column grid wants with room around it; past that
+   the tiles get large enough to look like feed posts again. */
+.profile-page {
+  width: 100%;
+  max-width: 935px;
+  margin-inline: auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-4);
+}
+
+/* The "tagged" placeholder. Centred and quiet — it is an absence, not an error. */
+.profile-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+.profile-page__empty-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.profile-page__empty-body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 640px) {
+  .profile-page {
+    gap: var(--space-3);
+    padding: var(--space-4) 0 var(--space-6);
+  }
+
+  /* The grid goes edge to edge on purpose: 16px of page padding either side of
+     a 2px gutter makes every tile narrower than it should be on a 375px screen,
+     and the density is the whole point of a three-column grid. Everything else
+     keeps its inset so text is not flush against the bezel. */
+  .profile-page > .profile-header,
+  .profile-page > .profile-about,
+  .profile-page > .profile-page__empty {
+    padding-inline: var(--space-4);
+  }
+}

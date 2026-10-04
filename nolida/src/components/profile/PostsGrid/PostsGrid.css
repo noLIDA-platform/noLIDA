@@ -1,0 +1,126 @@
+/* PostsGrid — three square tiles per row at every width. */
+
+.posts-grid {
+  display: grid;
+  /* Three columns, always. See the component note: a two-column phone grid makes
+     each tile look like a feed post instead of a thumbnail. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* `minmax(0, 1fr)` not a bare `1fr`: a bare track takes its min-content
+     minimum, so one wide tile would widen the grid and drag the page with it. */
+  min-width: 0;
+  max-width: 100%;
+}
+
+.posts-grid__cell {
+  position: relative;
+  min-width: 0;
+  /* Keeps the tiles square whatever is inside them. */
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--color-bg-subtle);
+}
+
+.posts-grid__link {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.posts-grid__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* A slow zoom rather than a jump on hover. Desktop affordance only — there is no
+   hover on the phone this grid mostly serves. */
+@media (hover: hover) {
+  .posts-grid__image {
+    transition: transform var(--duration-slow) var(--ease-standard);
+  }
+
+  .posts-grid__link:hover .posts-grid__image {
+    transform: scale(1.04);
+  }
+}
+
+/* Text-only post: the body itself is the thumbnail. Clamped rather than
+   truncated so every tile is the same height without a manual character count. */
+.posts-grid__text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-3);
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.posts-grid__video {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #ffffff;
+  background: rgba(10, 14, 39, 0.55);
+}
+
+.posts-grid__badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+}
+
+/* Appears on hover only, so a wall of thumbnails is not a wall of icons. */
+.posts-grid__comments {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 14, 39, 0.45);
+  color: #ffffff;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+@media (hover: hover) {
+  .posts-grid__link:hover .posts-grid__comments {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .posts-grid__image,
+  .posts-grid__comments {
+    transition: none;
+  }
+
+  .posts-grid__link:hover .posts-grid__image {
+    transform: none;
+  }
+}

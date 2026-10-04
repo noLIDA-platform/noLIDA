@@ -71,3 +71,30 @@ export async function listFollowing(userId: string): Promise<UserSummary[]> {
   );
   return result.rows;
 }
+
+/**
+ * How many people follow `userId`.
+ *
+ * Counts `follows` rows directly rather than the joined list `listFollowers`
+ * returns, because this is a number on a header, not a list of people. The
+ * consequence is deliberate and worth knowing: a row pointing at a since-deleted
+ * account still counts here but would not appear in the list. Nothing renders
+ * both on the same screen today, and `COUNT(*)` on an indexed column is the
+ * difference between a sub-millisecond query and one that joins three tables.
+ */
+export async function countFollowers(userId: string): Promise<number> {
+  const result = await query<{ count: number }>(
+    "SELECT COUNT(*)::int AS count FROM follows WHERE following_id = $1",
+    [userId]
+  );
+  return result.rows[0]?.count ?? 0;
+}
+
+/** How many people `userId` follows. See `countFollowers` on counting rows. */
+export async function countFollowing(userId: string): Promise<number> {
+  const result = await query<{ count: number }>(
+    "SELECT COUNT(*)::int AS count FROM follows WHERE follower_id = $1",
+    [userId]
+  );
+  return result.rows[0]?.count ?? 0;
+}

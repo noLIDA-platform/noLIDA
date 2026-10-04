@@ -93,6 +93,9 @@
   server only issues signatures — see "Media Uploads (Phase 5C.2 update)" below)
 - Phase 5C.3: complete (media viewer — sliding track, swipe, fade in/out, focus
   trap; see "Media Viewer (Phase 5C.3)" below)
+- Phase 5D: complete (Instagram-style profile — `/profile` and
+  `/user/[username]`, header, tabs, 3-column grid; see "Profile Page (Phase 5D)"
+  below)
 - Phase 6: complete (search and discovery — see `docs/SEARCH.md`)
 - Phase 7: complete (business authorization and submissions flow — authorization codes, business drafts, submissions, admin approval, and seeded admin)
 - Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
@@ -188,7 +191,10 @@
 - Search requests carry a token so a late response cannot overwrite a newer one. Typing is debounced; Enter and clear flush immediately.
 - `is_following` is computed per viewer in the same query as the results. A person card without it would always offer "Follow" for someone you already follow, and there would be no way to unfollow.
 - Follow is optimistic and reverted on failure — same rule as likes.
-- `/profile/[id]` is a minimal read-only view, signed-in only, inside `(main)`. The visitor's own profile redirects to `/profile`. An unknown account and a suspended account both 404.
+- `/profile/[id]` is a FORWARDING route, not a profile UI. It redirects to
+  `/user/[username]` when the account has a handle, and renders a minimal view
+  only for accounts that have no username. An unknown account and a suspended
+  account both 404.
 - Run `npm run test:search` AND `npm run test:feed`. They share the visibility predicate; a change to one can break the other.
 - Where `-webkit-line-clamp` is used, declare standard `line-clamp` alongside it.
 
@@ -600,3 +606,51 @@
   bottom at 520px instead.
 - `content-visibility: auto` on a slide is load-bearing: without it, a
   four-item track paints four fullscreen images for one being shown.
+
+## Profile Page (Phase 5D)
+- `/profile` is the current user's own profile.
+- `/user/[username]` is any user's public profile, keyed by HANDLE,
+  not by id. A profile URL is the one thing people put in a message,
+  and a UUID cannot be said out loud.
+- `/profile/[id]` FORWARDS to `/user/[username]`. Do not build a second
+  profile UI there; two UIs for one person is how /profile/[id] fell
+  behind /profile in the first place.
+- Your own handle redirects to `/profile`, so exactly one page ever
+  offers "Edit profile".
+- Layout: header, tabs, then ONE panel for the active tab.
+- The active tab is `?tab=posts|saved|tagged|about`. Not client state:
+  a tab bar is navigation, and navigation that needs JavaScript to
+  have happened is navigation that has not happened yet. It must
+  survive a refresh and be shareable.
+- ProfileTabs is a Server Component of plain `<Link>`s. Do not add
+  "use client" to it.
+- Only the active tab's list is fetched. Fetching every tab's data
+  pays for lists nobody is looking at.
+- "Saved" appears only on your own profile. It is always empty on
+  someone else's and invites a question we cannot answer.
+- Posts tab is a 3-column grid of square tiles, three columns at
+  EVERY width. A 2-column phone grid makes each tile look like a feed
+  post; the density is the point.
+- Text-only posts render their own body as the tile. Videos get a play
+  badge.
+- `postsCount` MUST come from `posts.repo.countByUser({ userId,
+  viewerId })`, which applies `VISIBLE_TO_VIEWER`. A count that
+  ignored visibility would contradict the grid beneath it and would
+  leak the existence of private posts.
+- Never filter visibility in the page. `getUserPosts` already applies
+  the predicate in SQL; filtering after loading is how a private post
+  leaks through a second door.
+- Only an APPROVED business appears in the header. A DRAFT or
+  PENDING_REVIEW business is the owner's own unfinished page and must
+  not be advertised.
+- Follow is optimistic and reverts on failure, like like and save.
+  The hover "Unfollow" label is a second `aria-hidden` span, not a JS
+  text swap — the button keeps ONE accessible name describing its
+  current state.
+- A tooltip on a DISABLED button never shows; put the `title` on a
+  wrapper span.
+- Profile view types live in `@/lib/profile/types`, NOT in
+  `profile.service.ts` — no component may import from `src/lib/server/`.
+- Verification (email/phone) shows on your OWN About tab only. It
+  used to live in a "My Account" card on /profile, which this phase
+  removed. Do not drop it.

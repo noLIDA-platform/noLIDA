@@ -44,6 +44,26 @@ export async function findByUserId(userId: string): Promise<Profile | null> {
   return result.rows[0] ?? null;
 }
 
+/**
+ * Look up a profile by its unique handle.
+ *
+ * `username` carries a unique index, so this is at most one row.
+ *
+ * Compared case-insensitively in SQL rather than in JS, because the value
+ * arrives from a route parameter with whatever casing someone typed or a shared
+ * link carried. `/user/Ada` and `/user/ada` are the same person; a case-sensitive
+ * comparison would 404 one of them, and the failure looks like a broken link
+ * rather than a typo. Handles are already stored lowercase by the profile
+ * validator, so this can only ever be more forgiving, never ambiguous.
+ */
+export async function findByUsername(username: string): Promise<Profile | null> {
+  const result = await query<Profile>(
+    `SELECT ${COLUMNS} FROM profiles WHERE lower(username) = lower($1) LIMIT 1`,
+    [username]
+  );
+  return result.rows[0] ?? null;
+}
+
 export async function create(
   input: { userId: string; username?: string; fullName?: string },
   db?: Db

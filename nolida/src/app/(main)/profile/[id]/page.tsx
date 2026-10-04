@@ -44,6 +44,14 @@ export default async function ProfileViewPage({
   const profile = await getProfileForViewer(id);
   if (!profile) notFound();
 
+  // The canonical URL for a person is their handle. This route stays because
+  // links to it already exist, but it FORWARDS rather than rendering a second,
+  // older version of the same page — two profile UIs for one person is a bug
+  // waiting to happen, and it is already how /profile/[id] fell behind /profile.
+  // Accounts with no username have no handle to forward to, so they still render
+  // the simple view below.
+  if (profile.username) redirect(`/user/${profile.username}`);
+
   const posts = await getUserPosts({
     viewerId: session.user.id,
     userId: id,

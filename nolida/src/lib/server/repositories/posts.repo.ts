@@ -267,6 +267,30 @@ export async function listByUser(input: {
 }
 
 /**
+ * How many of a user's posts this viewer may see.
+ *
+ * Takes a `viewerId` for the same reason `listByUser` does. A count that ignored
+ * visibility would contradict the grid rendered directly beneath it — "12 posts"
+ * above six tiles reads as a bug even when it is correct, and it would also leak
+ * the existence of private and followers-only posts to anyone counting.
+ *
+ * On your own profile every post is visible to you, so this is the true total.
+ */
+export async function countByUser(input: {
+  userId: string;
+  viewerId: string;
+}): Promise<number> {
+  const result = await query<{ count: number }>(
+    `SELECT COUNT(*)::int AS count
+     FROM posts p
+     WHERE ${VISIBLE_TO_VIEWER}
+       AND p.user_id = $2`,
+    [input.viewerId, input.userId]
+  );
+  return result.rows[0]?.count ?? 0;
+}
+
+/**
  * A user's saved posts, ordered by when the *post* was written rather than when
  * it was saved. One cursor shape — `(created_at, id)` of the post — then serves
  * every feed, and the client never has to know which list it is paging.

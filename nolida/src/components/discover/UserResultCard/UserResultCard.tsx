@@ -35,6 +35,12 @@ export function UserResultCard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The handle is the shareable URL. People without one still get a working
+  // link — just the id-based route, which forwards when a handle exists.
+  const profileHref = user.username
+    ? `/user/${user.username}`
+    : `/profile/${user.id}`;
+
   const name = user.display_name ?? user.full_name ?? user.username ?? "Someone";
   const isSelf = user.id === viewerId;
   const classes = ["user-result", className ?? ""].filter(Boolean).join(" ");
@@ -60,7 +66,7 @@ export function UserResultCard({
 
   return (
     <article className={classes}>
-      <Link href={`/profile/${user.id}`} className="user-result__link">
+      <Link href={profileHref} className="user-result__link">
         <Avatar src={user.avatar_url} name={name} size="lg" />
 
         <span className="user-result__identity">

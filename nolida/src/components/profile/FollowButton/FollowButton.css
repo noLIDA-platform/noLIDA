@@ -1,0 +1,45 @@
+/* FollowButton — one control plus its inline error line. */
+
+.follow-button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+/* `position: relative` so the hover label can be stacked exactly over the idle
+   one instead of shifting the button's contents sideways. */
+.follow-button__control {
+  position: relative;
+  min-width: 112px;
+}
+
+.follow-button__idle,
+.follow-button__hover {
+  display: inline-block;
+}
+
+.follow-button__hover {
+  position: absolute;
+  inset: 0;
+  /* Hidden by default and shown on hover/focus. Kept in the DOM so the width of
+     the button never changes between states — a button that resizes under the
+     pointer moves the target out from under it. */
+  opacity: 0;
+}
+
+.follow-button__control--following:hover .follow-button__idle,
+.follow-button__control--following:focus-visible .follow-button__idle {
+  opacity: 0;
+}
+
+.follow-button__control--following:hover .follow-button__hover,
+.follow-button__control--following:focus-visible .follow-button__hover {
+  opacity: 1;
+}
+
+.follow-button__error {
+  color: var(--color-error);
+  font-size: var(--text-xs);
+}

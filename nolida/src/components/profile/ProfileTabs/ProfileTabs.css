@@ -1,0 +1,61 @@
+/* ProfileTabs — a horizontal bar with an underline on the active tab. */
+
+.profile-tabs {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  min-width: 0;
+}
+
+.profile-tabs__list {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  /* A deliberate horizontal scroller: four tabs plus gap can exceed a 320px
+     screen, and they must scroll rather than push the page sideways. */
+  overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+}
+
+.profile-tabs__list::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-tabs__item {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.profile-tabs__link {
+  display: flex;
+  align-items: center;
+  /* Underline drawn as a border on the link rather than a background bar, so it
+     sits on the bar's own bottom edge instead of floating inside it. */
+  border-bottom: 2px solid transparent;
+  padding: var(--space-3) 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.profile-tabs__link:hover {
+  color: var(--color-text);
+}
+
+.profile-tabs__link--active {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.profile-tabs__link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}

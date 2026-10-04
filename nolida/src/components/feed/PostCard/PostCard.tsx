@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useState } from "react";
 import {
   Bookmark,
@@ -159,7 +160,19 @@ return (
         <Avatar src={author.avatar_url} name={authorName} size="md" />
 
         <div className="post-card__identity">
-          <span className="post-card__name">{authorName}</span>
+          {/* Linked to the handle, not the id: it is the one URL that can be
+              said out loud and put in a message. Falls back to plain text when
+              the author has not chosen a username. */}
+          {author.username ? (
+            <Link
+              href={`/user/${author.username}`}
+              className="post-card__name post-card__name--linked"
+            >
+              {authorName}
+            </Link>
+          ) : (
+            <span className="post-card__name">{authorName}</span>
+          )}
           <span className="post-card__meta">
             {author.username ? <span>@{author.username}</span> : null}
             <span aria-hidden="true">·</span>

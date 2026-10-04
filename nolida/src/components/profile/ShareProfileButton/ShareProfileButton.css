@@ -1,0 +1,23 @@
+/* ShareProfileButton — the control plus its inline confirmation line. */
+
+.share-profile {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.share-profile__hint {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+/* The URL is only shown when the clipboard write failed, so it has to be
+   selectable and breakable — an unbreakable absolute URL inside a flex column
+   is exactly how a page ends up wider than the viewport. */
+.share-profile__url {
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  user-select: all;
+}
