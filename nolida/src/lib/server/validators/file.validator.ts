@@ -70,6 +70,23 @@ export function maxBytesFor(kind: MediaKind): number {
   return kind === "image" ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES;
 }
 
+/**
+ * Extensions for Cloudinary's `allowed_formats`, which takes extensions rather
+ * than MIME types. Kept in step with ALLOWED_IMAGE_TYPES / ALLOWED_VIDEO_TYPES
+ * above — a format added to one list and not the other is a type that passes
+ * validation and is then refused by the provider.
+ *
+ * On the signed direct-upload path these strings are signed, so Cloudinary
+ * enforces them: they are the replacement for `sniffMimeType`, and the reason a
+ * renamed executable cannot be stored.
+ */
+export const ALLOWED_IMAGE_EXTENSIONS = "jpg,jpeg,png,webp,gif";
+export const ALLOWED_VIDEO_EXTENSIONS = "mp4,webm,mov,m4v";
+
+export function allowedExtensionsFor(kind: MediaKind): string {
+  return kind === "image" ? ALLOWED_IMAGE_EXTENSIONS : ALLOWED_VIDEO_EXTENSIONS;
+}
+
 /** A human-readable ceiling, e.g. "5 MB". Used in client and server messages. */
 export function maxSizeLabelFor(kind: MediaKind): string {
   return kind === "image" ? "5 MB" : "50 MB";

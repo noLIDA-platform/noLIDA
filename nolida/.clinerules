@@ -89,6 +89,9 @@
 - Phase 5C.1: complete (media URL validation — an upload stores the provider's
   https secure URL, never the http variant; brand renamed from "noLIDA" to
   "NOlida" throughout)
+- Phase 5C.2: complete (uploads go directly from the browser to Cloudinary; the
+  server only issues signatures — see "Media Uploads (Phase 5C.2 update)" below)
+- Phase 6: complete (search and discovery — see `docs/SEARCH.md`)
 - Phase 7: complete (business authorization and submissions flow — authorization codes, business drafts, submissions, admin approval, and seeded admin)
 - Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
 - Phase 7B: complete (WhatsApp icon buttons with context-specific prefilled messages)
@@ -531,3 +534,30 @@
   reported as "Media must be an https URL". `uploadMediaFile` now normalises
   `url` to https too, so both fields are safe, but `secureUrl` is the contract.
 - See docs/MEDIA.md.
+
+## Media Uploads (Phase 5C.2 update)
+- Uploads go DIRECTLY from the client to Cloudinary.
+- The server only issues signatures via /api/upload/signature.
+- Use uploadDirect() from src/lib/client/upload.ts — never POST file
+  bytes to our own server for uploads.
+- /api/upload still exists as a fallback but should not be used.
+- Always pass result.secureUrl (never result.url) to onChange.
+- Real progress via XMLHttpRequest's upload.onprogress.
+- Multiple files upload in parallel via Promise.all.
+- THE SIGNATURE IS THE CONTRACT: Cloudinary recomputes it from the
+  fields it RECEIVES, so every field in `params` must be echoed back
+  verbatim. A signed-but-unsent field is "Invalid Signature", not a
+  warning. The client iterates `signature.params` rather than listing
+  field names, so the two sides cannot drift.
+- `allowed_formats` is signed, which makes Cloudinary enforce it. That
+  is what replaces `sniffMimeType` on the direct path — do not remove
+  it, and do not add a format to one allow-list without the other.
+- There is NO server-enforced byte ceiling on the direct path.
+  Cloudinary has no per-request size parameter (`max_file_size` is not
+  real — not in the SDK's types, JS, or docs). Size is a client-side
+  courtesy check plus the account's plan limit. See docs/MEDIA.md.
+- The folder and the format allow-list are derived from `purpose` on
+  the server. Never accept a folder from the request body.
+- Only `purpose=post` may request `resourceType=video`.
+- Every signature writes UPLOAD_SIGNATURE_ISSUED to security_events.
+  A failed audit write is logged, never allowed to deny an upload.

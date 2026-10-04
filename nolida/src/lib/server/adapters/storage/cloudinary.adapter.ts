@@ -1,5 +1,7 @@
 import { v2 as cloudinary, type UploadApiResponse } from "cloudinary";
 import type {
+  SignedUpload,
+  SignUploadOptions,
   StorageAdapter,
   UploadOptions,
   UploadResult,
@@ -204,8 +206,70 @@ export function publicIdFromUrl(url: string): string | null {
   return withoutExt || null;
 }
 
+/**
+ * Authorise a direct browser-to-Cloudinary upload.
+ *
+ * The browser posts the file straight to Cloudinary; we only sign it. That drops
+ * one network hop and the server-side buffer, which is worth a few hundred
+ * milliseconds on an image and a great deal more on a 50MB video.
+ *
+ * THREE THINGS ARE LOAD-BEARING:
+ *
+ * 1. Cloudinary recomputes the signature from the fields it RECEIVES. A field
+ *    that was signed but not sent, or sent with a different value, fails with
+ *    "Invalid Signature" — so `params` is returned as the exact set to echo
+ *    back, and the client sends every entry verbatim.
+ * 2. `allowed_formats` is signed, which makes it enforced by Cloudinary rather
+ *    than merely requested by us. That is what replaces the magic-byte sniffing
+ *    the server-side path used to do: an `.exe` renamed to `.jpg` is refused by
+ *    the provider before it is ever stored.
+ * 3. Signatures live for one hour from `timestamp`, so one is minted per upload
+ *    rather than cached. A stale signature is a support ticket, not an error the
+ *    user can interpret.
+ *
+ * There is deliberately no size parameter here. Cloudinary's upload API has no
+ * per-request byte ceiling (`max_file_size` does not exist — it is not in the
+ * SDK's types, its JS, or its docs), so the size limit is a client-side courtesy
+ * check plus the account's own plan limit. See docs/MEDIA.md.
+ */
+export function createSignedUpload(options: SignUploadOptions): SignedUpload {
+  ensureConfigured();
+
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim() ?? "";
+  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim() ?? "";
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim() ?? "";
+
+  const timestamp = Math.round(Date.now() / 1000);
+
+  const paramsToSign: Record<string, string | number> = {
+    timestamp,
+    folder: options.folder,
+    allowed_formats: options.allowedFormats,
+  };
+
+  const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+
+  return {
+    signature,
+    timestamp,
+    apiKey,
+    cloudName,
+    uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/${options.resourceType}/upload`,
+    // Stringified to match exactly what a multipart form field carries: a number
+    // signed as `1738…` and sent as `"1738…"` is the same value, but building
+    // both from one literal removes the question.
+    params: {
+      timestamp: String(timestamp),
+      folder: options.folder,
+      allowed_formats: options.allowedFormats,
+    },
+    allowedFormats: options.allowedFormats,
+  };
+}
+
 export const cloudinaryAdapter: StorageAdapter = {
   name: "cloudinary",
   uploadBuffer,
   deleteAsset,
+  createSignedUpload,
 };

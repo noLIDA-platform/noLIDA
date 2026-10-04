@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ChevronDown,
@@ -21,7 +21,8 @@ import { Textarea } from "@/components/ui/Textarea/Textarea";
 import { apiFetch } from "@/lib/client/api";
 import {
   checkFileForUpload,
-  uploadMediaFile,
+  formatUploadSpeed,
+  uploadDirect,
   type UploadKind,
 } from "@/lib/client/upload";
 import {
@@ -54,12 +55,40 @@ const VISIBILITY_ICONS = {
 const VISIBILITY_OPTIONS: Visibility[] = ["PUBLIC", "FOLLOWERS", "PRIVATE"];
 
 /**
+ * One upload in flight, or one that failed and is waiting to be dismissed.
+ *
+ * Progress lives per item, not in one number for the whole composer: four files
+ * uploading at different speeds against one bar would show whichever event fired
+ * last and look stuck. The controller is held here so each card's cancel button
+ * stops its own upload and nothing else.
+ */
+interface PendingUpload {
+  id: string;
+  fileName: string;
+  kind: UploadKind;
+  percent: number;
+  /** Bytes per second, for the card's secondary line. */
+  speed: number;
+  /** Set once this one failed. The card stays until dismissed. */
+  error: string | null;
+  controller: AbortController;
+}
+
+/**
  * The composer. One component, used by `/home` and by `/create`.
  *
  * Media is uploaded IMMEDIATELY when the file is chosen, not when the post is
  * submitted. Uploading on submit would mean a 50MB video and a failed post leave
  * the user with an asset at the provider that no row references — and a long
  * upload freezing the Post button is a worse experience than an upload bar.
+ *
+ * Multiple files upload IN PARALLEL. That was the wrong call while files went
+ * through our own server — each one was a two-hop request holding a server
+ * buffer, and four at once really did mean four ways to time out. Now the bytes
+ * go straight to Cloudinary and the server is not in the path at all, so the
+ * only shared resource is the last mile, and starting all four together removes
+ * three sequential signature round trips and three sequential provider
+ * handshakes. Four 5MB photos on a slow link finish in about the time one did.
  *
  * The post joins the feed only once the server has it. Showing a post that failed
  * to save would leave a reader looking at something nobody else can see.
@@ -81,48 +110,168 @@ export function PostComposer({
   const [error, setError] = useState<string | null>(null);
 
   const [media, setMedia] = useState<PostMediaItem[]>([]);
-  const [uploading, setUploading] = useState(false);
+  const [pending, setPending] = useState<PendingUpload[]>([]);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
 
+  // A failed upload holds its slot until the user dismisses it, so "still in
+  // flight" means pending and not yet failed.
+  const inFlight = pending.filter((item) => item.error === null).length;
+  const uploading = inFlight > 0;
+
   const trimmed = body.trim();
   const remaining = POST_BODY_MAX - body.length;
-  const mediaFull = media.length >= POST_MEDIA_MAX;
+  // Counts BOTH saved and in-flight: four picks landing while two are still
+  // uploading must not add up to six items.
+  const mediaFull = media.length + inFlight >= POST_MEDIA_MAX;
   const canSubmit =
-    trimmed.length > 0 && trimmed.length <= POST_BODY_MAX && !submitting;
+    trimmed.length > 0 &&
+    trimmed.length <= POST_BODY_MAX &&
+    !submitting &&
+    !uploading;
 
-  const addMedia = async (
+  // Held in a ref so the unmount cleanup can reach the live list without
+  // re-running on every progress tick.
+  const pendingRef = useRef<PendingUpload[]>([]);
+  useEffect(() => {
+    pendingRef.current = pending;
+  }, [pending]);
+
+  // Navigating away with uploads in flight would otherwise leave up to four
+  // requests running against a component that no longer exists.
+  useEffect(() => {
+    return () => {
+      for (const item of pendingRef.current) item.controller.abort();
+    };
+  }, []);
+
+  /**
+   * Upload one file, updating only its own card.
+   *
+   * Declared before `addMediaFiles` so the dispatch below reads in one
+   * direction.
+   */
+  const runUpload = async (
+    id: string,
     file: File,
     kind: UploadKind,
+    controller: AbortController,
   ): Promise<void> => {
-    setError(null);
+    const patch = (changes: Partial<PendingUpload>): void => {
+      setPending((current) =>
+        current.map((item) => (item.id === id ? { ...item, ...changes } : item)),
+      );
+    };
 
-    if (media.length >= POST_MEDIA_MAX) {
-      setError(`A post can carry at most ${POST_MEDIA_MAX} photos or videos.`);
-      return;
-    }
+    // Progress fires many times a second PER FILE. With four in flight that is
+    // enough state churn to make typing in the textarea stutter, so paints are
+    // coalesced to roughly ten per second — smoother than a progress bar needs,
+    // and a fraction of the work. 100% always goes through, so a finished upload
+    // never sits at 96% while the response is being parsed.
+    let lastPaint = 0;
 
-    const localError = checkFileForUpload(file, kind);
-    if (localError) {
-      setError(localError);
-      return;
-    }
-
-    setUploading(true);
     try {
-      const uploaded = await uploadMediaFile(file, kind, "post");
+      const uploaded = await uploadDirect(file, {
+        purpose: "post",
+        resourceType: kind,
+        signal: controller.signal,
+        onProgress: (update) => {
+          const now = Date.now();
+          if (update.percent !== 100 && now - lastPaint < 100) return;
+          lastPaint = now;
+          patch({ percent: update.percent, speed: update.bytesPerSecond });
+        },
+      });
+
       // Re-checked after the await: the user can add another file while this one
       // is in flight, and appending unconditionally would quietly exceed the cap.
       setMedia((current) =>
         current.length >= POST_MEDIA_MAX
           ? current
-          : [...current, { url: uploaded.url, type: kind }],
+          : [...current, { url: uploaded.secureUrl, type: kind }],
       );
+      setPending((current) => current.filter((item) => item.id !== id));
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That upload failed.");
-    } finally {
-      setUploading(false);
+      if (controller.signal.aborted) {
+        // Cancelled by the user: drop the card rather than leaving a tombstone
+        // for something they deliberately stopped.
+        setPending((current) => current.filter((item) => item.id !== id));
+        return;
+      }
+      patch({
+        error: caught instanceof Error ? caught.message : "That upload failed.",
+      });
     }
+  };
+
+  /**
+   * Send every chosen file at once.
+   *
+   * Validation runs BEFORE anything is uploaded, so four rejected files produce
+   * a message and no network traffic rather than four doomed requests. Room is
+   * counted against what is saved AND what is still in flight, so several quick
+   * picks cannot add up past the cap.
+   */
+  const addMediaFiles = (files: File[], kind: UploadKind): void => {
+    setError(null);
+
+    const room = POST_MEDIA_MAX - media.length - inFlight;
+    if (room <= 0) {
+      setError(`A post can carry at most ${POST_MEDIA_MAX} photos or videos.`);
+      return;
+    }
+
+    const accepted = files.slice(0, room);
+    if (accepted.length < files.length) {
+      setError(
+        `A post can carry at most ${POST_MEDIA_MAX} items, so only the first ${accepted.length} were added.`,
+      );
+    }
+
+    const queued: { id: string; file: File; controller: AbortController }[] = [];
+    for (const file of accepted) {
+      const localError = checkFileForUpload(file, kind);
+      if (localError) {
+        setError(localError);
+        continue;
+      }
+      queued.push({
+        // Unique per pick: a file name alone collides the moment someone selects
+        // two images from different folders with the same name.
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        file,
+        controller: new AbortController(),
+      });
+    }
+
+    if (queued.length === 0) return;
+
+    setPending((current) => [
+      ...current,
+      ...queued.map(({ id, file, controller }) => ({
+        id,
+        fileName: file.name,
+        kind,
+        percent: 0,
+        speed: 0,
+        error: null,
+        controller,
+      })),
+    ]);
+
+    // Started together, not chained with `for … await`: awaiting each one would
+    // serialise four independent uploads behind each other for no reason.
+    for (const { id, file, controller } of queued) {
+      void runUpload(id, file, kind, controller);
+    }
+  };
+
+  const cancelUpload = (id: string): void => {
+    pending.find((item) => item.id === id)?.controller.abort();
+  };
+
+  const dismissPending = (id: string): void => {
+    setPending((current) => current.filter((item) => item.id !== id));
   };
 
   const removeMedia = (index: number): void => {
@@ -205,7 +354,7 @@ return (
         />
       </div>
 
-      {media.length > 0 ? (
+      {media.length > 0 || pending.length > 0 ? (
         <div className="post-composer__media">
           {media.map((item, index) => (
             <div key={`${item.url}-${index}`} className="post-composer__media-item">
@@ -236,6 +385,64 @@ return (
               </button>
             </div>
           ))}
+
+          {/* One card per upload in flight, each with its OWN bar. A single
+              shared bar would show whichever file's event fired last. */}
+          {pending.map((item) =>
+            item.error ? (
+              <div
+                key={item.id}
+                className="post-composer__media-item post-composer__media-item--failed"
+              >
+                <p className="post-composer__media-error" role="alert">
+                  {item.error}
+                </p>
+                <button
+                  type="button"
+                  className="post-composer__media-remove"
+                  onClick={() => dismissPending(item.id)}
+                  aria-label={`Dismiss the failed upload of ${item.fileName}`}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ) : (
+              <div
+                key={item.id}
+                className="post-composer__media-item post-composer__media-item--pending"
+              >
+                <div
+                  className="post-composer__media-progress"
+                  role="progressbar"
+                  aria-valuenow={item.percent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`Uploading ${item.fileName}`}
+                >
+                  <span
+                    className="post-composer__media-progress-fill"
+                    style={{ width: `${item.percent}%` }}
+                  />
+                </div>
+                <span className="post-composer__media-percent">
+                  {item.percent}%
+                  {formatUploadSpeed(item.speed) ? (
+                    <span className="post-composer__media-speed">
+                      {formatUploadSpeed(item.speed)}
+                    </span>
+                  ) : null}
+                </span>
+                <button
+                  type="button"
+                  className="post-composer__media-remove"
+                  onClick={() => cancelUpload(item.id)}
+                  aria-label={`Cancel the upload of ${item.fileName}`}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ),
+          )}
         </div>
       ) : null}
 
@@ -270,11 +477,9 @@ return (
             onChange={(event) => {
               const files = Array.from(event.target.files ?? []);
               event.target.value = "";
-              // Sequential, not Promise.all: four 5MB uploads in parallel on a
-              // mobile connection is how you get four timeouts.
-              void (async () => {
-                for (const file of files) await addMedia(file, "image");
-              })();
+              // Parallel: the bytes go straight to Cloudinary, so the only
+              // shared resource is the connection itself.
+              addMediaFiles(files, "image");
             }}
           />
           <input
@@ -286,9 +491,7 @@ return (
             onChange={(event) => {
               const files = Array.from(event.target.files ?? []);
               event.target.value = "";
-              void (async () => {
-                for (const file of files) await addMedia(file, "video");
-              })();
+              addMediaFiles(files, "video");
             }}
           />
 
@@ -296,7 +499,7 @@ return (
             type="button"
             className="post-composer__tool"
             onClick={() => imageInputRef.current?.click()}
-            disabled={uploading || mediaFull}
+            disabled={mediaFull}
             title={
               mediaFull
                 ? `A post can carry at most ${POST_MEDIA_MAX} items`
@@ -311,7 +514,7 @@ return (
             type="button"
             className="post-composer__tool"
             onClick={() => videoInputRef.current?.click()}
-            disabled={uploading || mediaFull}
+            disabled={mediaFull}
             title={
               mediaFull
                 ? `A post can carry at most ${POST_MEDIA_MAX} items`
@@ -325,7 +528,9 @@ return (
           {uploading ? (
             <span className="post-composer__uploading">
               <Spinner size="sm" />
-              <span>Uploading…</span>
+              <span>
+                Uploading {inFlight} {inFlight === 1 ? "file" : "files"}…
+              </span>
             </span>
           ) : null}
           <button

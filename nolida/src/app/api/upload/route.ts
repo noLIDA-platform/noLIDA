@@ -1,3 +1,27 @@
+/**
+ * Fallback for browsers that can't do direct uploads. Prefer
+ * /api/upload/signature + direct upload for speed.
+ *
+ * This route still buffers the whole file in server memory and makes two network
+ * hops, which is why /create, the account page and both business editors no
+ * longer call it. It is kept because a direct upload can fail for reasons that
+ * are not our code's fault — a corporate proxy that blocks api.cloudinary.com, a
+ * content blocker, an old browser — and "your photo will not upload" is a worse
+ * outcome than "your photo uploads slowly".
+ *
+ * THE CLIENT DOES NOT FALL BACK TO THIS AUTOMATICALLY, and that is deliberate.
+ * A CORS-blocked response does not mean the upload failed: the browser blocks
+ * the RESPONSE, while the bytes have usually already reached Cloudinary and the
+ * asset is stored. Retrying through this route would therefore re-send the whole
+ * file and leave the first asset orphaned at the provider — turning a working
+ * upload into a duplicated, half-visible one. A silent automatic retry is worse
+ * than an honest error.
+ *
+ * So this is a route to reach deliberately (a support path, a diagnostic, or a
+ * client's own retry on a failure that provably never reached the provider), not
+ * a transparent fallback wired behind an error handler. It is also the last
+ * remaining caller of `sniffMimeType`.
+ */
 import type { NextRequest } from "next/server";
 import { getRequestSessionUser } from "@/lib/server/auth/route-session";
 import { fail, ok } from "@/lib/server/api/response";

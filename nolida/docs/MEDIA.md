@@ -15,15 +15,15 @@ CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 ```
 
-The secret never reaches the browser. Uploads are **signed**: the file travels
-through our own `/api/upload`, the session is checked there, the bytes are
-validated there, and only then does the server call Cloudinary with its
-credentials. There is no unsigned upload preset and no `next-cloudinary` — a
-widget with an unsigned preset would let anyone with a browser upload to your
-account without a session.
+The secret never reaches the browser. Uploads are **signed**: our server issues
+a signature, and the browser posts the bytes straight to Cloudinary. There is no
+unsigned upload preset and no `next-cloudinary` — a widget with an unsigned
+preset would let anyone with a browser upload to your account without a
+session.
 
-If the vars are missing, `/api/upload` returns `500 STORAGE_NOT_CONFIGURED` and
-logs it server-side. The user sees "Photo uploads are not available right now."
+If the vars are missing, `/api/upload/signature` returns
+`500 STORAGE_NOT_CONFIGURED` and logs it server-side. The user sees "Photo
+uploads are not available right now."
 
 ### Folder layout
 
@@ -71,6 +71,11 @@ provider-neutral: `url`, `secureUrl`, `publicId`, dimensions, format, bytes.
 ## Validation rules
 
 Enforced in `src/lib/server/validators/file.validator.ts`, in this order.
+
+**This table describes the `/api/upload` fallback path.** On the direct path
+(Phase 5C.2) the file never reaches our server, so the equivalent gate is the
+signed `allowed_formats`, which Cloudinary enforces instead. The rules below are
+still the ones a user experiences — they are simply enforced somewhere else now.
 
 | Check | Rule |
 | ----- | ---- |
@@ -150,16 +155,36 @@ immediately. A cleanup job is the right home for that, not the request path.
 
 ---
 
-## Video, and why 50 MB
+## Video, and the missing size ceiling
 
-`maxDuration = 60` on the route. Files are held in memory as a Buffer, so 50 MB is
-the real ceiling — the limit is checked *before* the read, and again in the
-adapter.
+**The direct path has no server-enforced byte limit.** This is the one real gap
+Phase 5C.2 opens, and it is worth stating rather than discovering later.
 
-The escape hatch for larger files is a **signed direct-to-Cloudinary upload**
-(`generateAuthToken` + an upload preset), which keeps bytes off this server
-entirely. That is a replacement for the architecture, not the next increment of
-the number. At this scale the buffered path is fine.
+Cloudinary's upload API has no per-request maximum-size parameter. `max_file_size`
+looks plausible and is not real: it is absent from the SDK's TypeScript types,
+from its JavaScript and from its docs. Verified, not assumed.
+
+| Layer | Enforced? |
+| ----- | --------- |
+| `checkFileForUpload` in the client | Yes, for honest users |
+| Cloudinary `allowed_formats` | Yes, signed, so the provider rejects a wrong type |
+| The Cloudinary account's plan limit | Yes, at whatever the plan allows |
+| **A NOlida server** | **No** |
+
+The old path read the bytes and refused an oversize file. That is gone: a
+signed-in user who ignores the client can push a large file into the account. It
+burns quota rather than being a security hole, but it is not nothing.
+
+Closing it, cheapest first:
+
+1. Configure a **signed upload preset** in the Cloudinary dashboard with a
+   maximum file size, then sign `upload_preset`. Operator setup, no code.
+2. Verify at save time via the Admin API, where `cloudinary.api.resource(publicId)`
+   returns `bytes` and `format`, and refuse a URL whose asset is too large. Costs
+   one round trip per media item on publish.
+3. Accept it and watch usage.
+
+Option 1 for now; option 2 if abuse appears.
 
 ---
 
@@ -189,11 +214,88 @@ A non-`http(s)` value is deliberately left alone by `toSecure`, so a
 `javascript:` URL still fails loudly at the schema instead of being rewritten
 into something that merely looks valid.
 
+## Direct uploads (Phase 5C.2)
+
+The browser posts the file **straight to Cloudinary**. Our server signs; it does
+not carry.
+
+```
+browser ──tiny POST──▶ NOlida /api/upload/signature   (~50ms, no file)
+browser ─────────────▶ api.cloudinary.com/.../upload  (the bytes)
+```
+
+One network hop instead of two, and no server memory holding a 50MB buffer. The
+progress bar became a real 0–100: on the old path it had to stop at 90, because
+the server's validation and the provider's storage were invisible to the client.
+
+### The signature is the contract
+
+Cloudinary **recomputes the signature from the fields it receives**. So every
+signed field must be sent back, every sent field must have been signed, and
+values must match exactly. Get it wrong and every upload fails with
+`Invalid Signature` — not a warning, not a partial failure.
+
+The response therefore carries `params`: the exact set that was signed. The
+client iterates it rather than retyping field names, so adding a signed
+parameter later cannot silently break the client.
+
+```ts
+// server — sign
+const params = { timestamp, folder, allowed_formats };
+
+// client — echo, do not retype
+for (const [key, value] of Object.entries(sig.params)) form.append(key, value);
+```
+
+`allowed_formats` is signed, which means **Cloudinary enforces the allow-list**.
+That is what replaces `sniffMimeType` on this path: an `.exe` renamed to `.jpg`
+is refused by the provider. Do not remove it, and keep
+`ALLOWED_IMAGE_EXTENSIONS` in step with `ALLOWED_IMAGE_TYPES`.
+
+### What the client may choose
+
+Only a `purpose` and a `resourceType`. The folder and the allow-list are derived
+server-side from the purpose. A body-supplied folder would be an open write
+anywhere in the Cloudinary account.
+
+Every signature is rate limited (60/minute per user) and writes a
+`UPLOAD_SIGNATURE_ISSUED` row to `security_events`. That audit row matters more
+on this path than the old one: the bytes never pass through us, so it is the only
+trace that a write was authorised. A failed audit write is logged, never allowed
+to deny an upload.
+
+### Cancellation and progress
+
+Both upload surfaces hold an `AbortController`, so an in-flight upload can be
+cancelled. A 50MB video on a slow connection should not be a commitment you
+cannot back out of. The composer aborts every in-flight upload on unmount.
+
+Progress callbacks are coalesced to roughly ten per second per file. Four
+parallel uploads firing raw `progress` events would re-render the composer tens
+of times a second and make typing in the textarea stutter.
+
+Post media uploads in parallel. That was the wrong call while files went through
+our own server, where each one was a two-hop request holding a buffer. Now the
+only shared resource is the connection itself.
+
+### `/api/upload` is still there
+
+`/api/upload` remains for a proxy that blocks `api.cloudinary.com`, a content
+blocker, or an old browser — and it is the last caller of `sniffMimeType`.
+
+The client does **not** fall back to it automatically, which is deliberate. A
+CORS-blocked response does not mean the upload failed: the browser blocks the
+response while the bytes have usually already reached Cloudinary and been
+stored. Retrying would re-send the whole file and orphan the first asset,
+turning a working upload into a duplicated, half-visible one. An honest error
+beats a silent retry.
+
 ## Security notes
 
 - **Signed uploads only.** The API secret never reaches the browser.
 - **Session required.** `/api/upload` returns 401 without one.
-- **Rate limited** per user: 30/minute.
+- **Rate limited** per user: 60/minute for signatures, 30/minute for the
+  server-side fallback upload.
 - **https-only URLs** everywhere a URL is rendered into `src` or `href`. A
   `javascript:` value in `posts.media`, `products.images`, `avatar_url` or
   `businesses.photos` would be a stored XSS on a page other people load. The

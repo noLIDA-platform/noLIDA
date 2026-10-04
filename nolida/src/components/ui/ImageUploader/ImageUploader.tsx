@@ -1,18 +1,26 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Image as ImageIcon, Plus, X } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner/Spinner";
 import {
   checkFileForUpload,
   clientMaxLabel,
-  uploadMediaFile,
+  formatUploadSpeed,
+  uploadDirect,
   type UploadKind,
+  type UploadPurposeName,
 } from "@/lib/client/upload";
 import "./ImageUploader.css";
 
 export type UploadAspect = "square" | "wide" | "free";
-export type UploadPurposeName = "avatar" | "post" | "business" | "product";
+
+/**
+ * Re-exported so `import { UploadPurposeName } from ".../ImageUploader"` keeps
+ * working. The type itself lives in `lib/client/upload` because the post
+ * composer needs it and must not import a component to get a type.
+ */
+export type { UploadPurposeName };
 
 export interface ImageUploaderProps {
   /** The current asset URL, for edit mode. Null renders the empty drop zone. */
@@ -39,9 +47,14 @@ export interface ImageUploaderProps {
  * preview instead of replacing it.
  *
  * `fetch` cannot report upload progress, so this uses `XMLHttpRequest` via
- * `uploadMediaFile`. The bar is real bytes-sent, capped at 90% until the server
- * confirms — the last 10% is validation and provider storage, which the client
- * genuinely cannot see, and pretending otherwise would be a lie that snaps back.
+ * `uploadDirect`. Because the bytes go straight to Cloudinary, the bar is the
+ * REAL percentage — 0 to 100, nothing held back. On the old two-hop path the
+ * last 10% was server validation and provider storage that the client could not
+ * observe, so it had to stop at 90 and snap; there is no such gap now.
+ *
+ * An upload can be cancelled while it is in flight. That matters most for video:
+ * a 50MB file on a slow connection is a long enough commitment that "I picked
+ * the wrong one" should not mean waiting it out.
  */
 export function ImageUploader({
   value,
@@ -54,12 +67,21 @@ export function ImageUploader({
   className,
 }: ImageUploaderProps): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [speed, setSpeed] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const generatedId = useId();
   const inputId = `${generatedId}-file`;
+
+  // An unmount with an upload in flight would otherwise leave the request
+  // running with nobody listening to it.
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
 
   const accept =
     kind === "image"
@@ -78,6 +100,7 @@ export function ImageUploader({
 
   const handleFile = async (file: File): Promise<void> => {
     setError(null);
+    setNotice(null);
 
     const localError = checkFileForUpload(file, kind);
     if (localError) {
@@ -85,11 +108,23 @@ export function ImageUploader({
       return;
     }
 
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setBusy(true);
     setProgress(0);
+    setSpeed(0);
 
     try {
-      const uploaded = await uploadMediaFile(file, kind, purpose, setProgress);
+      const uploaded = await uploadDirect(file, {
+        purpose,
+        resourceType: kind,
+        signal: controller.signal,
+        onProgress: (update) => {
+          setProgress(update.percent);
+          setSpeed(update.bytesPerSecond);
+        },
+      });
       // `secureUrl`, never `url`. Cloudinary's `url` field is `http://` on many
       // accounts while `secure_url` is always https, and every media schema in
       // the app is https-only — passing `url` here was the Phase 5C.1 bug that
@@ -97,13 +132,25 @@ export function ImageUploader({
       onChange(uploaded.secureUrl);
       setError(null);
     } catch (caught) {
-      // The previous value is deliberately still in place: a failed upload must
-      // not silently clear the photo the user already had.
-      setError(caught instanceof Error ? caught.message : "That upload failed.");
+      if (controller.signal.aborted) {
+        // A cancel is a decision, not a fault. Showing it in the error colour
+        // with role="alert" would announce the user's own click back at them.
+        setNotice("Upload cancelled.");
+      } else {
+        // The previous value is deliberately still in place: a failed upload
+        // must not silently clear the photo the user already had.
+        setError(caught instanceof Error ? caught.message : "That upload failed.");
+      }
     } finally {
+      abortRef.current = null;
       setBusy(false);
       setProgress(0);
+      setSpeed(0);
     }
+  };
+
+  const handleCancel = (): void => {
+    abortRef.current?.abort();
   };
 
   const openPicker = (): void => {
@@ -113,6 +160,7 @@ export function ImageUploader({
 
   const handleRemove = (): void => {
     setError(null);
+    setNotice(null);
     // Removing is local state only. The asset itself is deleted by the service
     // that owns the row, which knows whether anyone else still references it.
     onChange(null);
@@ -226,12 +274,28 @@ export function ImageUploader({
             </div>
             <p className="ui-uploader__status-text">
               <Spinner size="sm" /> Uploading… {progress}%
+              {formatUploadSpeed(speed) ? (
+                <span className="ui-uploader__speed">
+                  {formatUploadSpeed(speed)}
+                </span>
+              ) : null}
             </p>
+            <button
+              type="button"
+              className="ui-uploader__cancel"
+              onClick={handleCancel}
+              aria-label="Cancel this upload"
+            >
+              <X size={14} />
+              <span>Cancel</span>
+            </button>
           </>
         ) : error ? (
           <p className="ui-uploader__error" role="alert">
             {error}
           </p>
+        ) : notice ? (
+          <p className="ui-uploader__notice">{notice}</p>
         ) : null}
       </div>
     </div>
