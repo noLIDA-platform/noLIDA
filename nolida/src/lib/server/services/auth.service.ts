@@ -210,22 +210,23 @@ export async function register(input: {
     throw error;
   }
 
-  // ── Dev OTP bypass (Phase 7F) ─────────────────────────────────────
+  // ── OTP bypass (Phase 7F, hardened 7F.5) ───────────────────────────
   //
   // Placed after the user and profile exist but before any OTP row is
   // written, so the bypass path generates and sends nothing at all. There is
   // no half-state where a code was sent but never expected.
   //
-  // `console.warn`, not `console.log`: it is a security-relevant event and
-  // should stand out in a terminal full of ordinary dev output. The message
-  // names the identifier so a developer can tell which account was created
-  // unverified.
-  if (isDevOtpBypassEnabled()) {
-    if (identifierType === "EMAIL") {
-      await usersRepo.markEmailVerified(userId);
-    } else {
-      await usersRepo.markPhoneVerified(userId);
-    }
+  // `identifier` is already normalised by `normalizeContact`, which prefers
+  // the email when both are supplied. Only emails can match the whitelist, so
+  // this branch is reachable for EMAIL registrations only — a phone signup
+  // always takes the normal OTP path below. That is the safe default, not an
+  // oversight, so the check is made explicit rather than left to fall out of
+  // the string comparison.
+  const bypassApplies =
+    identifierType === "EMAIL" && isDevOtpBypassEnabled(identifier);
+
+  if (bypassApplies) {
+    await usersRepo.markEmailVerified(userId);
 
     await securityEventsRepo.log({
       userId,
@@ -239,7 +240,7 @@ export async function register(input: {
     });
 
     console.warn(
-      `⚠️  DEV OTP BYPASS ACTIVE — user registered without verification: ${identifier}`,
+      `⚠️  OTP BYPASS — user registered without verification: ${identifier}`,
     );
 
     return { userId, identifier, identifierType, verified: true };

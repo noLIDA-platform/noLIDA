@@ -149,7 +149,7 @@ export function SignupForm({
         return;
       }
 
-      // ── Dev OTP bypass (Phase 7F) ───────────────────────────────────
+      // ── OTP bypass (Phase 7F, hardened 7F.5) ─────────────────────────
       //
       // When `verified` is true the server already marked the contact
       // verified and sent no code, so `/verify` would be a dead end. There is
@@ -157,9 +157,8 @@ export function SignupForm({
       // established here with the same credentials.
       //
       // This branch cannot fire in production: `register` only sets
-      // `verified` when `isDevOtpBypassEnabled()` is true, which requires
-      // NODE_ENV !== "production". The client does not decide this; it only
-      // obeys what the server said.
+      // `verified` for a whitelisted email on a non-production deployment.
+      // The client does not decide this; it only obeys what the server said.
       if (result.data.verified === true) {
         const loginResult = await apiFetch<{ userId: string }>("/api/auth/login", {
           method: "POST",
