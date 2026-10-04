@@ -171,22 +171,33 @@ export async function listAll(input: {
   return result.rows;
 }
 
-export async function logUsage(input: {
-  codeId: string;
-  userId: string;
-  ipAddress?: string | null;
-  metadata?: Record<string, unknown>;
-}): Promise<void> {
-  await query(
-    `INSERT INTO authorization_code_usage (code_id, used_by_user_id, ip_address, metadata)
-     VALUES ($1, $2, $3, $4)`,
-    [
-      input.codeId,
-      input.userId,
-      input.ipAddress ?? null,
-      input.metadata ? JSON.stringify(input.metadata) : null,
-    ]
-  );
+export async function logUsage(
+  input: {
+    codeId: string;
+    userId: string;
+    ipAddress?: string | null;
+    metadata?: Record<string, unknown>;
+  },
+  // Phase 7E: optional so the business-request flow can record the usage in the
+  // same transaction as the code it belongs to. Without it this write goes
+  // through the pool on a different connection and would survive a rollback,
+  // leaving a usage record for a code that no longer exists.
+  db?: Db
+): Promise<void> {
+  const text = `INSERT INTO authorization_code_usage (code_id, used_by_user_id, ip_address, metadata)
+     VALUES ($1, $2, $3, $4)`;
+  const params = [
+    input.codeId,
+    input.userId,
+    input.ipAddress ?? null,
+    input.metadata ? JSON.stringify(input.metadata) : null,
+  ];
+
+  if (db) {
+    await db.query(text, params);
+    return;
+  }
+  await query(text, params);
 }
 
 export async function findUsageByCode(

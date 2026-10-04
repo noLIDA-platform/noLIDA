@@ -1,0 +1,16 @@
+/* /list-your-business — Phase 7E, single in-app request form. */
+
+/*
+ * Layout only; the flow itself is styled in BusinessRequestFlow.css.
+ *
+ * `max-width`/`min-width` keep this a readable column that cannot be widened by
+ * a long business name inside it, and the bottom padding clears the app's fixed
+ * bottom nav so the primary action is never sitting underneath it.
+ */
+.list-your-business {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-6) 0;
+}

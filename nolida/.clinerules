@@ -84,6 +84,7 @@
 - Phase 8E: complete (no horizontal scroll, content fills the viewport, page is not pannable or auto-zooming)
 - Phase 8F: complete (mobile stability — no panning, no dead space below content; loading boundaries for perceived speed)
 - Phase 8G: complete (viewport meta verified in rendered HTML; root overflow guard, `html` hidden / `body` clip)
+- Phase 7E: complete (in-app business request flow — instant code, one transaction, no WhatsApp)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -398,3 +399,32 @@
   in `(main)/layout.tsx` delays the shell on EVERY navigation.
 - Navigation should feel instant; only real network slowness should
   cause a visible wait.
+
+## Business Request Flow (Phase 7E)
+- /list-your-business shows a single in-app request form. No WhatsApp
+  CTA, no manual code entry.
+- On submit, the server generates a code, auto-redeems it for the
+  user, creates a DRAFT business, and returns { code, businessId }.
+- All of this happens in one Postgres transaction. The audit writes
+  (code usage, security event) take the transaction client too — on
+  the pool they would outlive a rollback.
+- The code is created ALREADY SPENT: max_uses 1, uses_count 1,
+  status USED. It is a receipt, not a credential.
+  `authorizationCodes.repo.create` cannot set those columns, so they
+  are written immediately after, inside the same transaction.
+- The UI has a minimum 3-second loading state before revealing the
+  code — even if the API responds instantly. `MIN_DELAY_MS` in
+  BusinessRequestFlow.tsx; the CSS progress bar duplicates that
+  duration and the two must change together.
+- The code is displayed prominently with a copy button, and the user
+  is told it is saved to their account.
+- Continue navigates to /my-business/submit.
+- `POST /api/businesses/request` is rate limited per user. It is the
+  one endpoint where a signed-in user can mint a business, a code and
+  an audit row per call.
+- The old redeem-code endpoint and `RedeemCodeForm` stay for backward
+  compatibility (admin-issued codes), even though no page currently
+  renders the form. Do not delete them.
+- `/list-your-business` is `force-dynamic` — it reads a session and
+  redirects on status. Prerendered, it would serve every visitor the
+  same answer and bounce signed-in users past their own business.

@@ -1,0 +1,118 @@
+/* BusinessRequestFlow — the in-app listing request (Phase 7E). */
+
+.biz-request {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 560px;
+  min-width: 0;
+}
+
+/* Loading and success are single, centred moments; the form is a left-aligned
+   reading column. */
+.biz-request--centered {
+  align-items: center;
+  text-align: center;
+  /* Clears the app's fixed bottom nav so the primary action is never hidden. */
+  padding-bottom: var(--space-6);
+}
+
+.biz-request__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
+}
+
+.biz-request__lede {
+  margin: 0;
+  max-width: 44ch;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.biz-request__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.biz-request__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-sm);
+}
+
+/* ── Loading ──────────────────────────────────────────────────────── */
+
+.biz-request__progress {
+  width: 100%;
+  max-width: 280px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background-color: color-mix(in srgb, var(--color-primary) 16%, transparent);
+}
+
+/*
+ * Fills the track once over MIN_DELAY_MS. The duration is duplicated from the
+ * constant in the TSX — CSS cannot read it, so the two must be changed
+ * together. If they ever disagree the bar finishes early or late; it never
+ * gates anything, because the JS timer is what actually holds the stage.
+ */
+.biz-request__progress-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-gradient);
+  transform-origin: left center;
+  animation: biz-request-fill 3s linear forwards;
+}
+
+@keyframes biz-request-fill {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Respect the OS setting: a long animation is exactly what this asks people to
+   skip. */
+@media (prefers-reduced-motion: reduce) {
+  .biz-request__progress-bar {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
+/* ── Success ──────────────────────────────────────────────────────── */
+
+.biz-request__code-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.biz-request__code {
+  /* A real monospace stack rather than a token: there is no `--font-mono` in
+     `styles/tokens.css`, and referencing one would have silently fallen back to
+     the inherited sans — where `NLDA-XXXX-XXXX` groups into unreadable
+     blobs and is genuinely hard to transcribe. If a mono token is ever added,
+     swap this for it. */
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: clamp(1.25rem, 5vw, 1.75rem);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.08em;
+  /* Wraps rather than widening the card if a future code format is longer. */
+  overflow-wrap: anywhere;
+  user-select: all;
+}

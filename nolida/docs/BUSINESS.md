@@ -26,9 +26,27 @@ Rules:
 
 ## Business flow
 
+There are now **two** ways to obtain an authorization code. Both end at the
+same place: a `DRAFT` business owned by the user.
+
+**Self-service (Phase 7E, the default path).** The user fills in a short form
+at `/list-your-business`. `POST /api/businesses/request` generates a code,
+auto-redeems it, creates the DRAFT business and writes an audit row — all in
+one transaction. Nobody types a code. See `docs/BUSINESS-REQUEST.md`.
+
+1. The user submits the request form at `/list-your-business`.
+2. The server generates a code, marks it already-spent, and creates the
+   `DRAFT` business with its owner row in one transaction.
+3. The code is displayed on screen; Continue goes to `/my-business/submit`.
+
+**Admin-issued codes (unchanged, still supported).**
+
 1. An admin creates an authorization code.
 2. A signed-in user redeems the code via `POST /api/businesses/redeem-code`.
 3. The app creates a `DRAFT` business record and records the owner relationship.
+
+Both then converge:
+
 4. The user fills in details through `/my-business/submit`.
 5. Submitting the form creates a `business_submissions` row and flips the business to `PENDING_REVIEW`.
 6. An admin reviews the listing via `POST /api/admin/businesses/[id]/review`.
@@ -36,7 +54,8 @@ Rules:
 
 ## Key server files
 
-- `src/lib/server/services/authorization.service.ts`
+- `src/lib/server/services/businessRequest.service.ts` — the Phase 7E request flow
+- `src/lib/server/services/authorization.service.ts` — admin code generation and redemption
 - `src/lib/server/services/business.service.ts`
 - `src/lib/server/repositories/authorizationCodes.repo.ts`
 - `src/lib/server/repositories/businesses.repo.ts`

@@ -1,34 +1,58 @@
 import type { Metadata } from "next";
-import { RedeemCodeForm } from "@/components/business/RedeemCodeForm";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton/WhatsAppButton";
+import { redirect } from "next/navigation";
+import { BusinessRequestFlow } from "@/components/business/BusinessRequestFlow/BusinessRequestFlow";
+import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
+import { getMyBusiness } from "@/lib/server/services/business.service";
+import "./list-your-business.css";
 
 export const metadata: Metadata = { title: "List your business" };
 
-export default function ListYourBusinessPage() {
-  return (
-    <main style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 20px 80px" }}>
-      <div style={{ display: "grid", gap: 24, maxWidth: 720 }}>
-        <p style={{ margin: 0, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6366F1", fontWeight: 700 }}>
-          List your business
-        </p>
-        <h1 style={{ margin: 0, fontSize: "clamp(2.2rem, 4vw, 4rem)", lineHeight: 1.1 }}>
-          Start your listing in a few steps.
-        </h1>
-        <p style={{ margin: 0, color: "#475569", fontSize: 18, lineHeight: 1.7 }}>
-          Use the business code you received from noLIDA to create your listing. Then add your business profile and submit it for review.
-        </p>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 12 }}>
-          <WhatsAppButton
-            label="Ask how to list your business on WhatsApp"
-            message="Hi noLIDA, I want to list my business on noLIDA."
-          />
-          <span>Need a business code? Message us.</span>
-        </div>
-      </div>
+/**
+ * `/list-your-business` — one form, one code, one continue button (Phase 7E).
+ *
+ * Replaces the Phase 7 layout: a WhatsApp card that asked the user to go
+ * elsewhere and wait for a human, plus a manual code-entry form. Neither is
+ * here any more. The request now happens in-app and the code arrives
+ * immediately — see `docs/BUSINESS-REQUEST.md`.
+ *
+ * `RedeemCodeForm` and `POST /api/businesses/redeem-code` both still exist and
+ * still work: admin-issued codes are a real path, and removing them would break
+ * any code that was already sent to somebody.
+ *
+ * ## The redirect table
+ *
+ * A user who already has a business never sees this page — there is nothing to
+ * request. Which screen they land on depends on what state they are in:
+ *
+ * - DRAFT / CHANGES_REQUESTED → `/my-business/submit` (finish and send it)
+ * - PENDING_REVIEW / REJECTED / SUSPENDED → `/my-business/pending`
+ * - APPROVED → `/my-business` (the dashboard)
+ *
+ * The status is resolved on the server, never asked for in a query string, so
+ * the page cannot be used to peek at someone else's business state.
+ *
+ * `dynamic` because this reads a session cookie. Without it the page would be
+ * prerendered once at build time and served to every visitor, redirecting
+ * signed-in users straight past their own business.
+ */
+export const dynamic = "force-dynamic";
 
-      <section style={{ marginTop: 36, padding: 24, borderRadius: 20, border: "1px solid rgba(99, 102, 241, 0.2)", background: "rgba(255,255,255,0.75)" }}>
-        <RedeemCodeForm />
-      </section>
+export default async function ListYourBusinessPage() {
+  const session = await getCurrentSessionUser();
+  if (!session) redirect("/");
+
+  const business = await getMyBusiness(session.user.id);
+  if (business) {
+    if (business.status === "DRAFT" || business.status === "CHANGES_REQUESTED") {
+      redirect("/my-business/submit");
+    }
+    if (business.status === "APPROVED") redirect("/my-business");
+    redirect("/my-business/pending");
+  }
+
+  return (
+    <main className="list-your-business">
+      <BusinessRequestFlow />
     </main>
   );
 }
