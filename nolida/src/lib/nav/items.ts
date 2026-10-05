@@ -9,6 +9,10 @@ export const SIDEBAR_ITEMS: NavItem[] = [
   { label: "Home", href: "/home", icon: "HomeIcon" },
   { label: "Discover", href: "/discover", icon: "SearchIcon" },
   { label: "Create", href: "/create", icon: "PlusCircleIcon" },
+  // Requests sits directly above Messages on purpose: it is the marketplace's
+  // core loop, and burying it under a message thread would hide the one feature
+  // this product exists for.
+  { label: "Requests", href: "/requests", icon: "RequestIcon" },
   { label: "Messages", href: "/messages", icon: "MessageIcon" },
   { label: "Notifications", href: "/notifications", icon: "BellIcon" },
   { label: "Wallet", href: "/wallet", icon: "WalletIcon" },
@@ -22,6 +26,10 @@ export const AVATAR_MENU_SECTIONS: NavItem[][] = [
     { label: "Orders", href: "/orders", icon: "CartIcon" },
     { label: "Bookings", href: "/bookings", icon: "CheckIcon" },
     { label: "Favorites", href: "/favorites", icon: "BookmarkIcon" },
+    // Straight to the "mine" tab: "My requests" in an account menu that landed on
+    // the open feed would send people looking for their own post in the wrong
+    // list.
+    { label: "My Requests", href: "/requests?tab=mine", icon: "RequestIcon" },
     { label: "Rewards", href: "/rewards", icon: "HeartIcon" },
     { label: "Referrals", href: "/referrals", icon: "ShareIcon" },
   ],

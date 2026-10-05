@@ -113,6 +113,8 @@
 - Phase 7F: complete (OTP bypass for signup; originally dev-only)
 - Phase 7F.5: complete (OTP bypass hardened — email whitelist plus a
   VERCEL_ENV/NODE_ENV production refusal; see "OTP Bypass" below)
+- Phase 9: complete (requests and responses — post, respond, accept; see
+  "Requests and Responses (Phase 9)" below)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -654,3 +656,49 @@
 - Verification (email/phone) shows on your OWN About tab only. It
   used to live in a "My Account" card on /profile, which this phase
   removed. Do not drop it.
+
+## Requests and Responses (Phase 9)
+- Requests are their own entity (not a post type), but creating a
+  request also creates a REQUEST_POST in the feed for discovery.
+  Both rows go in ONE transaction — neither half is useful alone.
+- Statuses: OPEN, IN_PROGRESS, FULFILLED, CLOSED, CANCELLED.
+  OPEN and IN_PROGRESS both accept new offers.
+- Urgencies: URGENT, NORMAL, FLEXIBLE.
+- Response statuses: PENDING, ACCEPTED, DECLINED, WITHDRAWN.
+- ONLY a user with an APPROVED business can respond, and the business
+  is resolved from the SESSION. There is no `businessId` in the
+  response body and there must never be — it would let any signed-in
+  user answer as any business in the database.
+- One response per business per request (unique constraint). The
+  service checks `hasResponded` for a readable message and CATCHES the
+  unique violation for the race between two simultaneous taps.
+- The request owner cannot respond to their own request.
+- Accepting a response sets `accepted_response_id`, moves the request
+  to IN_PROGRESS, and sets every OTHER response to DECLINED — in one
+  transaction. `declineOthers` must include 'ACCEPTED' in its WHERE
+  clause, or accepting a second offer leaves TWO accepted responses.
+- ONLY THE OWNER SEES THE RESPONSES. Everyone else gets the count plus
+  their own offer. A competing business reading rivals' prices is the
+  one thing this marketplace must never expose — and the filter is in
+  the service, never in the page.
+- `requests.response_count` is denormalised. Written inside the same
+  transaction as the response that changes it, and clamped with
+  GREATEST(0, …).
+- Responses list OLDEST FIRST (the shared cursor is reused; only the
+  comparison flips to `>`). The first responder asked first and has
+  waited longest.
+- Money in requests is MAJOR units (naira), unlike products and
+  services which are minor units. `formatMoney` in
+  `@/lib/requests/constants` documents why, and must not "fix" it.
+- `deadline` is cast to text in SQL. node-postgres parses DATE into a
+  JS Date at LOCAL midnight, which shifts a day backwards west of UTC
+  — "due 15 March" would render as 14 March in Lagos.
+- No conversation is created on acceptance. Messaging is Phase 10 and
+  auto-opening a thread nobody asked for is that phase's decision.
+- Request view types live in `@/lib/requests/types` — no component may
+  import from `src/lib/server/`. Bounds live in
+  `@/lib/requests/constants` so the composer's counters cannot drift
+  from what the server accepts.
+- `purpose="request"` is a real upload folder (`nolida/requests`) and
+  is images-only. Adding it to `UPLOAD_FOLDERS` requires adding it to
+  the signature endpoint's allow-list too, or uploads fail.

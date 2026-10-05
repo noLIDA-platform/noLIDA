@@ -11,7 +11,6 @@ import {
 import {
   allowedExtensionsFor,
   folderForPurpose,
-  type UploadPurpose,
 } from "@/lib/server/validators/file.validator";
 import * as securityEventsRepo from "@/lib/server/repositories/securityEvents.repo";
 
@@ -33,21 +32,20 @@ export const runtime = "nodejs";
  */
 
 /** The purposes a client may request. Mirrors UPLOAD_FOLDERS. */
-const PURPOSE_VALUES = ["avatar", "post", "business", "product"] as const;
+const PURPOSE_VALUES = [
+  "avatar",
+  "post",
+  "business",
+  "product",
+  "request",
+] as const;
 
 const signatureRequestSchema = z.object({
   purpose: z.enum(PURPOSE_VALUES),
   resourceType: z.enum(["image", "video"]),
 });
 
-/**
- * Only a post may carry a video.
- *
- * An avatar, a business photo or a product image is an image by definition, and
- * without this the 50MB video ceiling becomes a way to put a video in someone's
- * profile picture — the same rule `/api/upload` enforces.
- */
-const VIDEO_PURPOSES: readonly UploadPurpose[] = ["post"];
+
 
 /** Vercel and most proxies put the caller's address first in the chain. */
 function clientIp(request: Request): string {
@@ -84,7 +82,13 @@ export async function POST(request: NextRequest) {
   const folder = folderForPurpose(purpose);
   if (!folder) return fail("VALIDATION_ERROR", "Unknown upload purpose.");
 
-  if (resourceType === "video" && !VIDEO_PURPOSES.includes(purpose)) {
+  if (
+    (purpose === "avatar" ||
+      purpose === "business" ||
+      purpose === "product" ||
+      purpose === "request") &&
+    resourceType !== "image"
+  ) {
     return fail("VALIDATION_ERROR", "Only posts may contain videos.");
   }
 

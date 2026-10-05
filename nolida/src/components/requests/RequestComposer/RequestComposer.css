@@ -1,0 +1,132 @@
+/* RequestComposer — four labelled sections on one page. */
+
+.request-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  min-width: 0;
+}
+
+.request-composer__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.request-composer__legend {
+  padding: 0 var(--space-1);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.request-composer__optional {
+  color: var(--color-text-muted);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.request-composer__label {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.request-composer__select {
+  width: 100%;
+  min-width: 0;
+  /* Never below 16px: iOS zooms the viewport on focus for anything smaller and
+     does not zoom back out. */
+  font-size: 1rem;
+}
+
+.request-composer__row {
+  display: grid;
+  /* Two equal columns, collapsing to one on a narrow screen rather than
+     squeezing two inputs into a phone width. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+@media (max-width: 520px) {
+  .request-composer__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.request-composer__urgency {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.request-composer__urgency-option {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.request-composer__urgency-option--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.request-composer__urgency-option:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.request-composer__counter,
+.request-composer__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.request-composer__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-xs);
+}
+
+.request-composer__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.request-composer__attachment {
+  display: block;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.request-composer__attachment img {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+}

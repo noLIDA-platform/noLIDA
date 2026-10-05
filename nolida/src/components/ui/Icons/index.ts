@@ -2,6 +2,7 @@ export {
   Bell as BellIcon,
   Bookmark as BookmarkIcon,
   Check as CheckIcon,
+  Handshake as RequestIcon,
   Heart as HeartIcon,
   Home as HomeIcon,
   LifeBuoy as AlertIcon,

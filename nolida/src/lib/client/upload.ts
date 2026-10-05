@@ -44,7 +44,12 @@ export type UploadKind = "image" | "video";
  * Declared here rather than in ImageUploader so both the uploader and the post
  * composer can use it without one importing the other.
  */
-export type UploadPurposeName = "avatar" | "post" | "business" | "product";
+export type UploadPurposeName =
+  | "avatar"
+  | "post"
+  | "business"
+  | "product"
+  | "request";
 
 /** What one successful upload gives back. Mirrors the server's UploadResult. */
 export interface UploadedMedia {

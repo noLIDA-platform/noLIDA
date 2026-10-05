@@ -1,0 +1,26 @@
+/* RequestOwnerActions — the owner's three ways to end a request. */
+
+.request-owner-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.request-owner-actions__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.request-owner-actions__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-xs);
+}
+
+/* The closed state explains itself rather than leaving an empty row. */
+.request-owner-actions__closed {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

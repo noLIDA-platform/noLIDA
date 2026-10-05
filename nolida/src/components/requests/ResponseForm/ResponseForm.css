@@ -1,0 +1,78 @@
+/* ResponseForm — the offer composer, and its blocked state. */
+
+.response-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  min-width: 0;
+}
+
+.response-form__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.response-form__as {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.response-form__row {
+  display: grid;
+  /* Two fields, equal, collapsing to one column on a narrow screen rather than
+     squeezing two inputs into a phone width. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+@media (max-width: 520px) {
+  .response-form__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.response-form__counter,
+.response-form__hint {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.response-form__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-xs);
+}
+
+/* The "you need an approved business" state. Explained rather than hidden: a
+   missing form with no explanation reads as a bug. */
+.response-form__blocked {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.response-form__blocked-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.response-form__blocked-body {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}

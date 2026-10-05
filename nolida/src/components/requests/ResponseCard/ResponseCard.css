@@ -1,0 +1,140 @@
+/* ResponseCard — one offer on a request. */
+
+.response-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  /* `border-inline-start` rather than a full border: the accepted offer needs to
+     be findable at a glance in a list of six. */
+  border-inline-start: 3px solid transparent;
+  min-width: 0;
+}
+
+.response-card--accepted {
+  border-inline-start-color: var(--color-success);
+}
+
+.response-card--pending {
+  border-inline-start-color: var(--color-border);
+}
+
+.response-card--declined,
+.response-card--withdrawn {
+  opacity: 0.7;
+}
+
+.response-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.response-card__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.response-card__identity {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.response-card__business {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+a.response-card__business:hover {
+  text-decoration: underline;
+}
+
+.response-card__meta {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.response-card__message {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.response-card__numbers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  min-width: 0;
+}
+
+.response-card__price {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.response-card__price--none {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.response-card__availability {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
+}
+
+.response-card__attachments {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+}
+
+.response-card__attachment {
+  display: block;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.response-card__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: var(--text-xs);
+}
+
+.response-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

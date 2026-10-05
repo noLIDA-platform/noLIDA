@@ -1,0 +1,134 @@
+/* Shared by /requests, /requests/new and /requests/[id]. */
+
+.requests-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.requests-page__head {
+  min-width: 0;
+}
+
+.requests-page__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.requests-page__subtitle {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+/* Two tabs, both plain links. */
+.requests-tabs {
+  display: flex;
+  gap: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+
+.requests-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.requests-tabs__link {
+  padding: var(--space-3) 0;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.requests-tabs__link--active {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+/* Two columns on a desktop, one on a phone. A request card is a paragraph plus
+   three facts, so it needs room before it needs density. */
+.requests-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .requests-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.requests-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.requests-filters__select {
+  min-width: 0;
+  font-size: 1rem;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.requests-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.requests-detail__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.requests-detail__section-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.requests-detail__note {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.requests-back {
+  align-self: flex-start;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.requests-back:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}

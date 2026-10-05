@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import {
   Bookmark,
+  ChevronRight,
   Heart,
   Link2,
   MapPin,
@@ -14,6 +15,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar/Avatar";
+import { Badge } from "@/components/ui/Badge/Badge";
 import { Card } from "@/components/ui/Card/Card";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { CommentSection } from "@/components/feed/CommentSection/CommentSection";
@@ -79,6 +81,21 @@ export function PostCard({
   const authorName =
     author.display_name ?? author.full_name ?? author.username ?? "Someone";
   const isOwner = author.id === viewer.id;
+
+  /**
+   * A request advertises itself in the feed as a REQUEST_POST, so the card has
+   * to link onward to the real thing.
+   *
+   * The request id is read out of metadata rather than trusted blindly — the
+   * column is free-form JSONB, so anything could be in it. A non-string is
+   * treated as absent, which leaves an ordinary post rather than a link to
+   * `/requests/undefined`.
+   */
+  const requestId =
+    post.type === "REQUEST_POST" && typeof post.metadata?.requestId === "string"
+      ? post.metadata.requestId
+      : null;
+
   const classes = ["post-card", className ?? ""].filter(Boolean).join(" ");
 
   const toggleLike = useCallback(async (): Promise<void> => {
@@ -156,6 +173,13 @@ export function PostCard({
 
 return (
     <Card as="article" className={classes}>
+      {/* The badge sits at the top of the card, above the author, so a request is
+          recognisable while scrolling before anybody reads the name. */}
+      {requestId ? (
+        <Badge variant="brand" className="post-card__request-badge">
+          Request
+        </Badge>
+      ) : null}
       <header className="post-card__head">
         <Avatar src={author.avatar_url} name={authorName} size="md" />
 
@@ -253,6 +277,16 @@ return (
           </p>
         ) : null}
       </div>
+
+      {/* The feed post is only a doorway — the request itself, with its budget,
+          deadline and offers, lives at /requests/[id]. This is the only thing on
+          the card that says so. */}
+      {requestId ? (
+        <Link href={`/requests/${requestId}`} className="post-card__request-cta">
+          View request
+          <Icon as={ChevronRight} size={16} />
+        </Link>
+      ) : null}
 
       <PostMedia media={post.media} />
 

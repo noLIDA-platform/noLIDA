@@ -15,6 +15,33 @@
   gap: var(--space-3);
 }
 
+/* The request badge sits above the header so a request is recognisable while
+   scrolling, before anybody reaches the name. */
+.post-card__request-badge {
+  align-self: flex-start;
+}
+
+/* The doorway from a feed post to the request it advertises. */
+.post-card__request-cta {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.post-card__request-cta:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 .post-card__identity {
   display: flex;
   flex-direction: column;

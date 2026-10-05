@@ -295,6 +295,9 @@ export const UPLOAD_FOLDERS = {
   post: "nolida/posts",
   business: "nolida/businesses",
   product: "nolida/products",
+  // Request photos are evidence, not promotion: a photo of the boiler that needs
+  // repairing, or the item that needs delivering.
+  request: "nolida/requests",
 } as const;
 
 export type UploadPurpose = keyof typeof UPLOAD_FOLDERS;
