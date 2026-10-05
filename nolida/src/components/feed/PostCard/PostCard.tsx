@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Bookmark,
   ChevronRight,
@@ -95,6 +95,31 @@ export function PostCard({
     post.type === "REQUEST_POST" && typeof post.metadata?.requestId === "string"
       ? post.metadata.requestId
       : null;
+
+  /**
+   * Double-tap to like, after Instagram.
+   *
+   * A timestamp rather than a boolean: a boolean that is already `true` does not
+   * re-trigger a CSS animation, so the second double-tap on a different post
+   * would show nothing. Incrementing forces the overlay to remount and play.
+   *
+   * Already-liked posts deliberately show NO burst. Re-liking is a no-op, and a
+   * heart bursting over a post somebody already loved reads as a glitch rather
+   * than a confirmation.
+   */
+  const [burst, setBurst] = useState(0);
+
+  useEffect(() => {
+    if (burst === 0) return;
+    const timer = window.setTimeout(() => setBurst(0), 700);
+    return () => window.clearTimeout(timer);
+  }, [burst]);
+
+  const handleDoubleTapLike = (): void => {
+    if (liked) return;
+    setBurst((current) => current + 1);
+    void toggleLike();
+  };
 
   const classes = ["post-card", className ?? ""].filter(Boolean).join(" ");
 
@@ -288,7 +313,22 @@ return (
         </Link>
       ) : null}
 
-      <PostMedia media={post.media} />
+      {/* Double-tap anywhere on the media likes the post, and the heart is the
+          feedback. `position: relative` on the wrapper is what anchors it. */}
+      <div className="post-card__media" onDoubleClick={handleDoubleTapLike}>
+        <PostMedia media={post.media} />
+        {burst > 0 ? (
+          <span
+            key={burst}
+            className="post-card__burst"
+            // Decorative: the like count below already changes, and a screen
+            // reader announcing "heart" for a gesture it cannot see is noise.
+            aria-hidden="true"
+          >
+            <Icon as={Heart} size={96} />
+          </span>
+        ) : null}
+      </div>
 
       {actionError ? (
         <p className="post-card__error" role="alert">

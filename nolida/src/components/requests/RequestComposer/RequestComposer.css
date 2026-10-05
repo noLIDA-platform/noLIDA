@@ -18,13 +18,19 @@
   min-width: 0;
 }
 
+/* Upwork's post-a-job form: uppercase small-cap section labels, and a submit
+   that is deliberately taller than every other control on the page. */
 .request-composer__legend {
   padding: 0 var(--space-1);
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  font-weight: 700;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+}
+
+.request-composer__section {
+  border-radius: var(--radius-md);
 }
 
 .request-composer__optional {

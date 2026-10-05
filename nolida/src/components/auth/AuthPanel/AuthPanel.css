@@ -1,18 +1,31 @@
-/* AuthPanel — shared chrome around every auth form. */
+/* AuthPanel — shared chrome around every auth form, after Instagram.
+   One column, 400px, centred. Instagram's auth is restrained: a wordmark, a
+   short form, and nothing competing for attention. */
+
 .auth-panel {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  width: 100%;
+  max-width: 400px;
+  margin-inline: auto;
+  min-width: 0;
 }
 
+/* The wordmark is the loudest thing on the screen, and everything under it is
+   deliberately quiet. */
 .auth-panel__header {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-2);
+  text-align: center;
 }
 
 .auth-panel__title {
-  font-size: var(--text-2xl);
+  /* `var(--text-2xl)` was never defined in tokens.css, so this silently fell
+     back to the inherited size and the title was no larger than the body. */
+  font-size: var(--text-xl);
   font-weight: var(--weight-extrabold);
   line-height: var(--leading-tight);
   letter-spacing: -0.02em;
@@ -44,7 +57,9 @@
   white-space: nowrap;
 }
 
-/* SOCIAL — deliberately inert until Phase 4C. */
+/* SOCIAL — deliberately inert until social sign-in ships. The mark sits LEFT of
+   the label rather than centred, which is what makes these read as "continue
+   with" rather than as another primary action. */
 .auth-panel__social {
   display: flex;
   flex-direction: column;
@@ -55,9 +70,9 @@
   width: 100%;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: var(--space-2);
-  padding: 0.625rem var(--space-4);
+  padding: var(--space-3) var(--space-4);
   font-family: inherit;
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);

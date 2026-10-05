@@ -59,11 +59,18 @@
   outline-offset: 2px;
 }
 
+/* Airbnb's active filter: a solid fill, not a tint. A tinted pill reads as
+   "suggested"; a solid one reads as "this is what you picked". */
 .filter-panel__pill--active {
   border-color: var(--color-primary);
-  background-color: var(--tint-brand-bg);
-  color: var(--color-primary);
-  font-weight: var(--weight-medium);
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: var(--weight-semibold);
+}
+
+.filter-panel__pill--active:hover {
+  background-color: var(--color-primary);
+  color: #ffffff;
 }
 
 .filter-panel__pill--icon {

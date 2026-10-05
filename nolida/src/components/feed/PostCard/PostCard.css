@@ -1,24 +1,106 @@
-/* PostCard — one post in the feed. Bordered surface, no shadow: a feed is a
-   list of equal entries, and shadows would make the page feel like a stack of
-   floating cards rather than a conversation. */
+/* PostCard — one post in the feed, after Instagram.
+   Borderless: a feed is a list of entries in one column, and a border around each
+   one turns it into a stack of separate cards. The only separator is a hairline
+   below, which is what makes two consecutive posts read as a conversation. */
 
-.post-card {
+.ui-card.post-card {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* The media goes edge to edge, so every OTHER row carries its own inset. Done
+   with padding rather than a negative margin on the media, which the overflow
+   rules forbid. */
+.post-card__head,
+.post-card__body,
+.post-card__actions {
+  padding-inline: var(--space-4);
 }
 
 .post-card__head {
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
+  padding-block: var(--space-3) var(--space-2);
+}
+
+.post-card__body {
+  padding-bottom: var(--space-3);
+}
+
+.post-card__actions {
+  padding-block: var(--space-1);
+}
+
+/* Rounded corners belong to the grid tile, not to a photo you are reading. */
+.post-card .post-media,
+.post-card .post-media__item {
+  border-radius: 0;
+}
+
+/* Anchors the double-tap heart. */
+.post-card__media {
+  position: relative;
+  min-width: 0;
+}
+
+/* The burst is `pointer-events: none` on purpose: a heart sitting over the photo
+   must not swallow the second tap of the double-tap it is reacting to. */
+.post-card__burst {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: #ffffff;
+  /* White outline so the heart reads over a pale photo as well as a dark one. */
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.45));
+  animation: post-card-burst 600ms var(--ease-standard) forwards;
+}
+
+@keyframes post-card-burst {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  45% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-card__burst {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The request CTA sits inside the inset, not flush. */
+.post-card__request-cta {
+  margin: 0 var(--space-4) var(--space-3);
 }
 
 /* The request badge sits above the header so a request is recognisable while
    scrolling, before anybody reaches the name. */
 .post-card__request-badge {
   align-self: flex-start;
+  margin: var(--space-3) var(--space-4) 0;
 }
 
 /* The doorway from a feed post to the request it advertises. */
@@ -164,12 +246,13 @@
 }
 
 /* `pre-wrap` keeps the author's line breaks; `anywhere` stops one long URL from
-   pushing the card wider than the screen. */
+   pushing the card wider than the screen. 15px / 1.4 is Instagram's body
+   rhythm — looser than a comment, tighter than a paragraph. */
 .post-card__text {
   margin: 0;
   color: var(--color-text);
-  font-size: var(--text-sm);
-  line-height: var(--leading-normal);
+  font-size: var(--text-base);
+  line-height: 1.4;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -192,20 +275,22 @@
 .post-card__actions {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
+  gap: var(--space-1);
+  /* Hairline between posts, the Instagram separator. */
+  border-top: 0;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
 }
 
 .post-card__action {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-2);
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   background: none;
-  color: var(--color-text-muted);
+  color: var(--color-text);
   font-family: inherit;
   font-size: var(--text-xs);
   cursor: pointer;

@@ -113,6 +113,8 @@
 - Phase 7F: complete (OTP bypass for signup; originally dev-only)
 - Phase 7F.5: complete (OTP bypass hardened — email whitelist plus a
   VERCEL_ENV/NODE_ENV production refusal; see "OTP Bypass" below)
+- Phase 5G: complete (polish pass against docs/UI-PATTERNS.md — auth, feed,
+  profile, search results, requests; see "UI Reference System (Phase 5G)" below)
 - Phase 9: complete (requests and responses — post, respond, accept; see
   "Requests and Responses (Phase 9)" below)
 
@@ -702,3 +704,26 @@
 - `purpose="request"` is a real upload folder (`nolida/requests`) and
   is images-only. Adding it to `UPLOAD_FOLDERS` requires adding it to
   the signature endpoint's allow-list too, or uploads fail.
+
+## UI Reference System (Phase 5G)
+- All user-facing features have a designated reference in
+  docs/UI-PATTERNS.md.
+- Before building or polishing any user-facing feature, check the
+  reference.
+- Follow the reference's UX patterns — adapt to NOlida's brand.
+- NEVER copy code, assets, logos, exact colors, or fonts.
+- Nigerian context wins (WhatsApp voice notes, naira-first amounts).
+- When in doubt, choose the simpler pattern.
+- Every new feature must be added to docs/UI-PATTERNS.md before
+  implementation.
+- A reference is a guide for LAYOUT and INTERACTION, not a licence
+  to restructure a working page. Polish means visual only: a pass that
+  changes a form payload, an API call or a state transition is a
+  rebuild, and a rebuild belongs in its own phase.
+- Reference tokens are never copied literally. Use the tokens this
+  app already defines; a one-off hex from a reference app is a new
+  token wearing a disguise.
+- Where a reference conflicts with a rule in this file (a negative
+  margin for full-bleed media, for example), the rule in this file
+  wins. The reference describes how it looks, not how this codebase
+  is built.

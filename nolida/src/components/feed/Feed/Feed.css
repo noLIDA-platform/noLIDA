@@ -1,15 +1,23 @@
-/* Feed — the list, plus the composer above it on `/home`. */
+/* Feed — the list, plus the composer above it on `/home`.
+   470px is Instagram's column. A wider feed makes a single photo small in the
+   middle of a desktop window, which is worse than a phone-shaped column. */
 
 .feed {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  width: 100%;
+  max-width: 470px;
+  margin-inline: auto;
+  min-width: 0;
 }
 
 .feed__list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  /* 8px between posts. The divider lives on the card itself, so the gap is what
+     keeps two posts from reading as one. */
+  gap: var(--space-2);
   list-style: none;
   margin: 0;
   padding: 0;

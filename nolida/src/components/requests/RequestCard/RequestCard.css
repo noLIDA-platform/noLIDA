@@ -1,4 +1,8 @@
-/* RequestCard — one request, as a grid tile or the detail page. */
+/* RequestCard — an Upwork job card.
+   The border, radius and padding come from the `Card` primitive this renders
+   inside, so they are NOT repeated here; doubling them gives a 2px edge and a
+   double inset. What is added is the listing feel: a hairline of colour on an
+   open request, and the shape of the title. */
 
 .request-card {
   display: flex;
@@ -7,6 +11,12 @@
   /* Load-bearing: this is a grid/flex child, and without it a long title widens
      every ancestor up to the document. */
   min-width: 0;
+}
+
+/* An open request gets a green hairline so a scrolling list of mostly-finished
+   requests still has something alive in it. */
+.ui-card.request-card--open {
+  border-color: var(--color-success);
 }
 
 /* A settled request recedes without becoming unreadable. */
@@ -54,14 +64,14 @@
 .request-card__title {
   margin: 0;
   color: var(--color-text);
-  font-size: var(--text-base);
-  font-weight: 700;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
   line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
 .request-card--compact .request-card__title {
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
 }
 
 .request-card__description {

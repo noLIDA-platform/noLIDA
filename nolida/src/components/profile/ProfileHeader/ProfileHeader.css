@@ -21,6 +21,21 @@
   flex: 0 0 auto;
 }
 
+/* Instagram sizes the profile photo by viewport, not by a fixed token: small on
+   a phone, generous on a desktop. Done here rather than by adding an avatar
+   size, because `xl` is used elsewhere and must not change with it. */
+.profile-header__avatar .ui-avatar {
+  width: 96px;
+  height: 96px;
+}
+
+@media (min-width: 768px) {
+  .profile-header__avatar .ui-avatar {
+    width: 150px;
+    height: 150px;
+  }
+}
+
 .profile-header__stats {
   display: flex;
   flex: 1 1 auto;
@@ -45,7 +60,7 @@
   margin: 0;
   color: var(--color-text);
   font-size: var(--text-lg);
-  font-weight: 700;
+  font-weight: var(--weight-bold);
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
 }
@@ -53,6 +68,20 @@
 .profile-header__stat-label {
   color: var(--color-text-muted);
   font-size: var(--text-xs);
+}
+
+/* Tighter on a desktop, where three stats have room to breathe; the phone keeps
+   the loose spread so the numbers do not crowd each other. */
+@media (min-width: 768px) {
+  .profile-header__stats {
+    justify-content: flex-start;
+    gap: var(--space-6);
+  }
+
+  .profile-header__stat {
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
 .profile-header__identity {
@@ -78,7 +107,7 @@
   margin: 0;
   color: var(--color-text);
   font-size: var(--text-sm);
-  line-height: 1.5;
+  line-height: 1.4;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }

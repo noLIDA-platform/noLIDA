@@ -11,16 +11,22 @@
   min-width: 0;
 }
 
+/* Upwork's submit-a-proposal: the section label is a small cap, and the message
+   is the only field that looks like the main event. */
 .response-form__title {
   margin: 0;
-  color: var(--color-text);
-  font-size: var(--text-base);
-  font-weight: 700;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .response-form__as {
-  color: var(--color-text-muted);
-  font-weight: 500;
+  color: var(--color-text);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: var(--weight-regular);
 }
 
 .response-form__row {

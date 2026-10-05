@@ -1,4 +1,6 @@
-/* UserResultCard — a person, with their follow button. */
+/* UserResultCard — a person, with their follow button. Airbnb result shape:
+   a card that lifts slightly, with the identity on the left and the single
+   action on the far right. */
 
 .user-result {
   display: flex;
@@ -6,8 +8,15 @@
   gap: var(--space-3);
   padding: var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background-color: var(--color-bg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.user-result:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
 }
 
 .user-result__link {
