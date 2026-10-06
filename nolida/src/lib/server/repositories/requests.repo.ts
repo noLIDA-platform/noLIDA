@@ -192,7 +192,17 @@ export async function listOpen(input: {
 }): Promise<RequestPage> {
   const decoded = decodeCursor(input.cursor);
 
-  const filters = [`r.status IN ('OPEN', 'IN_PROGRESS')`];
+  // Every bound parameter MUST appear in the SQL, explicitly cast: PostgreSQL
+  // cannot infer the type of a parameter the query never references (42P18),
+  // nor of one that only appears in an `IS NULL` test (42P08). The three
+  // optional filters are therefore always present and short-circuit when null.
+  const filters = [
+    `r.status IN ('OPEN', 'IN_PROGRESS')`,
+    `($1::uuid IS NULL OR r.category_id = $1)`,
+    `($2::text IS NULL OR r.location ILIKE '%' || $2 || '%')`,
+    `($3::text IS NULL OR r.urgency::text = $3)`,
+    `($4::timestamptz IS NULL OR (r.created_at, r.id) < ($4::timestamptz, $5::uuid))`,
+  ];
   const params: unknown[] = [
     input.categoryId ?? null,
     input.location ?? null,
@@ -200,13 +210,6 @@ export async function listOpen(input: {
     decoded?.createdAt ?? null,
     decoded?.id ?? null,
   ];
-
-  if (input.categoryId) filters.push(`r.category_id = $1`);
-  if (input.location) filters.push(`r.location ILIKE '%' || $2 || '%'`);
-  if (input.urgency) filters.push(`r.urgency = $3`);
-  filters.push(
-    `($4::timestamptz IS NULL OR (r.created_at, r.id) < ($4::timestamptz, $5::uuid))`
-  );
 
   const text = `${SELECT_REQUEST}
     WHERE ${filters.join(" AND ")}
