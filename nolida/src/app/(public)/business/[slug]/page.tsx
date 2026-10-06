@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BadgeCheck, MapPin, Package, Star, Wrench } from "lucide-react";
 import { Icon } from "@/components/ui/Icon/Icon";
-import { readBusinessPhotos } from "@/components/business/BusinessSubmissionForm";
+import { readBusinessPhotos } from "@/lib/business/photos";
 import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
 import {
   getBySlug,

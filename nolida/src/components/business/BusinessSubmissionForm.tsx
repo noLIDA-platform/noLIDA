@@ -4,71 +4,27 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { X } from "lucide-react";
 import { ImageUploader } from "@/components/ui/ImageUploader/ImageUploader";
+import {
+  BUSINESS_GALLERY_MAX,
+  readBusinessPhotos,
+  type BusinessPhotos,
+} from "@/lib/business/photos";
+
+/**
+ * Re-exported so existing importers keep working.
+ *
+ * These live in `@/lib/business/photos` because `/business/[slug]` — a Server
+ * Component — needs the same reader. Exporting them from here too costs nothing
+ * and keeps every existing `from "@/components/business/BusinessSubmissionForm"`
+ * import valid. See that file for the full reason.
+ */
+export {
+  BUSINESS_GALLERY_MAX,
+  readBusinessPhotos,
+  type BusinessPhotos,
+};
 
 export type BusinessFormMode = "submit" | "edit";
-
-/**
- * A business's photo set: one cover, one logo, and a gallery strip.
- *
- * The `photos` COLUMN has always defaulted to `'[]'` and the service typed it
- * `unknown[]`. This shape replaces the bare array, so `readBusinessPhotos`
- * accepts BOTH: an old row really does hold `[]`, and an admin or script may
- * still write the legacy form. Both are read, and everything is written in the
- * new shape.
- */
-export interface BusinessPhotos {
-  cover: string | null;
-  logo: string | null;
-  gallery: string[];
-}
-
-/** How many gallery images one business may carry. */
-export const BUSINESS_GALLERY_MAX = 8;
-
-/**
- * Normalise whatever is in `businesses.photos` into the shape the UI renders.
- *
- * Tolerant by necessity: the column is JSONB with no CHECK, so it may be `null`,
- * `[]`, an object from this phase, or an array of bare URL strings from before.
- * Anything unrecognised becomes an empty photo set rather than a render crash.
- */
-export function readBusinessPhotos(raw: unknown): BusinessPhotos {
-  const empty: BusinessPhotos = { cover: null, logo: null, gallery: [] };
-  if (typeof raw !== "object" || raw === null) return empty;
-
-  // Legacy shape: a bare array of URL strings, or of {url} objects.
-  if (Array.isArray(raw)) {
-    const gallery = raw
-      .map((entry) =>
-        typeof entry === "string"
-          ? entry
-          : typeof entry === "object" && entry !== null &&
-              typeof (entry as { url?: unknown }).url === "string"
-            ? (entry as { url: string }).url
-            : "",
-      )
-      .filter((url) => url.startsWith("https://"))
-      .slice(0, BUSINESS_GALLERY_MAX);
-    return { cover: null, logo: null, gallery };
-  }
-
-  const record = raw as Record<string, unknown>;
-  const str = (value: unknown): string | null =>
-    typeof value === "string" && value.startsWith("https://") ? value : null;
-
-  const gallery = Array.isArray(record.gallery)
-    ? record.gallery
-        .filter((entry): entry is string => typeof entry === "string")
-        .filter((url) => url.startsWith("https://"))
-        .slice(0, BUSINESS_GALLERY_MAX)
-    : [];
-
-  return {
-    cover: str(record.cover),
-    logo: str(record.logo),
-    gallery,
-  };
-}
 
 export interface BusinessSubmissionFormProps {
   /**

@@ -48,6 +48,11 @@ export const MOBILE_DRAWER_SECTIONS: NavItem[][] = [
     { label: "Bookings", href: "/bookings", icon: "CheckIcon" },
     { label: "Wallet", href: "/wallet", icon: "WalletIcon" },
     { label: "Favorites", href: "/favorites", icon: "BookmarkIcon" },
+    // Requests sits between Favorites and Messages on purpose. On the desktop
+    // sidebar it is a primary item, and it is the marketplace's core loop — a
+    // signed-in phone user with no desktop sidebar had no way to reach it at all,
+    // which made the feature invisible on the platform most of the audience uses.
+    { label: "Requests", href: "/requests", icon: "RequestIcon" },
     { label: "Messages", href: "/messages", icon: "MessageIcon" },
     { label: "Notifications", href: "/notifications", icon: "BellIcon" },
   ],

@@ -195,7 +195,7 @@ export function ProfileHeader({
 
       {business ? (
         <Link
-          href={`/business/${business.slug}`}
+          href={isOwnProfile ? "/my-business" : `/business/${business.slug}`}
           className="profile-header__business"
         >
           <span className="profile-header__business-icon">
