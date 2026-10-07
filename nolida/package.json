@@ -17,6 +17,7 @@
     "test:search": "tsx --env-file-if-exists=.env.local scripts/test-search.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.11.0",
     "lucide-react": "^1.48.0",

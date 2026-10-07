@@ -6,6 +6,7 @@ import { ProfileAbout } from "@/components/profile/ProfileAbout/ProfileAbout";
 import { ProfileHeader } from "@/components/profile/ProfileHeader/ProfileHeader";
 import { ProfileTabs } from "@/components/profile/ProfileTabs/ProfileTabs";
 import { PostsGrid } from "@/components/profile/PostsGrid/PostsGrid";
+import { StartConversationButton } from "@/components/messaging/StartConversationButton/StartConversationButton";
 import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
 import { getProfileByUsername } from "@/lib/server/services/profile.service";
 import { getUserPosts } from "@/lib/server/services/feed.service";

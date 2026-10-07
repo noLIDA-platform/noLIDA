@@ -38,11 +38,12 @@ const PURPOSE_VALUES = [
   "business",
   "product",
   "request",
+  "message",
 ] as const;
 
 const signatureRequestSchema = z.object({
   purpose: z.enum(PURPOSE_VALUES),
-  resourceType: z.enum(["image", "video"]),
+  resourceType: z.enum(["image", "video", "raw"]),
 });
 
 
@@ -89,7 +90,14 @@ export async function POST(request: NextRequest) {
       purpose === "request") &&
     resourceType !== "image"
   ) {
-    return fail("VALIDATION_ERROR", "Only posts may contain videos.");
+    return fail("VALIDATION_ERROR", "Only posts and messages may contain videos.");
+  }
+
+  // Raw is the document endpoint. Only message attachments use it — every
+  // other purpose is a photo or a clip, and handing raw to them would widen
+  // each of those surfaces into an arbitrary-file upload for no reason.
+  if (resourceType === "raw" && purpose !== "message") {
+    return fail("VALIDATION_ERROR", "That file type is not allowed here.");
   }
 
   let signed: SignedUpload;

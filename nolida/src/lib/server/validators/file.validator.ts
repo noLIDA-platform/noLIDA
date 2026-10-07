@@ -82,8 +82,19 @@ export function maxBytesFor(kind: MediaKind): number {
  */
 export const ALLOWED_IMAGE_EXTENSIONS = "jpg,jpeg,png,webp,gif";
 export const ALLOWED_VIDEO_EXTENSIONS = "mp4,webm,mov,m4v";
+/**
+ * Message documents (Phase 10). These travel as Cloudinary `raw` assets —
+ * the raw endpoint stores any file, so the signed allow-list is the ONLY
+ * thing standing between a message attachment and an arbitrary upload. Keep
+ * it small; a new format is a deliberate decision, not an accident.
+ */
+export const ALLOWED_RAW_EXTENSIONS = "pdf,doc,docx,txt,csv,xls,xlsx,zip";
 
-export function allowedExtensionsFor(kind: MediaKind): string {
+/** `raw` exists only for message documents — see ALLOWED_RAW_EXTENSIONS. */
+export type UploadResourceKind = MediaKind | "raw";
+
+export function allowedExtensionsFor(kind: UploadResourceKind): string {
+  if (kind === "raw") return ALLOWED_RAW_EXTENSIONS;
   return kind === "image" ? ALLOWED_IMAGE_EXTENSIONS : ALLOWED_VIDEO_EXTENSIONS;
 }
 
@@ -298,6 +309,8 @@ export const UPLOAD_FOLDERS = {
   // Request photos are evidence, not promotion: a photo of the boiler that needs
   // repairing, or the item that needs delivering.
   request: "nolida/requests",
+  // Message photos, voice notes (stored as video) and documents (raw).
+  message: "nolida/messages",
 } as const;
 
 export type UploadPurpose = keyof typeof UPLOAD_FOLDERS;

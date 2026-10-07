@@ -1,0 +1,314 @@
+/* Message bubble — one row of a thread. Mine sits right on the brand tint,
+   theirs left on the surface; actions float on hover/focus. */
+
+.msg-bubble {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: min(75%, 480px);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-bg);
+  min-width: 0;
+}
+
+.msg-bubble--mine {
+  align-self: flex-end;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.msg-bubble--theirs {
+  align-self: flex-start;
+}
+
+.msg-bubble__body {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  /* A long unbroken URL must wrap, not push the bubble past the column. */
+  overflow-wrap: anywhere;
+}
+
+.msg-bubble__forwarded {
+  font-size: var(--text-xs);
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.msg-bubble__reply {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-left: 3px solid currentColor;
+  border-radius: var(--radius-sm);
+  background-color: rgba(0, 0, 0, 0.06);
+  font-size: var(--text-xs);
+  min-width: 0;
+}
+
+.msg-bubble--mine .msg-bubble__reply {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.msg-bubble__reply-name {
+  font-weight: var(--weight-semibold);
+  flex-shrink: 0;
+}
+
+.msg-bubble__reply-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  opacity: 0.85;
+}
+
+.msg-bubble__deleted {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--text-xs);
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.msg-bubble--mine .msg-bubble__deleted {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.msg-bubble__meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  opacity: 0.75;
+}
+
+.msg-bubble__read {
+  color: var(--color-accent-cyan);
+  font-size: var(--text-xs);
+  letter-spacing: -0.1em;
+}
+
+.msg-bubble__attachments {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.msg-bubble__image {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.msg-bubble__file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  min-width: 200px;
+  max-width: 300px;
+  border-radius: var(--radius-sm);
+  background-color: rgba(0, 0, 0, 0.06);
+  color: inherit;
+  text-decoration: none;
+}
+
+.msg-bubble--mine .msg-bubble__file {
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.msg-bubble__file-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.msg-bubble__file-name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-bubble__file-size {
+  font-size: var(--text-xs);
+  opacity: 0.75;
+}
+
+/* Reactions sit as chips on the bubble's bottom edge. */
+
+.msg-bubble__reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.msg-bubble__reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+
+.msg-bubble--mine .msg-bubble__reaction {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: transparent;
+}
+
+.msg-bubble__reaction--mine {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+/* Action buttons: present but quiet, revealed on hover/focus. They stay in
+   the layout (not display:none) so keyboards can always reach them. */
+
+.msg-bubble__actions {
+  position: absolute;
+  top: 2px;
+  right: -34px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.msg-bubble--mine .msg-bubble__actions {
+  right: auto;
+  left: -34px;
+}
+
+.msg-bubble:hover .msg-bubble__actions,
+.msg-bubble__actions:focus-within {
+  opacity: 1;
+}
+
+.msg-bubble__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background-color: var(--color-bg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.msg-bubble__action:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Reaction picker and menu: absolutely positioned, hidden with a class (not
+   v-if) so the focus order does not jump when they open. */
+
+.msg-bubble__picker,
+.msg-bubble__menu {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.12));
+}
+
+.msg-bubble__picker {
+  top: 0;
+  right: 0;
+  gap: 2px;
+}
+
+.msg-bubble--mine .msg-bubble__picker {
+  right: auto;
+  left: 0;
+}
+
+.msg-bubble__picker button {
+  border: 0;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.msg-bubble__picker button:hover {
+  background-color: var(--color-bg-subtle);
+  transform: scale(1.15);
+}
+
+.msg-bubble__menu {
+  top: 0;
+  right: 0;
+  flex-direction: column;
+  min-width: 180px;
+  border-radius: var(--radius-md);
+  padding: var(--space-1);
+}
+
+.msg-bubble--mine .msg-bubble__menu {
+  right: auto;
+  left: 0;
+}
+
+.msg-bubble__menu button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.msg-bubble__menu button:hover {
+  background-color: var(--color-bg-subtle);
+}
+
+.msg-bubble__menu-danger {
+  color: var(--color-error) !important;
+}
+
+.msg-bubble__picker--hidden,
+.msg-bubble__menu--hidden {
+  display: none;
+}
+
+/* Touch devices never hover: reveal the affordances so a phone can reach
+   them. */
+@media (hover: none) {
+  .msg-bubble__actions {
+    opacity: 1;
+  }
+}

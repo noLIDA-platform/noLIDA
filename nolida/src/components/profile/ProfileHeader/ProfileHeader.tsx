@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { FollowButton } from "@/components/profile/FollowButton/FollowButton";
 import { ShareProfileButton } from "@/components/profile/ShareProfileButton/ShareProfileButton";
+import { StartConversationButton } from "@/components/messaging/StartConversationButton/StartConversationButton";
 import type {
   ProfileBusinessCard,
   ProfileCard,
@@ -158,24 +159,11 @@ export function ProfileHeader({
               initialFollowing={isFollowing}
               size="md"
             />
-            {/* A tooltip on a DISABLED button never appears: the element emits no pointer
-                events, so there is nothing to hover. The title therefore lives on
-                a wrapper span, which is the only thing that can receive the
-                pointer. */}
-            <span
-              className="profile-header__soon"
-              title="Messaging is coming soon"
-            >
-              <Button
-                size="md"
-                variant="secondary"
-                disabled
-                ariaLabel="Message this person (coming soon)"
-              >
-                <Icon as={MessageCircle} size={16} />
-                <span>Message</span>
-              </Button>
-            </span>
+            <StartConversationButton
+              otherUserId={profile.id}
+              size="md"
+              ariaLabel="Message this person"
+            />
             <span
               className="profile-header__soon"
               title="Reporting and blocking are coming soon"

@@ -723,7 +723,32 @@
 - Reference tokens are never copied literally. Use the tokens this
   app already defines; a one-off hex from a reference app is a new
   token wearing a disguise.
-- Where a reference conflicts with a rule in this file (a negative
+ - Where a reference conflicts with a rule in this file (a negative
   margin for full-bleed media, for example), the rule in this file
   wins. The reference describes how it looks, not how this codebase
   is built.
+
+## Messaging (Phase 10)
+- Conversations are DIRECT (1:1) for now. Group chats are future.
+- Message kinds: TEXT, VOICE, IMAGE, FILE, SHARED_ITEM, SYSTEM.
+- Voice notes store { url, duration, waveform } as JSONB.
+- Attachments store an array of { url, type, size, name }.
+- Shared items store { type, id, title, subtitle, imageUrl }.
+- Reactions: ❤️ 😂 😮 😢 👍 🙏 (fixed set for v1).
+- Reply: reply_to_message_id points to the original message.
+- Forward: is_forwarded + forwarded_from_message_id.
+- Edit window: 15 minutes. Delete is a soft delete.
+- Read receipts: message_receipts tracks delivered_at and read_at.
+- Typing indicators use the typing_status table. Entries older than
+  5 seconds are considered stale.
+- Real-time: Supabase Realtime if env vars are set. Fallback to 5s
+  polling otherwise.
+- Voice notes use MediaRecorder + getUserMedia. Uploaded to
+  Cloudinary via the existing /api/upload/signature flow.
+- Block/report actions inside the chat menu write to the reports
+  table (Phase 17 will surface them in the admin panel).
+- Calls are NOT in this phase. Deferred to Phase 10.5.
+- UI reference: WhatsApp (primary), iMessage (secondary).
+
+## Phase status
+- Phase 10: complete

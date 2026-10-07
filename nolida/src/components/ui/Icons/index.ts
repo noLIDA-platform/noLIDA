@@ -17,3 +17,29 @@ export {
   User as UserIcon,
   Wallet as WalletIcon,
 } from "lucide-react";
+
+// Messaging (Phase 10)
+export {
+  Archive as ArchiveIcon,
+  ArrowLeft as ArrowLeftIcon,
+  Ban as BanIcon,
+  BellOff as BellOffIcon,
+  CheckCheck as CheckCheckIcon,
+  ChevronLeft as ChevronLeftIcon,
+  Copy as CopyIcon,
+  CornerUpLeft as CornerUpLeftIcon,
+  EllipsisVertical as MoreVerticalIcon,
+  FileText as FileTextIcon,
+  Flag as FlagIcon,
+  Image as(ImageIcon),
+  Mic as MicIcon,
+  Pause as PauseIcon,
+  Pin as PinIcon,
+  Play as PlayIcon,
+  Plus as PlusIcon,
+  Send as SendIcon,
+  Smile as SmileIcon,
+  Square as StopIcon,
+  Trash2 as Trash2Icon,
+  X as XIcon,
+} from "lucide-react";

@@ -48,7 +48,12 @@ export interface SignUploadOptions {
    * the provider account.
    */
   folder: string;
-  resourceType: "image" | "video";
+  /**
+   * Cloudinary resource type. "raw" is for message documents (Phase 10): a
+   * PDF or spreadsheet stored through the raw endpoint, formats enforced by
+   * the signed allow-list exactly as they are for images and video.
+   */
+  resourceType: "image" | "video" | "raw";
   /** Comma-separated extension allow-list, enforced by the provider. */
   allowedFormats: string;
 }

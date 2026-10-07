@@ -1,15 +1,27 @@
 import type { Metadata } from "next";
-import { MessageCircle } from "lucide-react";
-import { PagePlaceholder } from "@/components/app/PagePlaceholder/PagePlaceholder";
+import { getCurrentSessionUser } from "@/lib/server/auth/current-user";
+import * as messagingService from "@/lib/server/services/messaging.service";
+import { ConversationList } from "@/components/messaging/ConversationList/ConversationList";
+import { CONVERSATION_PAGE_SIZE } from "@/lib/messaging/constants";
 
 export const metadata: Metadata = { title: "Messages" };
 
-export default function MessagesPage() {
+export default async function MessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const session = await getCurrentSessionUser();
+  const q = (await searchParams).q;
+
+  const page = await messagingService.listConversations({
+    userId: session.user.id,
+    limit: CONVERSATION_PAGE_SIZE,
+  });
+
   return (
-    <PagePlaceholder
-      icon={MessageCircle}
-      title="Messages"
-      description="Conversations with the people you book and buy from. Threads need a messaging backend, delivery receipts and unread counts before they are worth showing, so nothing is faked here."
-    />
+    <div className="messages-page">
+      <ConversationList conversations={page.items} />
+    </div>
   );
 }

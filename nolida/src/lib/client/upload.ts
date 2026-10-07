@@ -49,7 +49,8 @@ export type UploadPurposeName =
   | "post"
   | "business"
   | "product"
-  | "request";
+  | "request"
+  | "message";
 
 /** What one successful upload gives back. Mirrors the server's UploadResult. */
 export interface UploadedMedia {
@@ -260,7 +261,13 @@ export interface DirectUploadProgress {
 
 export interface DirectUploadOptions {
   purpose: UploadPurposeName;
-  resourceType: UploadKind;
+  /**
+   * "raw" exists for message documents (Phase 10) — a PDF stored through
+   * Cloudinary's raw endpoint. Voice notes ride "video": the SDK and the
+   * provider both accept audio under the video resource type, and that keeps
+   * one signature chain for every voice format MediaRecorder emits.
+   */
+  resourceType: UploadKind | "raw";
   onProgress?: (progress: DirectUploadProgress) => void;
   /** Cancels the in-flight upload. The promise rejects with a cancel message. */
   signal?: AbortSignal;
@@ -426,7 +433,11 @@ export async function uploadDirect(
           height: data.height ?? null,
           format: data.format ?? "",
           bytes: data.bytes ?? 0,
-          resourceType: options.resourceType,
+          // `raw` is a request-time endpoint (message documents), not a result
+          // kind — nothing downstream reads this field, so report it as video
+          // rather than widening the shared `UploadedMedia` contract.
+          resourceType:
+            options.resourceType === "raw" ? "video" : options.resourceType,
           duration: data.duration ?? null,
         });
       });

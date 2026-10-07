@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/ui/EmptyState/EmptyState";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { ServiceCard } from "@/components/business/ServiceCard/ServiceCard";
 import { ProductCard } from "@/components/business/ProductCard/ProductCard";
+import { StartConversationButton } from "@/components/messaging/StartConversationButton/StartConversationButton";
 import type { BusinessProduct, BusinessService } from "@/types/catalog";
 import type { PublicBusiness } from "@/types/public-business";
 
@@ -265,17 +266,11 @@ export function BusinessProfileClient({
           </Button>
         ) : (
           <>
-            <span className="biz-actions__pending" title="Coming soon">
-              <Button
-                type="button"
-                disabled
-                fullWidth
-                ariaLabel="Message this business — coming soon"
-              >
-                <Icon as={MessageCircle} size={16} />
-                Message
-              </Button>
-            </span>
+            <StartConversationButton
+              otherUserId={business.owner.id}
+              fullWidth
+              ariaLabel={`Message ${business.name}`}
+            />
             <span className="biz-actions__pending" title="Coming soon">
               <Button
                 type="button"
