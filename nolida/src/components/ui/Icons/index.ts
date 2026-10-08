@@ -31,7 +31,7 @@ export {
   EllipsisVertical as MoreVerticalIcon,
   FileText as FileTextIcon,
   Flag as FlagIcon,
-  Image as(ImageIcon),
+  Image as ImageIcon,
   Mic as MicIcon,
   Pause as PauseIcon,
   Pin as PinIcon,

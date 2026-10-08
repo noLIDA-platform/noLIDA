@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ChatHeader } from "@/components/messaging/ChatHeader/ChatHeader";
 import { MessageBubble } from "@/components/messaging/MessageBubble/MessageBubble";
-import { MessageComposer, type ComposerReplyContext } from "@/components/messaging/MessageComposer/MessageComposer";
+import { MessageComposer, type ComposerReplyContext, type AttachmentInput } from "@/components/messaging/MessageComposer/MessageComposer";
 import { TypingIndicator } from "@/components/messaging/TypingIndicator/TypingIndicator";
+import { apiFetch } from "@/lib/client/api";
+import type { ConversationView, MessageView } from "@/lib/messaging/types";
 import {
   MESSAGE_PAGE_SIZE,
   POLL_INTERVAL_MS,
@@ -109,11 +111,14 @@ export function ChatWindow({
     async function tick() {
       if (cancelled) return;
       try {
-        const result = await apiFetch<{ typing: boolean }>(
+        const result = await apiFetch<{ conversation: ConversationView }>(
           `/api/conversations/${conversation.id}`
         );
         if (!result.ok) return;
-        setConversation((prev) => ({ ...prev, typing: result.data.typing }));
+        setConversation((prev) => ({
+          ...prev,
+          typing: result.data.conversation.typing,
+        }));
       } catch {
         // ignore
       }
@@ -151,7 +156,7 @@ export function ChatWindow({
   const handleSend = useCallback(
     async (payload: {
       body: string;
-      attachments?: { url: string; kind: string; name: string; size: number }[];
+      attachments?: AttachmentInput[];
       voiceNote?: { url: string; duration: number };
       replyToId?: string;
     }) => {
@@ -308,6 +313,24 @@ export function ChatWindow({
     }
   };
 
+  const handleEdit = (message: MessageView) => {
+    const next = prompt("Edit message:", message.body ?? "");
+    if (next === null) return;
+    const trimmed = next.trim();
+    if (!trimmed || trimmed === message.body) return;
+    void (async () => {
+      const result = await apiFetch<{ message: MessageView }>(
+        `/api/messages/${message.id}`,
+        { method: "PATCH", body: { body: trimmed } }
+      );
+      if (result.ok) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === message.id ? result.data.message : m))
+        );
+      }
+    })();
+  };
+
   const handleReport = (message: MessageView) => {
     const reason = prompt(
       "Reason (SPAM, HARASSMENT, SCAM, INAPPROPRIATE, OTHER):"
@@ -356,24 +379,17 @@ export function ChatWindow({
             </div>
             {group.items.map((message, idx) => {
               const prev = group.items[idx - 1];
-              const showTail =
-                !prev ||
-                prev.sender.id !== message.sender.id ||
-                new Date(message.createdAt).getTime() - new Date(prev.createdAt).getTime() > 60_000;
               const isMine = message.sender.id === viewerId;
-              const lastInGroup =
-                idx === group.items.length - 1 ||
-                group.items[idx + 1]?.sender.id !== message.sender.id;
 
               return (
                 <MessageBubble
                   key={message.id}
                   message={message}
                   isMine={isMine}
-                  showTail={showTail}
                   onReply={handleReply}
                   onReact={handleReact}
                   onForward={handleForward}
+                  onEdit={handleEdit}
                   onDelete={handleDelete}
                   onReport={handleReport}
                 />
@@ -392,9 +408,9 @@ export function ChatWindow({
           conversationId={conversation.id}
           viewerId={viewerId}
           replyTo={replyTo}
+          replyToId={replyTo?.id}
           onCancelReply={() => setReplyTo(null)}
           onSend={handleSend}
-          sending={sending}
         />
       </div>
     </div>

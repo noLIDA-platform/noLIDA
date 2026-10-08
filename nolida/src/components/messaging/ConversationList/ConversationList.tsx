@@ -23,8 +23,9 @@ import "./ConversationList.css";
 export interface ConversationListProps {
   conversations: ConversationView[];
   activeId?: string;
+  userId?: string;
   onSelect?: (id: string) => void;
-  onMenu?: (id: string, action: string) => void;
+  onMenu?: (id: string, action: "pin" | "mute" | "archive" | "delete", current: boolean) => void;
 }
 
 function formatTime(iso: string): string {
@@ -54,16 +55,15 @@ type MenuAction = "pin" | "mute" | "archive" | "delete";
 
 function MenuIcon({ action }: { action: MenuAction }) {
   const size = 14;
-  switch (action) {
-    case "pin":
-      return <Icon as={PinIcon} size={size} />;
-    case "mute":
-      return <Icon as={BellOffIcon} size={size} />;
-    case "archive":
-      return <Icon as={ArchiveIcon} size={size} />;
-    case "delete":
-      return <Icon as={Trash2Icon} size={size} />;
-  }
+  const icon =
+    action === "pin"
+      ? PinIcon
+      : action === "mute"
+        ? BellOffIcon
+        : action === "archive"
+          ? ArchiveIcon
+          : Trash2Icon;
+  return <Icon as={icon} size={size} />;
 }
 
 export function ConversationList({
@@ -184,7 +184,7 @@ export function ConversationList({
                   onClick={() => handleSelect(conversation.id)}
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    if (onMenu) onMenu(conversation.id);
+                    setMenuOpenId(conversation.id);
                   }}
                 >
                   <div className="conv-list__avatar">
@@ -243,7 +243,7 @@ export function ConversationList({
                         role="menuitem"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onMenu?.(conversation.id, "pin");
+                          onMenu?.(conversation.id, "pin", conversation.pinned);
                           setMenuOpenId(null);
                         }}
                       >
@@ -255,7 +255,7 @@ export function ConversationList({
                         role="menuitem"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onMenu?.(conversation.id, "mute");
+                          onMenu?.(conversation.id, "mute", conversation.muted);
                           setMenuOpenId(null);
                         }}
                       >
@@ -267,7 +267,7 @@ export function ConversationList({
                         role="menuitem"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onMenu?.(conversation.id, "archive");
+                          onMenu?.(conversation.id, "archive", conversation.archived);
                           setMenuOpenId(null);
                         }}
                       >
@@ -280,7 +280,7 @@ export function ConversationList({
                         className="conv-list__menu-item--danger"
                         onClick={(e) => {
                           e.stopPropagation();
-                          onMenu?.(conversation.id, "delete");
+                          onMenu?.(conversation.id, "delete", false);
                           setMenuOpenId(null);
                         }}
                       >
