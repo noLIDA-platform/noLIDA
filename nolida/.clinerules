@@ -45,7 +45,32 @@
 
 ## Money rules (never break)
 - All balance mutations inside a Postgres transaction with row locks
+
+## Preventing Broken Imports
+
+- Before starting ANY new work, read `docs/CODEBASE-REFERENCE.md` first.
+- Every import used in the codebase must be listed in that document. If an import is not listed, it does not exist — do not use it.
+- This file is the single source of truth for import paths, package names, service functions, repository functions, and component prop types.
+- Always copy the closest working page as a template for new pages and components.
+- After any edit, run `npm run build` to catch import errors before committing.
+
+---
+
+## Workflow
 - Every financial POST/PUT/PATCH requires Idempotency-Key header
+
+
+## Preventing Broken Imports
+
+- Before starting ANY new work, read `docs/CODEBASE-REFERENCE.md` first.
+- Every import used in the codebase must be listed in that document. If an import is not listed, it does not exist — do not use it.
+- This file is the single source of truth for import paths, package names, service functions, repository functions, and component prop types.
+- Always copy the closest working page as a template for new pages and components.
+- After any edit, run `npm run build` to catch import errors before committing.
+
+---
+
+## Workflow
 - No users.wallet_balance column
 - Personal wallet and business earnings in separate tables
 - Never trust client values for price, fees, discount, balance, or payment status
@@ -72,51 +97,6 @@
 - Rate limiting is in-memory for now — must move to Redis before launch.
 - Auth service owns all logic; repositories own only SQL.
 - Never reveal whether an email/phone exists in password-reset flows.
-
-## Phase status
-- Phase 0: complete (scaffold, env, health route)
-- Phase 1: complete (UI primitives, design tokens, `/design` showcase)
-- Phase 2: complete (brand tokens, generated brand assets, logo, marketing site)
-- Phase 3: complete (database + auth backend — migrations, repositories, services, routes)
-- Phase 4: complete (auth screens wired to the API; HTTP end-to-end green — see `docs/PHASE-4.md` and `docs/AUTH-UI.md`)
-- Phase 4B: complete (auth screens, layout and orientation — see `docs/PHASE-4B.md`)
-- Phase 4C: complete (noise-inspired mobile welcome on `/` — see `Home Page — Mobile Welcome` below)
-- Phase 4D: complete (marketing `/explore` page and mobile welcome collage — see `Explore Page (Phase 4D)` and `Mobile Welcome Collage (Phase 4D)` below)
-- Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
-- Phase 5B: complete (feed, posts, comments, interactions — see `docs/FEED.md`)
-- Phase 5C: complete (media and uploads — profile photo, post media, business
-  photos, product images, via Cloudinary; see "Media Uploads" below)
-- Phase 5C.1: complete (media URL validation — an upload stores the provider's
-  https secure URL, never the http variant; brand renamed from "noLIDA" to
-  "NOlida" throughout)
-- Phase 5C.2: complete (uploads go directly from the browser to Cloudinary; the
-  server only issues signatures — see "Media Uploads (Phase 5C.2 update)" below)
-- Phase 5C.3: complete (media viewer — sliding track, swipe, fade in/out, focus
-  trap; see "Media Viewer (Phase 5C.3)" below)
-- Phase 5D: complete (Instagram-style profile — `/profile` and
-  `/user/[username]`, header, tabs, 3-column grid; see "Profile Page (Phase 5D)"
-  below)
-- Phase 6: complete (search and discovery — see `docs/SEARCH.md`)
-- Phase 7: complete (business authorization and submissions flow — authorization codes, business drafts, submissions, admin approval, and seeded admin)
-- Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
-- Phase 7B: complete (WhatsApp icon buttons with context-specific prefilled messages)
-- Phase 7C: complete (single desktop logo and authenticated headers for business pages)
-- Phase 7D: complete (shared navigation and desktop avatar dropdown)
-- Phase 8A: complete (seeded categories, owner-managed services and products)
-- Phase 8B: complete (public business profile, category listings, business search, post-approval redirect)
-- Phase 8C: complete (My Business dashboard — tab navigation, real overview, profile editing, placeholder sub-pages)
-- Phase 8D: complete (mobile bottom-nav overflow fix, Analytics promoted and given real metrics, password eye toggle)
-- Phase 8E: complete (no horizontal scroll, content fills the viewport, page is not pannable or auto-zooming)
-- Phase 8F: complete (mobile stability — no panning, no dead space below content; loading boundaries for perceived speed)
-- Phase 8G: complete (viewport meta verified in rendered HTML; root overflow guard, `html` hidden / `body` clip)
-- Phase 7E: complete (in-app business request flow — instant code, one transaction, no WhatsApp)
-- Phase 7F: complete (OTP bypass for signup; originally dev-only)
-- Phase 7F.5: complete (OTP bypass hardened — email whitelist plus a
-  VERCEL_ENV/NODE_ENV production refusal; see "OTP Bypass" below)
-- Phase 5G: complete (polish pass against docs/UI-PATTERNS.md — auth, feed,
-  profile, search results, requests; see "UI Reference System (Phase 5G)" below)
-- Phase 9: complete (requests and responses — post, respond, accept; see
-  "Requests and Responses (Phase 9)" below)
 
 ## Auth UI (Phase 4) — locked rules
 - `/` is the sign-in screen. `/login` only ever redirects to `/`. Never restore a landing page at `/`.
@@ -751,4 +731,37 @@
 - UI reference: WhatsApp (primary), iMessage (secondary).
 
 ## Phase status
+- Phase 0: complete (scaffold, env, health route)
+- Phase 1: complete (UI primitives, design tokens, `/design` showcase)
+- Phase 2: complete (brand tokens, generated brand assets, logo, marketing site)
+- Phase 3: complete (database + auth backend — migrations, repositories, services, routes)
+- Phase 4: complete (auth screens wired to the API; HTTP end-to-end green — see `docs/PHASE-4.md` and `docs/AUTH-UI.md`)
+- Phase 4B: complete (auth screens, layout and orientation — see `docs/PHASE-4B.md`)
+- Phase 4C: complete (noise-inspired mobile welcome on `/` — see `Home Page — Mobile Welcome` below)
+- Phase 4D: complete (marketing `/explore` page and mobile welcome collage — see `Explore Page (Phase 4D)` and `Mobile Welcome Collage (Phase 4D)` below)
+- Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
+- Phase 5B: complete (feed, posts, comments, interactions — see `docs/FEED.md`)
+- Phase 5C: complete (media and uploads — profile photo, post media, business photos, product images, via Cloudinary; see "Media Uploads" below)
+- Phase 5C.1: complete (media URL validation — an upload stores the provider's https secure URL, never the http variant; brand renamed from "noLIDA" to "NOlida" throughout)
+- Phase 5C.2: complete (uploads go directly from the browser to Cloudinary; the server only issues signatures — see "Media Uploads (Phase 5C.2 update)" below)
+- Phase 5C.3: complete (media viewer — sliding track, swipe, fade in/out, focus trap; see "Media Viewer (Phase 5C.3)" below)
+- Phase 5D: complete (Instagram-style profile — `/profile` and `/user/[username]`, header, tabs, 3-column grid; see "Profile Page (Phase 5D)" below)
+- Phase 6: complete (search and discovery — see `docs/SEARCH.md`)
+- Phase 7: complete (business authorization and submissions flow — authorization codes, business drafts, submissions, admin approval, and seeded admin)
+- Phase 7+: not started — roadmap and vocabulary in `docs/PRODUCT.md`
+- Phase 7B: complete (WhatsApp icon buttons with context-specific prefilled messages)
+- Phase 7C: complete (single desktop logo and authenticated headers for business pages)
+- Phase 7D: complete (shared navigation and desktop avatar dropdown)
+- Phase 8A: complete (seeded categories, owner-managed services and products)
+- Phase 8B: complete (public business profile, category listings, business search, post-approval redirect)
+- Phase 8C: complete (My Business dashboard — tab navigation, real overview, profile editing, placeholder sub-pages)
+- Phase 8D: complete (mobile bottom-nav overflow fix, Analytics promoted and given real metrics, password eye toggle)
+- Phase 8E: complete (no horizontal scroll, content fills the viewport, page is not pannable or auto-zooming)
+- Phase 8F: complete (mobile stability — no panning, no dead space below content; loading boundaries for perceived speed)
+- Phase 8G: complete (viewport meta verified in rendered HTML; root overflow guard, `html` hidden / `body` clip)
+- Phase 7E: complete (in-app business request flow — instant code, one transaction, no WhatsApp)
+- Phase 7F: complete (OTP bypass for signup; originally dev-only)
+- Phase 7F.5: complete (OTP bypass hardened — email whitelist plus a VERCEL_ENV/NODE_ENV production refusal; see "OTP Bypass" below)
+- Phase 5G: complete (polish pass against docs/UI-PATTERNS.md — auth, feed, profile, search results, requests; see "UI Reference System (Phase 5G)" below)
+- Phase 9: complete (requests and responses — post, respond, accept; see "Requests and Responses (Phase 9)" below)
 - Phase 10: complete
