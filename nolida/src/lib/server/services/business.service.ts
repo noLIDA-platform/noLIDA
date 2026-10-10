@@ -31,6 +31,14 @@ import { appendRandomSuffix, generateSlug } from "@/utils/slug";
  *   still resolved for uniqueness (`resolveUniqueSlug`), so editing cannot
  *   collide with another business or break the unique index.
  *
+ *   The rule since the slug-lifecycle fix: a slug follows the name UNTIL an
+ *   owner sets one explicitly. An auto-derived slug (the stored slug is exactly
+ *   what `generateSlug(name)` produces) is regenerated when the name changes;
+ *   anything else — an explicitly chosen slug — never moves. Without this,
+ *   a business created through the redeem-code placeholder ("My Business" →
+ *   slug `my-business`) kept serving `/business/my-business` after it was
+ *   renamed, on the profile card, in search results and on every share.
+ *
  * PENDING_REVIEW remaining editable is deliberate too: an owner correcting a
  * typo while waiting does not need to re-queue, and the submission that is
  * already in review is a separate snapshot.
@@ -169,9 +177,12 @@ function normalizeBusinessInput(input: {
 }
 
 async function resolveUniqueSlug(baseName: string, existingId?: string): Promise<string> {
-  const base = generateSlug(baseName || "my-business");
-  const initial = base || "business";
-  let candidate = initial;
+  // No hidden default here: the caller passes the name that will actually be
+  // stored (see `createBusinessDraft`), so the slug always derives from the
+  // name on the row. The literal fallback only catches a name with nothing
+  // slugable in it at all ("!!!" → "").
+  const base = generateSlug(baseName) || "business";
+  let candidate = base;
   let attempt = 0;
 
   while (attempt < 20) {
@@ -179,7 +190,7 @@ async function resolveUniqueSlug(baseName: string, existingId?: string): Promise
     if (!exists || (existingId && exists.id === existingId)) {
       return candidate;
     }
-    candidate = appendRandomSuffix(initial);
+    candidate = appendRandomSuffix(base);
     attempt += 1;
   }
 
@@ -214,13 +225,19 @@ export async function createBusinessDraft(
   }
 
   const fields = normalizeBusinessInput(input);
-  const slug = await resolveUniqueSlug(input.name);
+  // Derive the slug from the name that will actually be STORED. An empty
+  // `input.name` stores "My Business", and `generateSlug("")` would be "" —
+  // so without this the row read name "My Business" over slug "business",
+  // and the slug-lifecycle rule in `updateBusiness` (slug follows the name
+  // while auto-derived) could never recognise it as auto-derived.
+  const name = fields.name || "My Business";
+  const slug = await resolveUniqueSlug(name);
 
   const business = await withTransaction(async (client) => {
     const row = await businessesRepo.create(
       {
         ownerUserId: userId,
-        name: fields.name || "My Business",
+        name,
         slug,
         category: (fields.category as string | null) ?? null,
         description: (fields.description as string | null) ?? null,
@@ -281,7 +298,26 @@ export async function updateBusiness(
   }
 
   const fields = normalizeBusinessInput(input);
-  const nextSlug = input.slug?.trim() ? await resolveUniqueSlug(input.slug, business.id) : business.slug;
+  let nextSlug = business.slug;
+
+  if (input.slug?.trim()) {
+    // An explicitly chosen slug wins outright and is frozen from then on.
+    nextSlug = await resolveUniqueSlug(input.slug, business.id);
+  } else if (
+    fields.name &&
+    fields.name !== business.name &&
+    business.slug === generateSlug(business.name)
+  ) {
+    // A RENAME follows only while the slug is still the one the stored name
+    // derives from — i.e. nobody has ever customised it. A rename to something
+    // with nothing slugable in it ("!!!") keeps the old slug rather than
+    // degrading the URL to the "business" fallback.
+    const derived = generateSlug(fields.name);
+    if (derived) {
+      nextSlug = await resolveUniqueSlug(fields.name, business.id);
+    }
+  }
+
   const nextValues: Record<string, unknown> = {
     ...fields,
     slug: nextSlug,

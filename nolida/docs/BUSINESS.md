@@ -52,6 +52,29 @@ Both then converge:
 6. An admin reviews the listing via `POST /api/admin/businesses/[id]/review`.
 7. Approvals update the business and the latest submission record.
 
+## Slug lifecycle
+
+A business slug is its public URL (`/business/[slug]`), so it follows three
+rules, enforced in `business.service.ts` and recorded here:
+
+1. **Creation.** The slug is derived from the name that will actually be
+   stored (`generateSlug`, in `src/utils/slug.ts`), de-duplicated with a
+   random suffix when taken. An empty name stores "My Business" and therefore
+   slug `my-business` — a placeholder pair, consistent until the owner renames.
+2. **Rename.** When the name changes and no explicit slug is sent, the slug is
+   regenerated from the new name — but ONLY while the stored slug is still
+   exactly what `generateSlug(current name)` produces (auto-derived). A rename
+   to something with nothing slugable in it keeps the old slug.
+3. **Custom slug.** An explicit `slug` value (accepted by
+   `POST /api/businesses/me`, never sent by the current UI) wins and is frozen:
+   later renames never move it.
+
+Migration `012_fix_placeholder_business_slugs.sql` is the one-off data fix for
+rows created before rule 2 existed: a placeholder slug (`my-business` /
+`business`) that no longer matches the stored name is re-derived from the name
+(e.g. "DML Urban Trim" → `dml-urban-trim`). A business still named
+"My Business" keeps its slug; a chosen slug is never touched.
+
 ## Key server files
 
 - `src/lib/server/services/businessRequest.service.ts` — the Phase 7E request flow
