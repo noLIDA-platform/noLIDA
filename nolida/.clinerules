@@ -1,9 +1,9 @@
-# NOlida — Cline Rules
+# NOLIda — Cline Rules
 
 ## Brand Name (locked)
-- The product name is "NOlida" (capital N, capital O, lowercase
-  "lida").
-- Never use "noLIDA", "Nolida", or any other casing in user-facing
+- The product name is "NOLIda" (capital N, O, L, I; lowercase
+  "da").
+- Never use "NOlida", "Nolida", "nolida" or any other casing in user-facing
   text or internal references.
 - The only exception is the npm package name in package.json, which
   stays lowercase for npm compatibility.
@@ -124,7 +124,7 @@
 - It lives in (marketing) so it uses SiteHeader + SiteFooter.
 - It reuses existing marketing section components. Do not create new
   section components for it.
-- Reachable from: mobile welcome screen (top-right "Explore NOlida →"),
+- Reachable from: mobile welcome screen (top-right "Explore NOLIda →"),
   desktop SlimTopBar, desktop SiteHeader.
 
 ## Mobile Welcome Collage (Phase 4D)
@@ -134,7 +134,7 @@
   read as ambient texture.
 - A dark gradient overlay sits between the collage and the content.
 - Animation: 24s slow drift. Respects prefers-reduced-motion.
-- The "Explore NOlida →" link sits top-right.
+- The "Explore NOLIda →" link sits top-right.
 
 ## App Shell (Phase 5A)
 - Every signed-in screen lives in `src/app/(main)/`. The session guard is the `redirect()` in `(main)/layout.tsx`; never move it into individual pages, and never render a signed-in screen outside the group.
@@ -203,7 +203,7 @@
 - Brand colors are derived from the app icon (`public/branding/logo-source.jpg`). Never invent new colors.
 - Brand assets are GENERATED, never hand-edited: run `npm run generate:brand` after replacing the source icon.
 - Logo component lives at `src/components/brand/Logo/`. It renders no anchor — wrap it in a `Link` to make it navigable.
-- Wordmark is "NOlida" (capital N and O, lowercase "lida"), set at `--weight-extrabold` with `-0.03em` tracking.
+- Wordmark is "NOLIda" (capital N, O, L, I; lowercase "da"), set at `--weight-extrabold` with `-0.03em` tracking.
 - The full gradient (cyan → indigo → violet → magenta) is reserved for the logo, hero backgrounds, step numerals, stat values, and special brand moments.
 - Buttons and daily UI use SOLID `--color-primary`, never the gradient.
 - The `inverse` and `outline-inverse` button variants are the only approved controls on navy/gradient surfaces.
@@ -321,7 +321,7 @@
   and an action-named aria-label plus aria-pressed.
 
 ## Layout Overflow (Phase 8E)
-- No page in NOlida causes horizontal scrolling on any mobile width.
+- No page in NOLIda causes horizontal scrolling on any mobile width.
 - html and body BOTH use `overflow-x: clip` + `max-width`, never
   `hidden`. `hidden` makes the element a scroll container, so the
   document keeps a scrollport and can still be rubber-banded sideways —
@@ -690,7 +690,7 @@
   docs/UI-PATTERNS.md.
 - Before building or polishing any user-facing feature, check the
   reference.
-- Follow the reference's UX patterns — adapt to NOlida's brand.
+- Follow the reference's UX patterns — adapt to NOLIda's brand.
 - NEVER copy code, assets, logos, exact colors, or fonts.
 - Nigerian context wins (WhatsApp voice notes, naira-first amounts).
 - When in doubt, choose the simpler pattern.
@@ -742,7 +742,7 @@
 - Phase 5A: complete (session-gated app shell, `/home`, `/profile`, settings index — see `docs/PHASE-5A.md`)
 - Phase 5B: complete (feed, posts, comments, interactions — see `docs/FEED.md`)
 - Phase 5C: complete (media and uploads — profile photo, post media, business photos, product images, via Cloudinary; see "Media Uploads" below)
-- Phase 5C.1: complete (media URL validation — an upload stores the provider's https secure URL, never the http variant; brand renamed from "noLIDA" to "NOlida" throughout)
+- Phase 5C.1: complete (media URL validation — an upload stores the provider's https secure URL, never the http variant; brand renamed to "NOLIda" throughout — final rename from "NOlida")
 - Phase 5C.2: complete (uploads go directly from the browser to Cloudinary; the server only issues signatures — see "Media Uploads (Phase 5C.2 update)" below)
 - Phase 5C.3: complete (media viewer — sliding track, swipe, fade in/out, focus trap; see "Media Viewer (Phase 5C.3)" below)
 - Phase 5D: complete (Instagram-style profile — `/profile` and `/user/[username]`, header, tabs, 3-column grid; see "Profile Page (Phase 5D)" below)

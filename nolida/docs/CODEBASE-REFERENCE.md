@@ -1,4 +1,4 @@
-# NOlida Codbase Reference
+# NOLIda Codbase Reference
 
 `C:\dev\nolida` is the git root (`noLIDA-platform/noLIDA.git`). All paths below are absolute under that root.
 

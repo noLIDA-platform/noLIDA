@@ -1,22 +1,23 @@
 # Product brief
 
-What NOlida is, what the words in this repo mean, and what gets built next.
+What NOLIda is, what the words in this repo mean, and what gets built next.
 Read this before naming anything: a variable, a table, a route, a marketing
 sentence.
 
 ## The name
 
-NOlida — lowercase `no`, uppercase `LIDA`, always one word. It stands for
+NOLIda — uppercase `NOLI`, lowercase `da`, always one word. It stands for
 **no** **L**imitless **I**ntelligent **D**igital **A**ssistant: the product is
 deliberately *not* an open-ended assistant. It is a bounded service with a
-specific job, and the name is the reminder. Never write "Nolida", "NO LIDA",
-"noLida" or "no-lida". The wordmark's typography is locked in `docs/BRAND.md`.
+specific job, and the name is the reminder. Never write "NOlida", "Nolida",
+"NO LIDA", "noLida" or "no-lida". The wordmark's typography is locked in
+`docs/BRAND.md`.
 
 ## What the business does
 
-- NOlida is a **digital service business**. It sells **plans** — subscription
+- NOLIda is a **digital service business**. It sells **plans** — subscription
   tiers with a price and a term. Nothing physical ships.
-- When a subscription is paid for, NOlida issues a **virtual card** to the user.
+- When a subscription is paid for, NOLIda issues a **virtual card** to the user.
   That card is the deliverable.
 - Money moves in one direction only: a user funds their **wallet** through
   **fintail**, the payment processor, and subscribing **debits that wallet**.

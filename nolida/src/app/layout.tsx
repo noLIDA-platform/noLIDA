@@ -8,11 +8,11 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3001",
   ),
   title: {
-    default: "NOlida",
-    template: "%s · NOlida",
+    default: "NOLIda",
+    template: "%s · NOLIda",
   },
   description:
-    "Discover, request, book, and pay — all in one place. NOlida is Nigeria's all-in-one social marketplace.",
+    "Discover, request, book, and pay — all in one place. NOLIda is Nigeria's all-in-one social marketplace.",
   icons: {
     icon: [
       { url: "/branding/favicon-32.png", sizes: "32x32", type: "image/png" },
@@ -21,15 +21,15 @@ export const metadata: Metadata = {
     apple: "/branding/apple-touch-icon.png",
   },
   openGraph: {
-    title: "NOlida",
+    title: "NOLIda",
     description: "Discover, request, book, and pay — all in one place.",
-    siteName: "NOlida",
+    siteName: "NOLIda",
     type: "website",
     images: ["/branding/logo-app-icon-512.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "NOlida",
+    title: "NOLIda",
     description: "Discover, request, book, and pay — all in one place.",
     images: ["/branding/logo-app-icon-512.png"],
   },

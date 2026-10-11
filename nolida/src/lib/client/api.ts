@@ -1,6 +1,6 @@
 /**
  * Client-safe fetch helper for the `{ ok: true, data }` /
- * `{ ok: false, error }` envelope every NOlida API route returns.
+ * `{ ok: false, error }` envelope every NOLIda API route returns.
  *
  * Safe to import from Client Components: no server-only imports.
  */

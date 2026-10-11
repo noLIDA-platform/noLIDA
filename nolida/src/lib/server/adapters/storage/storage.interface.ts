@@ -2,7 +2,7 @@
  * The storage contract every provider satisfies.
  *
  * The interface exists so that swapping Cloudinary for S3, UploadThing or a
- * NOlida-hosted bucket later is a change to `index.ts` alone. Callers — the
+ * NOLIda-hosted bucket later is a change to `index.ts` alone. Callers — the
  * upload route, the uploader component — depend on these two functions and
  * nothing about HTTP, signatures or public IDs leaks into them.
  *

@@ -310,7 +310,7 @@ function readUploadError(xhr: XMLHttpRequest): string {
  * Upload one file DIRECTLY to Cloudinary.
  *
  * Flow: ask our own server for a signature (a few milliseconds, no file), post
- * the bytes straight to Cloudinary, done. The file never touches a NOlida
+ * the bytes straight to Cloudinary, done. The file never touches a NOLIda
  * server, so there is no second hop and no server memory holding a 50MB buffer.
  *
  * WHY EVERY SIGNED PARAM IS SENT:

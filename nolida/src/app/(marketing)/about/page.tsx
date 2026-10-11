@@ -11,14 +11,14 @@ import "../pages.css";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "NOlida is a social marketplace that connects people and businesses across Nigeria.",
+    "NOLIda is a social marketplace that connects people and businesses across Nigeria.",
 };
 
 const BELIEFS: readonly { icon: React.ReactNode; title: string; text: string }[] = [
   {
     icon: <Icon as={Search} size={22} />,
     title: "Simplicity",
-    text: "Finding work and hiring help should take minutes, not days. Every screen in NOlida is built to be obvious.",
+    text: "Finding work and hiring help should take minutes, not days. Every screen in NOLIda is built to be obvious.",
   },
   {
     icon: <Icon as={Heart} size={22} />,
@@ -36,15 +36,15 @@ export default function AboutPage() {
   return (
     <>
       <Hero
-        eyebrow="About NOlida"
+        eyebrow="About NOLIda"
         title="One platform for everyone."
-        subtitle="NOlida is a social marketplace built in Nigeria, for the people who live here."
+        subtitle="NOLIda is a social marketplace built in Nigeria, for the people who live here."
       />
 
       <Section padding="lg">
         <div className="pg-prose">
           <p>
-            NOlida started with a simple frustration: finding someone to fix a
+            NOLIda started with a simple frustration: finding someone to fix a
             generator, paint a flat, or deliver a package meant asking around,
             calling numbers, and hoping for the best.
           </p>
@@ -88,7 +88,7 @@ export default function AboutPage() {
 
       <CtaSection
         title="Come build it with us."
-        subtitle="Join NOlida today. It's free for customers and for businesses."
+        subtitle="Join NOLIda today. It's free for customers and for businesses."
         primaryCta={{ label: "Create account", href: "/signup" }}
         secondaryCta={{ label: "List your business", href: "/for-business" }}
       />

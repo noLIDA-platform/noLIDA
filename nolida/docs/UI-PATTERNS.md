@@ -1,6 +1,6 @@
-# NOlida UI Patterns & Reference Apps
+# NOLIda UI Patterns & Reference Apps
 
-For every user-facing feature, NOlida borrows its UX pattern from the
+For every user-facing feature, NOLIda borrows its UX pattern from the
 best-in-class app for that specific use case. Copy patterns, never
 code, assets, logos, or branding.
 

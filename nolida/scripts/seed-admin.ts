@@ -24,7 +24,7 @@ async function main() {
   await profilesRepo.create({
     userId: user.id,
     username: "nolida-admin",
-    fullName: "NOlida Admin",
+    fullName: "NOLIda Admin",
   });
 
   await query(

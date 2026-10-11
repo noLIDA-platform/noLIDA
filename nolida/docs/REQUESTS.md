@@ -1,7 +1,7 @@
 # Requests & Responses (Phase 9)
 
 The request-first marketplace: a person says what they need, businesses send
-offers, the person picks one. This is the core loop NOlida exists for.
+offers, the person picks one. This is the core loop NOLIda exists for.
 
 ```
 person posts a request ──▶ a REQUEST_POST appears in the feed

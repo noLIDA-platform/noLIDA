@@ -12,7 +12,7 @@ import "./category.css";
 
 export const metadata: Metadata = {
   title: "Category",
-  description: "Browse approved businesses by category on NOlida.",
+  description: "Browse approved businesses by category on NOLIda.",
 };
 
 const PAGE_SIZE = 12;

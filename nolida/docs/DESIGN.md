@@ -1,6 +1,6 @@
-# NOlida — Phase 1 Design System & UI Primitives
+# NOLIda — Phase 1 Design System & UI Primitives
 
-This document specifies the design tokens, CSS architectural conventions, component primitives, and icon system for NOlida.
+This document specifies the design tokens, CSS architectural conventions, component primitives, and icon system for NOLIda.
 
 ---
 

@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Requests",
-  description: "Open requests on NOlida and the ones you have posted.",
+  description: "Open requests on NOLIda and the ones you have posted.",
 };
 
 /** Two tabs, both plain links — navigation survives a refresh and is shareable. */
@@ -62,7 +62,7 @@ export default async function RequestsPage({
       ? {
           title: "You haven't posted any requests yet",
           description:
-            "Ask for something and businesses on NOlida will send you offers.",
+            "Ask for something and businesses on NOLIda will send you offers.",
         }
       : {
           title: "No open requests right now",

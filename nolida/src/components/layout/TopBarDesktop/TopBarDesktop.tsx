@@ -37,7 +37,7 @@ export function TopBarDesktop({
             type="search"
             name="q"
             placeholder="Search posts and people"
-            aria-label="Search NOlida"
+            aria-label="Search NOLIda"
             className="app-topbar__field"
           />
         </form>

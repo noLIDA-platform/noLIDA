@@ -121,7 +121,7 @@ export async function requestBusinessAccess(input: {
   // connection open across it would only add contention.
   const existing = await businessesRepo.findByOwner(input.userId);
   if (existing && ["APPROVED", "PENDING_REVIEW"].includes(existing.status)) {
-    throw new AuthError("USER_ALREADY_HAS_BUSINESS", "You already have a business on NOlida.");
+    throw new AuthError("USER_ALREADY_HAS_BUSINESS", "You already have a business on NOLIda.");
   }
 
   return withTransaction(async (client) => {

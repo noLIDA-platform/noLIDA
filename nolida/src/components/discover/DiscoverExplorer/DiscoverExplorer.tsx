@@ -367,7 +367,7 @@ return (
           {featuredBusinesses.length > 0 ? (
             <DiscoverySection
               title="Featured businesses"
-              subtitle="Approved businesses on NOlida"
+              subtitle="Approved businesses on NOLIda"
             >
               <div className="discover__businesses">
                 {featuredBusinesses.map((business) => (

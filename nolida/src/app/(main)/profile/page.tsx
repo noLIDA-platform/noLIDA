@@ -21,7 +21,7 @@ import "@/components/profile/profile-page.css";
 
 export const metadata: Metadata = {
   title: "Profile",
-  description: "Your NOlida name, verification status and account details.",
+  description: "Your NOLIda name, verification status and account details.",
 };
 
 /**

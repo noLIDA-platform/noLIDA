@@ -5,7 +5,7 @@ Status: Accepted (locked)
 
 ## Context
 
-NOlida is a global platform combining social content, businesses, services, products,
+NOLIda is a global platform combining social content, businesses, services, products,
 requests, bookings, commerce, messaging, payments, and transactions. That means the
 foundation must support: server-rendered content at scale, heavy interactive UI,
 multi-tenant data isolation, and — most importantly — **money movement that must never

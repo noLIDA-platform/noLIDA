@@ -20,7 +20,7 @@ import "../requests.css";
 
 export const metadata: Metadata = {
   title: "Request",
-  description: "A request on NOlida and the offers sent against it.",
+  description: "A request on NOLIda and the offers sent against it.",
 };
 
 /**

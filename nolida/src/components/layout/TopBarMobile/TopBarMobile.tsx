@@ -46,7 +46,7 @@ export function TopBarMobile({
     <>
       <header className={classes}>
         <div className="app-topbar__inner">
-          <Link href="/home" className="app-topbar__brand" aria-label="NOlida home">
+          <Link href="/home" className="app-topbar__brand" aria-label="NOLIda home">
             <Logo size="sm" />
           </Link>
 
@@ -54,7 +54,7 @@ export function TopBarMobile({
             <Link
               href="/discover"
               className="app-icon-button"
-              aria-label="Search NOlida"
+              aria-label="Search NOLIda"
             >
               <Icon as={Search} size={20} />
             </Link>

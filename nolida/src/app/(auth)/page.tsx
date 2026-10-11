@@ -10,11 +10,11 @@ import "./home.css";
 export const metadata: Metadata = {
   title: "Sign in",
   description:
-    "Sign in to NOlida to discover, request, book, and pay — all in one place.",
+    "Sign in to NOLIda to discover, request, book, and pay — all in one place.",
 };
 
 /**
- * The NOlida front door: sign-in.
+ * The NOLIda front door: sign-in.
  *
  * `/` is the login page, so the marketing landing page that used to live here
  * is gone (its sections survive on `/how-it-works`, `/for-business`, `/pricing`

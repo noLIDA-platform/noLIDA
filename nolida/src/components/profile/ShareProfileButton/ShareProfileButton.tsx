@@ -42,7 +42,7 @@ export function ShareProfileButton({
 
     if (typeof navigator.share === "function") {
       try {
-        await navigator.share({ url, title: "A profile on NOlida" });
+        await navigator.share({ url, title: "A profile on NOLIda" });
         return;
       } catch {
         // Dismissed by the user, or the sheet was unavailable. Not an error worth

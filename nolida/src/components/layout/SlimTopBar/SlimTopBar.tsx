@@ -36,10 +36,10 @@ export function SlimTopBar({ className }: { className?: string }) {
         <Link
           href="/"
           className="slim-top-bar__brand"
-          aria-label="NOlida home"
+          aria-label="NOLIda home"
         >
           <Logo size="sm" showWordmark={false} />
-          <span className="slim-top-bar__wordmark">NOlida</span>
+          <span className="slim-top-bar__wordmark">NOLIda</span>
         </Link>
 
         <nav className="slim-top-bar__nav" aria-label="Primary">

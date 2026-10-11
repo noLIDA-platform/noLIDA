@@ -1,6 +1,6 @@
 # Media & Uploads (Phase 5C)
 
-Photos and videos across NOlida. Files live at Cloudinary; **NOlida stores only
+Photos and videos across NOLIda. Files live at Cloudinary; **NOLIda stores only
 URLs**. No file is ever written to the server filesystem or into Postgres.
 
 ---
@@ -169,7 +169,7 @@ from its JavaScript and from its docs. Verified, not assumed.
 | `checkFileForUpload` in the client | Yes, for honest users |
 | Cloudinary `allowed_formats` | Yes, signed, so the provider rejects a wrong type |
 | The Cloudinary account's plan limit | Yes, at whatever the plan allows |
-| **A NOlida server** | **No** |
+| **A NOLIda server** | **No** |
 
 The old path read the bytes and refused an oversize file. That is gone: a
 signed-in user who ignores the client can push a large file into the account. It
@@ -220,7 +220,7 @@ The browser posts the file **straight to Cloudinary**. Our server signs; it does
 not carry.
 
 ```
-browser ──tiny POST──▶ NOlida /api/upload/signature   (~50ms, no file)
+browser ──tiny POST──▶ NOLIda /api/upload/signature   (~50ms, no file)
 browser ─────────────▶ api.cloudinary.com/.../upload  (the bytes)
 ```
 

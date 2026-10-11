@@ -9,7 +9,7 @@ import "../requests.css";
 
 export const metadata: Metadata = {
   title: "Post a request",
-  description: "Tell NOlida what you need and get offers from businesses.",
+  description: "Tell NOLIda what you need and get offers from businesses.",
 };
 
 /**
