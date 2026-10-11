@@ -18,6 +18,7 @@ const COLUMNS = [
   "language",
   "timezone",
   "currency",
+  "onboarding_completed_at",
   "created_at",
   "updated_at",
 ].join(", ");
@@ -111,4 +112,23 @@ export async function usernameExists(username: string): Promise<boolean> {
     [username]
   );
   return result.rows.length > 0;
+}
+
+/**
+ * Stamp the first-login tour as completed (Phase 10.2).
+ *
+ * The timestamp is minted server-side with `NOW()`: the client only ever
+ * sends the intent (`onboarding_completed: true`), never a value — a
+ * client-supplied timestamp would be a lie waiting to happen. Idempotent:
+ * completing twice just re-stamps.
+ */
+export async function markOnboardingComplete(userId: string): Promise<Profile> {
+  const result = await query<Profile>(
+    `UPDATE profiles SET onboarding_completed_at = NOW() WHERE user_id = $1
+     RETURNING ${COLUMNS}`,
+    [userId]
+  );
+  const row = result.rows[0];
+  if (!row) throw new Error("profiles.repo.markOnboardingComplete: profile not found");
+  return row;
 }

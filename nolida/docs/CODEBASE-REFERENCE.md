@@ -77,6 +77,8 @@ Every component lives in `src/components/ui/`. Each component's props are define
 | `Tab` — `src/components/ui/Tab/Tab.tsx` | `TabProps` | Check the file for exact props |
 | `Tabs` — `src/components/ui/Tabs/Tabs.tsx` | `TabsProps` | Check the file for exact props |
 | `ButtonGroup` — `src/components/ui/ButtonGroup/ButtonGroup.tsx` | `ButtonGroupProps` | Check the file for exact props |
+| `Skeleton` — `src/components/ui/Skeleton/Skeleton.tsx` | `SkeletonProps` (width, height, radius, className) | Server Component; gray shimmer block; assemble loading shapes from these, not spinners |
+| `VoiceInput` — `src/components/ui/VoiceInput/VoiceInput.tsx` | `VoiceInputProps` (value, onChange, multiline, placeholder, rows, maxLength, disabled, ariaLabel, id, onKeyDown, textareaRef, className, inputClassName) | "use client"; Web Speech API dictation; mic hidden where unsupported |
 
 ---
 
@@ -143,7 +145,7 @@ Services live in `src/lib/server/services/`. All business logic goes here.
 | `interaction.service.ts` | likePost, unlikePost, commentOnPost, deleteComment, likeComment, unlikeComment, sharePost, savePost, unsavePost, followUser, unfollowUser |
 | `messaging.service.ts` | mapMessage, listConversations, startConversation, getConversation, updateConversationSettings, listMessages, searchMessages, sendMessage, editMessage, deleteMessage, addReaction, removeReaction, forwardMessage, markConversationRead, setTyping, reportMessage, blockUser, unblockUser |
 | `post.service.ts` | createPost, updatePost, deletePost |
-| `profile.service.ts` | getOwnProfile, updateOwnProfile, getProfileData, getProfileByUsername, getProfileForViewer, getProfilePhotos |
+| `profile.service.ts` | getOwnProfile, updateOwnProfile (`onboarding_completed: true` stamps the tour; anything else updates profile fields), getProfileData, getProfileByUsername, getProfileForViewer, getProfilePhotos |
 | `publicBusiness.service.ts` | getBySlug, listByCategory, listFeatured, countByCategory, getBusinessStats, profileTasks, profileCompletionPercent, getOwnerDashboardStats |
 | `request.service.ts` | createRequest, getRequest, listResponses, createResponse, acceptResponse, declineResponse, withdrawResponse, cancelRequest, countByUser, countOpenByUser, countClosedByUser, updateRequest |
 | `search.service.ts` | searchPosts, searchBusinesses, searchType, searchUser, searchCounts |
@@ -167,6 +169,7 @@ Repositories live in `src/lib/server/repositories/`. All SQL goes here. Only pg 
 | `service.repo.ts` | create, update, softDelete, getById, getBySlug, getByBusiness, listByBusiness, countByBusiness |
 | `tag.repo.ts` | create, update, delete, getById, getBySlug, listAll, listByPost |
 | `user.repo.ts` | create, update, softDelete, getById, getByEmail, getByPhone, getByUsername, getByOtp, listPublicUsers, search, searchTyped, getPublicUser, countBySlug |
+| `profiles.repo.ts` | findByUserId, findByUsername, create, update (profile fields only — never the tour timestamp), markOnboardingComplete (stamps `onboarding_completed_at = NOW()`), usernameExists |
 | `verification.repo.ts` | createRecord, getRecord, updateRecord, deleteRecord, getByToken, getByContact, consumeToken, isValid |
 | `whatsapp.repo.ts` | create, getByPhone, listByUser, updateSettings, delete |
 

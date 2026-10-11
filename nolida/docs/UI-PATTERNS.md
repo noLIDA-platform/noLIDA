@@ -81,6 +81,14 @@ code, assets, logos, or branding.
 | OTP verification | WhatsApp | Telegram |
 | Complete profile | Instagram | LinkedIn |
 | Mobile welcome | Noise app | — |
+| First-login tour (3 steps) | Duolingo | LinkedIn |
+
+### Composition & Input
+| Feature | Primary | Secondary |
+|---|---|---|
+| Voice-to-text dictation | iOS keyboard mic | Google Docs voice typing |
+| Message dictate option | WhatsApp | iMessage |
+| Loading skeletons | Facebook | YouTube |
 
 ### Settings & Account
 | Feature | Primary | Secondary |

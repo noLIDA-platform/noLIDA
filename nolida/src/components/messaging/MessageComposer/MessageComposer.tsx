@@ -8,6 +8,7 @@ import {
   XIcon,
 } from "@/components/ui/Icons";
 import { VoiceRecorder } from "@/components/messaging/VoiceRecorder/VoiceRecorder";
+import { VoiceInput } from "@/components/ui/VoiceInput/VoiceInput";
 import {
   DOCUMENT_EXTENSIONS,
   DOCUMENT_MIME_TYPES,
@@ -440,16 +441,21 @@ export function MessageComposer({
           </div>
         ) : null}
 
-        <textarea
-          ref={textareaRef}
-          className="message-composer__textarea"
+        {/* Dictation lives in the field (mic on the right); the toolbar keeps
+            the voice-NOTE recorder. Two different mics for two different
+            jobs: one types what you say, the other sends what you said. */}
+        <VoiceInput
           value={body}
+          onChange={setBody}
+          multiline
           placeholder={placeholder ?? "Message"}
-          onChange={(event) => setBody(event.target.value)}
-          onKeyDown={handleKeyDown}
           rows={1}
           maxLength={MESSAGE_BODY_MAX}
-          aria-label="Message"
+          onKeyDown={handleKeyDown}
+          textareaRef={textareaRef}
+          ariaLabel="Message"
+          className="message-composer__voice"
+          inputClassName="message-composer__textarea"
         />
 
         <button

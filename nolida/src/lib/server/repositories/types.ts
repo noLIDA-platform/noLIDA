@@ -30,6 +30,8 @@ export interface Profile {
   language: string | null;
   timezone: string | null;
   currency: string | null;
+  /** Null until the first-login tour is completed or skipped (Phase 10.2). */
+  onboarding_completed_at: string | null;
   created_at: string;
   updated_at: string;
 }

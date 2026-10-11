@@ -1,0 +1,33 @@
+.ui-skeleton {
+  display: block;
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-subtle) 25%,
+    var(--color-border) 50%,
+    var(--color-bg-subtle) 75%
+  );
+  background-size: 200% 100%;
+  animation: ui-skeleton-shimmer 1.5s infinite linear;
+  border-radius: var(--radius-sm);
+  /* Never interactive, never announced — the component sets aria-hidden. */
+}
+
+@keyframes ui-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/*
+ * The shimmer is decoration. Under reduced motion it becomes a static block —
+ * the layout hint survives, the movement does not.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .ui-skeleton {
+    animation: none;
+    background: var(--color-bg-subtle);
+  }
+}

@@ -58,6 +58,15 @@ export const updateProfileSchema = z
     city: z.string().trim().max(80).nullable().optional(),
     timezone: z.string().trim().max(64).nullable().optional(),
     currency: z.string().trim().max(8).nullable().optional(),
+    /**
+     * First-login tour completion (Phase 10.2). A literal, not a boolean:
+     * the client can only ever express the intent "I finished the tour".
+     * The timestamp itself is minted server-side (`NOW()` in
+     * `profiles.repo.markOnboardingComplete`) — a client-supplied value
+     * would be trusted input for a server fact. There is deliberately no
+     * `false`: un-completing the tour is not an operation.
+     */
+    onboarding_completed: z.literal(true).optional(),
   })
   .refine((data) => Object.keys(data).length > 0, {
     message: "Provide at least one field to update.",

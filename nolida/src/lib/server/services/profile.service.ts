@@ -33,6 +33,11 @@ export interface UpdateOwnProfileInput {
   city?: string | null;
   timezone?: string | null;
   currency?: string | null;
+  /**
+   * First-login tour intent (Phase 10.2). The only accepted value is `true`;
+   * the timestamp is minted server-side, never taken from the client.
+   */
+  onboarding_completed?: true;
 }
 
 /**
@@ -56,24 +61,33 @@ export async function updateOwnProfile(
 ): Promise<Profile> {
   const current = await getOwnProfile(userId);
 
-  if (input.avatar_url !== undefined && !isAllowedAvatarUrl(input.avatar_url)) {
+  // The tour flag is a separate write, not part of the editable-columns
+  // update below: `profiles.repo.update` allow-lists profile fields and must
+  // never learn a timestamp column. Stripped before the spread so it cannot
+  // leak into the generic path even by accident.
+  const { onboarding_completed, ...profileFields } = input;
+  if (onboarding_completed === true) {
+    return profilesRepo.markOnboardingComplete(userId);
+  }
+
+  if (profileFields.avatar_url !== undefined && !isAllowedAvatarUrl(profileFields.avatar_url)) {
     throw new ServiceError(
       "INVALID",
       "That photo link is not a valid https address.",
     );
   }
 
-  if (input.username && input.username !== current.username) {
-    if (await profilesRepo.usernameExists(input.username)) {
+  if (profileFields.username && profileFields.username !== current.username) {
+    if (await profilesRepo.usernameExists(profileFields.username)) {
       throw new ServiceError("INVALID", "That username is already taken.");
     }
   }
 
-  const updated = await profilesRepo.update(userId, input);
+  const updated = await profilesRepo.update(userId, profileFields);
 
   if (
-    input.avatar_url !== undefined &&
-    input.avatar_url !== current.avatar_url
+    profileFields.avatar_url !== undefined &&
+    profileFields.avatar_url !== current.avatar_url
   ) {
     void deleteReplacedAvatar(current.avatar_url);
   }

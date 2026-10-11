@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
-import { Textarea } from "@/components/ui/Textarea/Textarea";
+import { VoiceInput } from "@/components/ui/VoiceInput/VoiceInput";
 import { ImageUploader } from "@/components/ui/ImageUploader/ImageUploader";
 import { apiFetch } from "@/lib/client/api";
 import {
@@ -125,12 +125,17 @@ export function RequestComposer({
         <label className="request-composer__label" htmlFor="request-title">
           Title
         </label>
-        <Input
+        {/* Single-line dictation for the title; the multiline description
+            below gets its own mic. Location stays plain — postcodes and
+            street names dictate badly. */}
+        <VoiceInput
           id="request-title"
           value={title}
-          onChange={(event) => setTitle(event.target.value)}
+          onChange={setTitle}
           maxLength={MAX_TITLE_LEN}
           placeholder="AC repairer needed in Lagos tomorrow"
+          ariaLabel="Request title"
+          inputClassName="ui-input"
         />
         <p className="request-composer__counter">
           {trimmedTitle.length < MIN_TITLE_LEN
@@ -141,13 +146,16 @@ export function RequestComposer({
         <label className="request-composer__label" htmlFor="request-description">
           Describe the job
         </label>
-        <Textarea
+        <VoiceInput
           id="request-description"
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={setDescription}
+          multiline
           maxLength={MAX_DESCRIPTION_LEN}
           rows={6}
           placeholder="What is wrong, what you have tried, and anything a business should know before quoting."
+          ariaLabel="Request description"
+          inputClassName="ui-textarea"
         />
         <p className="request-composer__counter">
           {trimmedDescription.length < MIN_DESCRIPTION_LEN
