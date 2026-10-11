@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/Card/Card";
 import { Input } from "@/components/ui/Input/Input";
 import { Avatar } from "@/components/ui/Avatar/Avatar";
 import { ImageUploader } from "@/components/ui/ImageUploader/ImageUploader";
-import { VoiceInput } from "@/components/ui/VoiceInput/VoiceInput";
 import { apiFetch } from "@/lib/client/api";
 import type { Profile } from "@/lib/server/repositories/types";
 import "./account.css";
@@ -168,16 +167,15 @@ export function AccountSettings({ profile }: AccountSettingsProps): React.JSX.El
 
           <label className="account-settings__label" htmlFor="account-bio">
             Bio
-            <VoiceInput
+            <textarea
+              className="ui-textarea account-settings__textarea"
               id="account-bio"
               value={bio}
-              onChange={setBio}
-              multiline
+              onChange={(event) => setBio(event.target.value)}
               maxLength={500}
               rows={4}
               placeholder="Tell people what you do."
-              ariaLabel="Bio"
-              inputClassName="account-settings__textarea"
+              aria-label="Bio"
             />
           </label>
 

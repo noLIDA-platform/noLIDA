@@ -7,8 +7,7 @@ import {
   SendIcon,
   XIcon,
 } from "@/components/ui/Icons";
-import { VoiceRecorder } from "@/components/messaging/VoiceRecorder/VoiceRecorder";
-import { VoiceInput } from "@/components/ui/VoiceInput/VoiceInput";
+
 import {
   DOCUMENT_EXTENSIONS,
   DOCUMENT_MIME_TYPES,
@@ -110,7 +109,7 @@ export function MessageComposer({
 }: MessageComposerProps): React.JSX.Element {
   const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
-  const [voiceNote, setVoiceNote] = useState<{ url: string; duration: number } | null>(null);
+
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -270,12 +269,11 @@ export function MessageComposer({
       await onSend({
         body: trimmed,
         attachments: readyAttachments.length > 0 ? readyAttachments : undefined,
-        voiceNote: voiceNote ?? undefined,
         replyToId,
       });
       setBody("");
       setAttachments([]);
-      setVoiceNote(null);
+
       onCancelReply?.();
     } catch (err) {
       setError((err as Error).message || "Failed to send message.");
@@ -314,18 +312,12 @@ export function MessageComposer({
     !sending &&
     uploadingCount === 0 &&
     trimmedBody.length <= MESSAGE_BODY_MAX &&
-    (trimmedBody.length > 0 || readyAttachments.length > 0 || voiceNote !== null);
+    (trimmedBody.length > 0 || readyAttachments.length > 0);
 
   return (
     <div className="message-composer">
-      {voiceNote ? (
-        <div className="message-composer__voice-chip">
-          <span>Voice note ready ({Math.round(voiceNote.duration / 1000)}s)</span>
-          <button type="button" className="message-composer__voice-chip__remove" aria-label="Remove voice note" onClick={() => setVoiceNote(null)}>
-            <XIcon size={12} />
-          </button>
-        </div>
-      ) : null}
+
+
 
         {attachments.length > 0 ? (
         <div className="message-composer__attachments" role="list" aria-label="Attachments">
@@ -417,13 +409,7 @@ export function MessageComposer({
           <span className="message-composer__toolbar-label">File</span>
         </button>
 
-        <VoiceRecorder
-          disabled={sending || uploadingCount > 0}
-          onRecorded={(note) => {
-            setVoiceNote(note);
-            setError(null);
-          }}
-        />
+
       </div>
 
       <div className="message-composer__input-row">
@@ -441,21 +427,16 @@ export function MessageComposer({
           </div>
         ) : null}
 
-        {/* Dictation lives in the field (mic on the right); the toolbar keeps
-            the voice-NOTE recorder. Two different mics for two different
-            jobs: one types what you say, the other sends what you said. */}
-        <VoiceInput
-          value={body}
-          onChange={setBody}
-          multiline
-          placeholder={placeholder ?? "Message"}
+        <textarea
+          className="message-composer__textarea"
           rows={1}
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          placeholder={placeholder ?? "Message"}
           maxLength={MESSAGE_BODY_MAX}
           onKeyDown={handleKeyDown}
-          textareaRef={textareaRef}
-          ariaLabel="Message"
-          className="message-composer__voice"
-          inputClassName="message-composer__textarea"
+          ref={textareaRef}
+          aria-label="Message"
         />
 
         <button

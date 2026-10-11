@@ -173,47 +173,7 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
-/* VoiceInput's wrapper takes the textarea's place in the input row: same
-   flex share, and the composer's own border wins over the ui-textarea base
-   so the field does not render double-bordered. */
-.message-composer__input-row > .message-composer__voice {
-  flex: 1 1 0;
-  min-width: 0;
-}
 
-.message-composer__input-row > .message-composer__voice .ui-voice__field {
-  min-width: 0;
-  min-height: var(--space-12);
-  max-height: 150px;
-  padding: var(--space-3);
-  padding-right: var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font: inherit;
-  font-size: var(--text-base);
-  resize: none;
-  outline: none;
-}
-
-.message-composer__input-row > .message-composer__voice .ui-voice__field:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent);
-}
-
-/* The mic sits inside the field's padding rather than the row's edge, so it
-   clears the send button instead of floating over it. */
-.message-composer__input-row > .message-composer__voice .ui-voice__mic {
-  right: var(--space-2);
-}
-
-@media (min-width: 768px) {
-  .message-composer__input-row > .message-composer__voice .ui-voice__field {
-    min-height: var(--space-14);
-    font-size: var(--text-lg);
-  }
-}
 
 .message-composer__send {
   flex: 0 0 auto;

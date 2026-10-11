@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button/Button";
 import { Input } from "@/components/ui/Input/Input";
-import { VoiceInput } from "@/components/ui/VoiceInput/VoiceInput";
 import { ImageUploader } from "@/components/ui/ImageUploader/ImageUploader";
 import { apiFetch } from "@/lib/client/api";
 import {
@@ -125,17 +124,13 @@ export function RequestComposer({
         <label className="request-composer__label" htmlFor="request-title">
           Title
         </label>
-        {/* Single-line dictation for the title; the multiline description
-            below gets its own mic. Location stays plain — postcodes and
-            street names dictate badly. */}
-        <VoiceInput
+        <Input
           id="request-title"
           value={title}
-          onChange={setTitle}
+          onChange={(event) => setTitle(event.target.value)}
           maxLength={MAX_TITLE_LEN}
           placeholder="AC repairer needed in Lagos tomorrow"
-          ariaLabel="Request title"
-          inputClassName="ui-input"
+          aria-label="Request title"
         />
         <p className="request-composer__counter">
           {trimmedTitle.length < MIN_TITLE_LEN
@@ -146,16 +141,14 @@ export function RequestComposer({
         <label className="request-composer__label" htmlFor="request-description">
           Describe the job
         </label>
-        <VoiceInput
-          id="request-description"
-          value={description}
-          onChange={setDescription}
-          multiline
-          maxLength={MAX_DESCRIPTION_LEN}
+        <textarea
+          className="ui-textarea"
           rows={6}
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          maxLength={MAX_DESCRIPTION_LEN}
           placeholder="What is wrong, what you have tried, and anything a business should know before quoting."
-          ariaLabel="Request description"
-          inputClassName="ui-textarea"
+          aria-label="Request description"
         />
         <p className="request-composer__counter">
           {trimmedDescription.length < MIN_DESCRIPTION_LEN

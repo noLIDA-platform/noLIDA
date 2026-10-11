@@ -28,18 +28,7 @@
   background: none;
 }
 
-/* VoiceInput's wrapper takes the textarea's place in the avatar row: same
-   flex share, and the composer's borderless look wins over the ui-textarea
-   base (two-deep beats one class regardless of stylesheet order). */
-.post-composer__row > .ui-voice {
-  flex: 1;
-  min-width: 0;
-}
 
-.post-composer__row > .ui-voice .ui-voice__field {
-  border: 0;
-  background: none;
-}
 
 .post-composer__location {
   padding-left: calc(32px + var(--space-3));

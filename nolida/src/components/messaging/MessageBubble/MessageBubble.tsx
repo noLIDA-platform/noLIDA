@@ -17,7 +17,7 @@ import {
 } from "@/lib/messaging/constants";
 import type { MessageView } from "@/lib/messaging/types";
 import { SharedItemCard } from "@/components/messaging/SharedItemCard/SharedItemCard";
-import { VoiceNotePlayer } from "@/components/messaging/VoiceNotePlayer/VoiceNotePlayer";
+
 import "./MessageBubble.css";
 
 export interface MessageBubbleProps {
@@ -97,7 +97,7 @@ export function MessageBubble({
     Date.now() - new Date(message.createdAt).getTime() < EDIT_WINDOW_MS &&
     Boolean(message.body) &&
     message.attachments.length === 0 &&
-    !message.voiceNote &&
+
     !message.sharedItem;
   const canDeleteForEveryone = isMine && !deleted;
 
@@ -171,11 +171,7 @@ export function MessageBubble({
           ) : null}
 
           {message.voiceNote ? (
-            <VoiceNotePlayer
-              url={message.voiceNote.url}
-              durationMs={message.voiceNote.duration}
-              mine={isMine}
-            />
+            <span className="msg-bubble__voice-placeholder">Voice message (not available)</span>
           ) : null}
 
           {message.sharedItem ? (

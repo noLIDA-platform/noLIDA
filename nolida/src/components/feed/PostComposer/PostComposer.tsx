@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import { Input } from "@/components/ui/Input/Input";
 import { Spinner } from "@/components/ui/Spinner/Spinner";
-import { VoiceInput } from "@/components/ui/VoiceInput/VoiceInput";
 import { apiFetch } from "@/lib/client/api";
 import {
   checkFileForUpload,
@@ -342,23 +341,16 @@ return (
     <section className={classes} aria-label="Create a post">
       <div className="post-composer__row">
         <Avatar src={viewer.avatarUrl} name={viewer.displayName} size="md" />
-        {/* VoiceInput keeps the composer's own borderless look: the
-            `post-composer__input` class (passed through `inputClassName`)
-            supplies `border: 0; background: none`, the `ui-textarea` class
-            supplies the type scale and focus ring. `Textarea` would wrap all
-            of that in an extra `.ui-field` div the row's flex layout does
-            not expect. */}
-        <VoiceInput
+        <textarea
+          className="ui-textarea post-composer__input"
+          rows={large ? 6 : 3}
           value={body}
-          onChange={setBody}
-          multiline
+          onChange={(event) => setBody(event.target.value)}
           placeholder={
             large ? "What do you want to tell people?" : "What's on your mind?"
           }
-          rows={large ? 6 : 3}
           maxLength={POST_BODY_MAX}
-          ariaLabel="Post body"
-          inputClassName="ui-textarea post-composer__input"
+          aria-label="Post body"
         />
       </div>
 
