@@ -1,0 +1,43 @@
+/* /requests loading — card grid that mirrors the real list. */
+.requests-skeleton__list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .requests-skeleton__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.request-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.request-skeleton__avatar {
+  border-radius: var(--radius-full);
+}
+
+.request-skeleton__identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.request-skeleton__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

@@ -1,0 +1,14 @@
+/* /notifications loading — circle + two bar rows, stacked. */
+.notifications-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 560px;
+}
+
+.notifications-skeleton__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}

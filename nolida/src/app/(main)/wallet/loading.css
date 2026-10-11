@@ -1,0 +1,24 @@
+/* /wallet loading — balance card plus a stacked transaction list. */
+.wallet-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 560px;
+}
+
+.wallet-skeleton__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.wallet-skeleton__rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
