@@ -333,6 +333,9 @@ async function conversationViewFor(
 
   return {
     id: conversation.id,
+    name: conversation.name ?? null,
+    type: conversation.type,
+    memberCount: conversation.member_count,
     otherUser: {
       id: otherId,
       username: profile?.username ?? null,
@@ -490,6 +493,9 @@ export async function listConversations(input: {
   return {
     items: page.rows.map((row) => ({
       id: row.id,
+      name: row.name ?? null,
+      type: row.type,
+      memberCount: row.member_count,
       otherUser: rowToOtherUser(row),
       lastMessage: previewFromListRow(row, input.userId),
       unreadCount: row.unread_count,
@@ -1160,3 +1166,485 @@ export async function unblockUser(input: {
   });
   return { blocked: false };
 }
+/**
+ * Create a group conversation owned by one person.
+ */
+export async function createGroup(
+  input: {
+    creatorId: string;
+    name: string;
+    description?: string;
+    avatarUrl?: string | null;
+    memberIds: string[];
+    inviteCode: string;
+  },
+  db?: PoolClient
+): Promise<ConversationView> {
+  const { creatorId, name, description, avatarUrl, memberIds, inviteCode } = input;
+
+  if (!name || name.length > 60) {
+    throw new ServiceError("VALIDATION", "Group name must be 1-60 characters.");
+  }
+  const trimmedDescription = description?.trim() ?? null;
+  if (trimmedDescription && trimmedDescription.length > 200) {
+    throw new ServiceError(
+      "VALIDATION",
+      "Group description must be 200 characters or fewer."
+    );
+  }
+  if (memberIds.length < 1) {
+    throw new ServiceError(
+      "VALIDATION",
+      "A group needs at least 1 member besides the creator."
+    );
+  }
+  if (memberIds.length + 1 > 256) {
+    throw new ServiceError(
+      "VALIDATION",
+      "Groups are capped at 256 members in total."
+    );
+  }
+  if (memberIds.includes(creatorId)) {
+    throw new ServiceError("VALIDATION", "The creator cannot be in the member list.");
+  }
+
+  const uniqueMembers = Array.from(new Set(memberIds));
+  if (uniqueMembers.length !== memberIds.length) {
+    throw new ServiceError("VALIDATION", "A member cannot be added twice.");
+  }
+
+  const creator = await usersRepo.findById(creatorId);
+  if (!creator || creator.status !== "ACTIVE") {
+    throw new ServiceError("NOT_FOUND", "That user could not be found or is not active.");
+  }
+
+  // Stable pair placeholders so the NOT NULL / CHECK constraints hold.
+  // user_a is the creator; user_b is the smallest member larger than the
+  // creator, or the smallest member at all when none is larger. The members
+  // table is authoritative for group membership.
+  const orderedMembers = uniqueMembers.slice().sort();
+  let userB: string = "";
+  for (const id of orderedMembers) {
+    if (id !== creatorId && (userB === null || id < userB)) {
+      userB = id;
+    }
+  }
+  if (userB === null) {
+    userB = orderedMembers[0] ?? creatorId;
+  }
+
+  let inviteCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const exists = await conversationsRepo.findByIdByInviteCode(inviteCode);
+    if (!exists) break;
+    inviteCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+  }
+
+  const row = await withTransaction(async (client) => {
+    const insert = await conversationsRepo.createGroup(
+      {
+        name,
+        description: trimmedDescription,
+        avatarUrl: avatarUrl ?? null,
+        createdById: creatorId,
+        userA: creatorId,
+        userB: userB,
+        inviteCode,
+        memberIds: uniqueMembers,
+      },
+      client
+    );
+    return insert;
+  });
+
+  return conversationViewFor(row.id, creatorId);
+}
+
+/**
+ * Edit a group's name, description or cover photo. Only the ADMIN can do it.
+ */
+export async function updateGroupInfo(
+  input: {
+    conversationId: string;
+    userId: string;
+    name?: string;
+    description?: string;
+    avatarUrl?: string | null;
+  },
+  db?: PoolClient
+): Promise<ConversationView | null> {
+  const member = await getMember(input.conversationId, input.userId, db);
+  if (!member || member.role !== "ADMIN") {
+    throw new ServiceError("FORBIDDEN", "Only the group admin can edit group info.");
+  }
+
+  const { name, description, avatarUrl } = input;
+  const sets: string[] = [];
+  const values: unknown[] = [];
+  let index = 1;
+
+  if (name !== undefined) {
+    if (!name || name.length > 60) {
+      throw new ServiceError("VALIDATION", "Group name must be 1-60 characters.");
+    }
+    sets.push(`name = $${index++}`);
+    values.push(name);
+  }
+  if (description !== undefined) {
+    if (description.length > 200) {
+      throw new ServiceError(
+        "VALIDATION",
+        "Group description must be 200 characters or fewer."
+      );
+    }
+    sets.push(`description = $${index++}`);
+    values.push(description);
+  }
+  if (avatarUrl !== undefined) {
+    sets.push(`avatar_url = $${index++}`);
+    values.push(avatarUrl);
+  }
+
+  if (sets.length === 0) {
+    return findById(input.conversationId, db);
+  }
+
+  values.push(input.conversationId);
+  const text = `UPDATE conversations SET ${sets.join(", ")} WHERE id = $${index}`;
+  if (db) {
+    await db.query(text, values);
+  } else {
+    await query(text, values);
+  }
+  return findById(input.conversationId, db);
+}
+
+/**
+ * Add members to a group. Only the ADMIN can do it; the new total must stay
+ * at or under 256. Duplicate members are rejected.
+ */
+export async function addGroupMembers(
+  input: { conversationId: string; userId: string; memberIds: string[] },
+  db?: PoolClient
+): Promise<ConversationView | null> {
+  const member = await getMember(input.conversationId, input.userId, db);
+  if (!member || member.role !== "ADMIN") {
+    throw new ServiceError("FORBIDDEN", "Only the group admin can add members.");
+  }
+
+  const existing = await query<{ id: string }>(
+    "SELECT id FROM conversation_members WHERE conversation_id = $1 AND user_id = ANY($2)",
+    [input.conversationId, input.memberIds]
+  );
+  if (existing.rows.length > 0) {
+    throw new ServiceError("VALIDATION", "One or more of these people are already in the group.");
+  }
+  if (memberCount(input.conversationId, db) + input.memberIds.length > 256) {
+    throw new ServiceError(
+      "VALIDATION",
+      "Groups are capped at 256 members in total."
+    );
+  }
+
+  const values = input.memberIds.flatMap((id) => [
+    input.conversationId,
+    id,
+    "MEMBER",
+  ]);
+  if (values.length === 0) return findById(input.conversationId, db);
+
+  const text = `INSERT INTO conversation_members (conversation_id, user_id, role)
+                 VALUES ($1, $2, $3)
+                 ON CONFLICT (conversation_id, user_id) DO NOTHING`;
+  if (db) {
+    await db.query(text, values);
+  } else {
+    await query(text, values);
+  }
+  return findById(input.conversationId, db);
+}
+
+/**
+ * Remove a member from a group. Only the ADMIN can do it. The last admin can
+ * never be removed — the group would become unmanageable.
+ */
+export async function removeGroupMember(
+  input: { conversationId: string; userId: string; targetUserId: string },
+  db?: PoolClient
+): Promise<ConversationView | null> {
+  const member = await getMember(input.conversationId, input.userId, db);
+  if (!member || member.role !== "ADMIN") {
+    throw new ServiceError("FORBIDDEN", "Only the group admin can remove members.");
+  }
+
+  const target = await getMember(input.conversationId, input.targetUserId, db);
+  if (!target) {
+    throw new ServiceError("NOT_FOUND", "That person is not in the group.");
+  }
+  if (target.role === "ADMIN") {
+    const admins = await countAdmins(input.conversationId, db);
+    if (admins <= 1) {
+      throw new ServiceError(
+        "FORBIDDEN",
+        "The last admin cannot be removed from the group."
+      );
+    }
+  }
+
+  const values = [input.conversationId, input.targetUserId];
+  if (db) {
+    await db.query(
+      "DELETE FROM conversation_members WHERE conversation_id = $1 AND user_id = $2",
+      values
+    );
+  } else {
+    await query(
+      "DELETE FROM conversation_members WHERE conversation_id = $1 AND user_id = $2",
+      values
+    );
+  }
+
+  if (memberCount(input.conversationId, db) === 0) {
+    deleteEmptyGroup(input.conversationId, db);
+  }
+  return findById(input.conversationId, db);
+}
+
+/**
+ * Promote a member to admin. Only the current admin can do it.
+ */
+export async function makeGroupAdmin(
+  input: { conversationId: string; userId: string; targetUserId: string },
+  db?: PoolClient
+): Promise<ConversationView | null> {
+  const member = await getMember(input.conversationId, input.userId, db);
+  if (!member || member.role !== "ADMIN") {
+    throw new ServiceError("FORBIDDEN", "Only the group admin can promote members.");
+  }
+
+  const values = [input.conversationId, input.targetUserId, "ADMIN"];
+  if (db) {
+    await db.query(
+      `UPDATE conversation_members SET role = $3
+       WHERE conversation_id = $1 AND user_id = $2`,
+      values
+    );
+  } else {
+    await query(
+      `UPDATE conversation_members SET role = $3
+       WHERE conversation_id = $1 AND user_id = $2`,
+      values
+    );
+  }
+  return findById(input.conversationId, db);
+}
+
+/**
+ * The prefs for a user describe how their own client behaves — the server
+ * never withholds data based on them, it only stops writing certain
+ * side-effects (read timestamps, typing flags) for that user. Default ON.
+ */
+async function getMessagingPrefs(userId: string): Promise<{
+  readReceiptsEnabled: boolean;
+  typingIndicatorEnabled: boolean;
+}> {
+  const profile = await profilesRepo.findByUserId(userId);
+  return {
+    readReceiptsEnabled:
+      profile.read_receipts_enabled ??
+      (process.env.NODE_ENV === "development" ? true : false),
+    typingIndicatorEnabled:
+      profile.typing_indicator_enabled ??
+      (process.env.NODE_ENV === "development" ? true : false),
+  };
+}
+
+/**
+ * Leave a group. If the leaver is the last ADMIN, the most senior remaining
+ * member (lowest user id) is promoted. If the group becomes empty it is
+ * deleted outright.
+ */
+export async function leaveGroup(
+  input: { conversationId: string; userId: string },
+  db?: PoolClient
+): Promise<ConversationView | null> {
+  const member = await getMember(input.conversationId, input.userId, db);
+  if (!member) {
+    throw new ServiceError("NOT_FOUND", "You are not in this group.");
+  }
+
+  const roles = await query<{ role: string }>(
+    "SELECT role FROM conversation_members WHERE conversation_id = $1 ORDER BY user_id",
+    [input.conversationId]
+  );
+  const allMembers = roles.rows.map((r) => r.user_id);
+
+  if (member.role === "ADMIN") {
+    const admins = roles.rows
+      .filter((r) => r.role === "ADMIN")
+      .map((r) => r.user_id);
+    if (admins.length === 1 && admins[0] === input.userId) {
+      const next = allMembers.find((id) => id !== input.userId) ?? null;
+      if (next) {
+        await query(
+          "UPDATE conversation_members SET role = 'ADMIN' WHERE conversation_id = $1 AND user_id = $2",
+          [input.conversationId, next]
+        );
+      }
+    }
+  }
+
+  if (allMembers.length === 1) {
+    deleteEmptyGroup(input.conversationId, db);
+    return null;
+  }
+
+  const values = [input.conversationId, input.userId];
+  if (db) {
+    await db.query(
+      "DELETE FROM conversation_members WHERE conversation_id = $1 AND user_id = $2",
+      values
+    );
+  } else {
+    await query(
+      "DELETE FROM conversation_members WHERE conversation_id = $1 AND user_id = $2",
+      values
+    );
+  }
+  return findById(input.conversationId, db);
+}
+
+async function deleteEmptyGroup(conversationId: string, db?: PoolClient): Promise<void> {
+  if (db) {
+    await db.query("DELETE FROM conversations WHERE id = $1", [conversationId]);
+  } else {
+    await query("DELETE FROM conversations WHERE id = $1", [conversationId]);
+  }
+}
+
+function memberCount(conversationId: string, db?: PoolClient): Promise<number> {
+  return query<{ member_count: number }>(
+    "SELECT count(*)::int AS member_count FROM conversation_members WHERE conversation_id = $1",
+    [conversationId]
+  ).then((result) => result.rows[0]?.member_count ?? 0);
+}
+
+async function countAdmins(conversationId: string, db?: PoolClient): Promise<number> {
+  const result = await query<{ cnt: number }>(
+    "SELECT count(*)::int AS cnt FROM conversation_members WHERE conversation_id = $1 AND role = 'ADMIN'",
+    [conversationId]
+  );
+  return result.rows[0]?.cnt ?? 0;
+}
+
+/**
+ * Write global messaging preferences for the signed-in user. These are the
+ * only two flags a user can toggle from the settings page; they never affect
+ * what this service returns, only what the client is allowed to read back.
+ */
+export async function updateGlobalMessagingPrefs(
+  userId: string,
+  fields: Partial<{
+    readReceiptsEnabled: boolean;
+    typingIndicatorEnabled: boolean;
+  }>
+): Promise<{
+  readReceiptsEnabled: boolean;
+  typingIndicatorEnabled: boolean;
+}> {
+  const allowed = ["readReceiptsEnabled", "typingIndicatorEnabled"];
+  for (const key of Object.keys(fields)) {
+    if (!allowed.includes(key)) {
+      throw new ServiceError("VALIDATION", `Unknown preference: ${key}.`);
+    }
+  }
+  const updated = await profilesRepo.updateMessagingPrefs(userId, fields);
+  return {
+    readReceiptsEnabled: updated.read_receipts_enabled ?? false,
+    typingIndicatorEnabled: updated.typing_indicator_enabled ?? false,
+  };
+}
+
+/**
+ * Advance the caller's read pointer to the conversation's newest message.
+ * A user who disabled receipts never writes read timestamps, but the call
+ * still succeeds and still counts as "seen" for the rest of the group.
+ */
+export async function markConversationRead(input: {
+  userId: string;
+  conversationId: string;
+}): Promise<{ unreadCount: 0 }> {
+  const prefs = await getMessagingPrefs(input.userId);
+  if (!prefs.readReceiptsEnabled) {
+    void publishConversationEvent(input.conversationId, "read", {
+      userId: input.userId,
+    });
+    return { unreadCount: 0 };
+  }
+
+  await requireMember(input.conversationId, input.userId);
+  const conversation = await conversationsRepo.findById(input.conversationId);
+  if (!conversation) {
+    throw new ServiceError("NOT_FOUND", "That conversation was not found.");
+  }
+  if (!conversation.last_message_id) return { unreadCount: 0 };
+  await receiptsRepo.markRead({
+    conversationId: input.conversationId,
+    userId: input.userId,
+    lastReadMessageId: conversation.last_message_id,
+    at: new Date().toISOString(),
+  });
+  void publishConversationEvent(input.conversationId, "read", {
+    userId: input.userId,
+  });
+  return { unreadCount: 0 };
+}
+
+/**
+ * Typing is an expiring flag, re-armed by the client while keys are down.
+ * A user who disabled the indicator simply never writes the row, and the
+ * service never returns that someone is typing for them.
+ */
+export async function setTyping(input: {
+  userId: string;
+  conversationId: string;
+  typing: boolean;
+}): Promise<{ typing: boolean }> {
+  const prefs = await getMessagingPrefs(input.userId);
+  if (!prefs.typingIndicatorEnabled) {
+    if (!input.typing) {
+      await typingRepo.clear({
+        conversationId: input.conversationId,
+        userId: input.userId,
+      });
+    }
+    void publishConversationEvent(input.conversationId, "typing", {
+      userId: input.userId,
+    });
+    return { typing: input.typing };
+  }
+
+  await requireMember(input.conversationId, input.userId);
+  if (input.typing) {
+    const expiresAt = new Date(Date.now() + TYPING_TTL_MS).toISOString();
+    await typingRepo.touch({
+      conversationId: input.conversationId,
+      userId: input.userId,
+      expiresAt,
+    });
+    void publishConversationEvent(input.conversationId, "typing", {
+      userId: input.userId,
+    });
+  } else {
+    await typingRepo.clear({
+      conversationId: input.conversationId,
+      userId: input.userId,
+    });
+    void publishConversationEvent(input.conversationId, "typing", {
+      userId: input.userId,
+      stopped: true,
+    });
+  }
+  return { typing: input.typing };
+}
+

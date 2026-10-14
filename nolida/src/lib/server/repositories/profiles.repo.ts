@@ -132,3 +132,51 @@ export async function markOnboardingComplete(userId: string): Promise<Profile> {
   if (!row) throw new Error("profiles.repo.markOnboardingComplete: profile not found");
   return row;
 }
+/**
+ * Global messaging preferences live on the user's profile row. These are the
+ * two knobs the chat honors:
+ *
+ *   read_receipts_enabled = false  ->  the client never advances
+ *                                       last_read_at, so "read at" is never
+ *                                       written for this viewer.
+ *   typing_indicator_enabled = false ->  typing_status entries are never
+ *   written for this viewer.
+ *
+ * Default on is ON; a spare profile row for a brand-new user also starts ON.
+ */
+export async function updateMessagingPrefs(
+  userId: string,
+  fields: Partial<{
+    readReceiptsEnabled: boolean;
+    typingIndicatorEnabled: boolean;
+  }>
+): Promise<Profile> {
+  const entries = Object.entries(fields).filter(
+    ([key, value]) =>
+      (key === "readReceiptsEnabled" || key === "typingIndicatorEnabled") &&
+      value !== undefined
+  );
+  if (entries.length === 0) {
+    return findByUserId(userId);
+  }
+
+  const sets = entries.map(([key], i) => {
+    const column =
+      key === "readReceiptsEnabled"
+        ? "read_receipts_enabled"
+        : "typing_indicator_enabled";
+    return `${column} = $${i + 1}`;
+  });
+  const values = entries.map(([, value]) => value);
+  const result = await query<Profile>(
+    `UPDATE profiles SET ${sets.join(", ")} WHERE user_id = $${values.length + 1}
+     RETURNING id, user_id, username, full_name, display_name, bio, avatar_url,
+               date_of_birth, country, city, language, timezone, currency,
+               read_receipts_enabled, typing_indicator_enabled,
+               onboarding_completed_at, created_at, updated_at`,
+    [...values, userId]
+  );
+  const row = result.rows[0];
+  if (!row) throw new Error("profiles.repo.updateMessagingPrefs: profile not found");
+  return row;
+}
