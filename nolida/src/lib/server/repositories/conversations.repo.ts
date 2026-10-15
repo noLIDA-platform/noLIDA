@@ -1,5 +1,5 @@
 import type { PoolClient } from "pg";
-import { query } from "@/lib/db/client";
+import { query, withTransaction } from "@/lib/db/client";
 import { decodeCursor, encodeCursor } from "./cursor";
 
 type Db = Pick<PoolClient, "query">;
@@ -22,11 +22,19 @@ export interface ConversationRow {
   last_message_at: string;
   created_at: string;
   updated_at: string;
+  /** Group identity (migration 013). Null name on a 1:1 row. */
+  name: string | null;
+  type: "DIRECT" | "GROUP";
+  created_by: string | null;
+  /** Not a column — always read through a count subquery cast to int. */
+  member_count: number;
 }
 
 export interface ConversationMemberRow {
   conversation_id: string;
   user_id: string;
+  /** Migration 013. Group roles only; 1:1 rows are always MEMBER. */
+  role: "ADMIN" | "MEMBER";
   last_read_at: string;
   last_read_message_id: string | null;
   pinned: boolean;
@@ -42,6 +50,10 @@ export interface ConversationListRow {
   pinned: boolean;
   muted: boolean;
   archived: boolean;
+  /** Group identity (migration 013) — `name` is null for a 1:1 row. */
+  name: string | null;
+  type: "DIRECT" | "GROUP";
+  member_count: number;
   other_id: string;
   other_username: string | null;
   other_display_name: string | null;
@@ -91,6 +103,8 @@ const SELECT_LIST = `
     lm.status AS last_status,
     lm.sender_id AS last_sender_id,
     lm.created_at AS last_created_at,
+    (SELECT count(*)::int FROM conversation_members mc
+     WHERE mc.conversation_id = c.id) AS member_count,
     COALESCE((
       SELECT count(*) FROM messages m
       WHERE m.conversation_id = c.id
@@ -182,7 +196,7 @@ export async function findById(
 ): Promise<ConversationRow | null> {
   const text = `SELECT id, user_a, user_b, last_message_id, last_message_at,
                        created_at, updated_at, name, type, created_by,
-                       (SELECT count(*) FROM conversation_members cm
+                       (SELECT count(*)::int FROM conversation_members cm
                         WHERE cm.conversation_id = c.id) AS member_count
                 FROM conversations c
                 WHERE c.id = $1`;
@@ -334,24 +348,25 @@ export async function updateMemberSettings(
         input.userId,
       ]);
   return result.rows[0] ?? null;
+}
 
-  /**
-   * Create a group conversation owned by one person.
-   *   creatorId — the group owner / first admin
-   *   name       — 1-60 characters, required
-   *   description — optional, max 200 characters (client-side courtesy only)
-   *   avatarUrl   — optional group cover (https URL; server re-checks)
-   *   memberIds   — everyone besides the creator; 2+ people, 256 total max
-   *
-   * The creator is stored as ADMIN, everyone else as MEMBER. The owner
-   * (created_by), the pair columns and a generated invite code keep the row
-   * addressable by the 1:1 code paths (receipts, messages, blocks); all group
-   * rules live in the service.
-   */
-  export async function createGroup(
+/**
+ * Create a group conversation owned by one person.
+ *   creatorId — the group owner / first admin
+ *   name       — 1-60 characters, required
+ *   description — optional, max 200 characters (client-side courtesy only)
+ *   avatarUrl   — optional group cover (https URL; server re-checks)
+ *   memberIds   — everyone besides the creator; 1+ people (2+ total), 256 max
+ *
+ * The creator is stored as ADMIN, everyone else as MEMBER. The owner
+ * (created_by), the pair columns and a generated invite code keep the row
+ * addressable by the 1:1 code paths (receipts, messages, blocks); all group
+ * rules live in the service.
+ */
+export async function createGroup(
   input: {
     name: string;
-    description?: string;
+    description?: string | null;
     avatarUrl?: string | null;
     createdById: string;
     userA: string;
@@ -370,7 +385,7 @@ export async function updateMemberSettings(
   if (trimmedDescription && trimmedDescription.length > 200) {
     throw new Error("Group description must be 200 characters or fewer.");
   }
-  if (memberIds.length < 2) {
+  if (memberIds.length < 1) {
     throw new Error("A group needs at least 1 member besides the creator.");
   }
   if (memberIds.length + 1 > 256) {
@@ -393,13 +408,13 @@ export async function updateMemberSettings(
     throw new Error("That user could not be found or is not active.");
   }
 
-  const row = await withTransaction(async (client) => {
+  const run = async (client: Db): Promise<ConversationRow> => {
     const insert = await client.query(
       `INSERT INTO conversations
         (type, name, description, avatar_url, created_by, user_a, user_b, invite_code)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id, user_a, user_b, last_message_id, last_message_at,
-                 created_at, updated_at, name, type, created_by, member_count`,
+                 created_at, updated_at, name, type, created_by`,
       [
         "GROUP",
         name,
@@ -413,28 +428,31 @@ export async function updateMemberSettings(
     );
     const conversationId = insert.rows[0].id;
 
-    const members = [
+    // Three placeholders per ROW — generated from `members`, never from the
+    // flattened values, or the counts drift apart at 2+ members.
+    const members: Array<[string, string]> = [
       [createdById, "ADMIN"],
-      ...uniqueMembers.map((userId) => [userId, "MEMBER"]),
+      ...uniqueMembers.map((userId): [string, string] => [userId, "MEMBER"]),
     ];
-    const memberValues = members.flatMap(([userId, role]) => [
-      insert.rows[0].id,
-      userId,
-      role,
-    ]);
-    if (memberValues.length > 0) {
-      const placeholders = memberValues.map((_, i) => `$${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3}`).join(", ");
-      await client.query(
-        `INSERT INTO conversation_members (conversation_id, user_id, role)
-         VALUES (${placeholders})
-         ON CONFLICT (conversation_id, user_id) DO NOTHING`,
-        memberValues
-      );
-    }
-    return insert.rows[0];
-  });
+    const memberValues: unknown[] = [];
+    const tuples = members.map(([userId, role], index) => {
+      memberValues.push(conversationId, userId, role);
+      return `($${index * 3 + 1}, $${index * 3 + 2}, $${index * 3 + 3})`;
+    });
+    await client.query(
+      `INSERT INTO conversation_members (conversation_id, user_id, role)
+       VALUES ${tuples.join(", ")}
+       ON CONFLICT (conversation_id, user_id) DO NOTHING`,
+      memberValues
+    );
 
-  return row;
+    // member_count is not a real column (neither migration adds one) — the
+    // canonical SELECT computes it, so re-read through that.
+    const created = await findById(conversationId, client);
+    if (!created) throw new Error("createGroup: row not found after insert");
+    return created;
+  };
+  return db ? run(db) : withTransaction(run);
 }
 
 /**
@@ -513,19 +531,21 @@ export async function addGroupMembers(
   if (existing.rows.length > 0) {
     throw new Error("One or more of these people are already in the group.");
   }
-  if (memberCount(input.conversationId, db) + input.memberIds.length > 256) {
+  const current = await memberCount(input.conversationId, db);
+  if (current + input.memberIds.length > 256) {
     throw new Error("Groups are capped at 256 members in total.");
   }
 
-  const values = input.memberIds.flatMap((id) => [
-    input.conversationId,
-    id,
-    "MEMBER",
-  ]);
-  if (values.length === 0) return findById(input.conversationId, db);
+  if (input.memberIds.length === 0) return findById(input.conversationId, db);
 
+  // One tuple per member; the placeholder indexes follow the tuple index.
+  const values: unknown[] = [];
+  const tuples = input.memberIds.map((id, index) => {
+    values.push(input.conversationId, id, "MEMBER");
+    return `($${index * 3 + 1}, $${index * 3 + 2}, $${index * 3 + 3})`;
+  });
   const text = `INSERT INTO conversation_members (conversation_id, user_id, role)
-                 VALUES ($1, $2, $3)
+                 VALUES ${tuples.join(", ")}
                  ON CONFLICT (conversation_id, user_id) DO NOTHING`;
   if (db) {
     await db.query(text, values);
@@ -572,8 +592,8 @@ export async function removeGroupMember(
     );
   }
 
-  if (memberCount(input.conversationId, db) === 0) {
-    deleteEmptyGroup(input.conversationId, db);
+  if ((await memberCount(input.conversationId, db)) === 0) {
+    await deleteEmptyGroup(input.conversationId, db);
   }
   return findById(input.conversationId, db);
 }
@@ -621,8 +641,8 @@ export async function leaveGroup(
     throw new Error("You are not in this group.");
   }
 
-  const roles = await query<{ role: string }>(
-    "SELECT role FROM conversation_members WHERE conversation_id = $1 ORDER BY user_id",
+  const roles = await query<{ user_id: string; role: string }>(
+    "SELECT user_id, role FROM conversation_members WHERE conversation_id = $1 ORDER BY user_id",
     [input.conversationId]
   );
   const allMembers = roles.rows.map((r) => r.user_id);
@@ -684,17 +704,42 @@ export async function findByIdByInviteCode(
   inviteCode: string,
   db?: Db
 ): Promise<ConversationRow | null> {
-  return query<ConversationRow>(
-    "SELECT id, user_a, user_b, last_message_id, last_message_at, created_at, updated_at, name, type, created_by, member_count FROM conversations WHERE invite_code = $1",
-    [inviteCode]
-  ).then((result) => result.rows[0] ?? null);
+  const text = `SELECT id, user_a, user_b, last_message_id, last_message_at,
+                       created_at, updated_at, name, type, created_by,
+                       (SELECT count(*)::int FROM conversation_members cm
+                        WHERE cm.conversation_id = conversations.id) AS member_count
+                FROM conversations WHERE invite_code = $1`;
+  return query<ConversationRow>(text, [inviteCode]).then(
+    (result) => result.rows[0] ?? null
+  );
 }
 
-async function countAdmins(conversationId: string, db?: Db): Promise<number> {
-  const result = await query<{ cnt: number }>(
-    "SELECT count(*)::int AS cnt FROM conversation_members WHERE conversation_id = $1 AND role = 'ADMIN'",
-    [conversationId]
-  );
+/**
+ * Live membership total — the source for the 256-member cap and the
+ * empty-group cleanup check. Cast to int so callers get a number, not the
+ * string node-postgres parses bigint into.
+ */
+export async function memberCount(
+  conversationId: string,
+  db?: Db
+): Promise<number> {
+  const text =
+    "SELECT count(*)::int AS member_count FROM conversation_members WHERE conversation_id = $1";
+  const result = db
+    ? await db.query<{ member_count: number }>(text, [conversationId])
+    : await query<{ member_count: number }>(text, [conversationId]);
+  return result.rows[0]?.member_count ?? 0;
+}
+
+export async function countAdmins(
+  conversationId: string,
+  db?: Db
+): Promise<number> {
+  const text =
+    "SELECT count(*)::int AS cnt FROM conversation_members WHERE conversation_id = $1 AND role = 'ADMIN'";
+  const result = db
+    ? await db.query<{ cnt: number }>(text, [conversationId])
+    : await query<{ cnt: number }>(text, [conversationId]);
   return result.rows[0]?.cnt ?? 0;
 }
 

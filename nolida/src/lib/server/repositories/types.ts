@@ -32,6 +32,9 @@ export interface Profile {
   currency: string | null;
   /** Null until the first-login tour is completed or skipped (Phase 10.2). */
   onboarding_completed_at: string | null;
+  /** Global messaging preferences (migration 013) — both default ON. */
+  read_receipts_enabled: boolean;
+  typing_indicator_enabled: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -104,6 +104,11 @@ export interface ConversationPreview {
 
 export interface ConversationView {
   id: string;
+  /** Group name — always null for a 1:1 conversation. */
+  name: string | null;
+  type: "DIRECT" | "GROUP";
+  /** Members in the conversation (2 for a 1:1, 1+ for a group). */
+  memberCount: number;
   otherUser: MessagingUser;
   lastMessage: ConversationPreview | null;
   unreadCount: number;

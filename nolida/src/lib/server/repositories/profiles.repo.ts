@@ -18,6 +18,8 @@ const COLUMNS = [
   "language",
   "timezone",
   "currency",
+  "read_receipts_enabled",
+  "typing_indicator_enabled",
   "onboarding_completed_at",
   "created_at",
   "updated_at",
@@ -157,7 +159,11 @@ export async function updateMessagingPrefs(
       value !== undefined
   );
   if (entries.length === 0) {
-    return findByUserId(userId);
+    const current = await findByUserId(userId);
+    if (!current) {
+      throw new Error("profiles.repo.updateMessagingPrefs: profile not found");
+    }
+    return current;
   }
 
   const sets = entries.map(([key], i) => {

@@ -765,3 +765,22 @@
 - Phase 5G: complete (polish pass against docs/UI-PATTERNS.md — auth, feed, profile, search results, requests; see "UI Reference System (Phase 5G)" below)
 - Phase 9: complete (requests and responses — post, respond, accept; see "Requests and Responses (Phase 9)" below)
 - Phase 10: complete
+- Phase 10.3: complete (group-chat backend landing — `conversations.repo.ts` and `messaging.service.ts` repaired: brace nesting, duplicated read/typing/group blocks, SQL confined to the repository, prefs-aware types; see "Messaging (Phase 10, expanded)" below)
+
+## Messaging (Phase 10, expanded)
+- Conversations are DIRECT or GROUP (max 256 members).
+- Anyone can create a group.
+- Message kinds: TEXT, IMAGE, FILE, SHARED_ITEM, SYSTEM.
+- Reactions: ❤️ 😂 😮 😢 👍 🙏 (fixed set for v1).
+- Edit window: 15 minutes. Delete is soft.
+- Group roles: ADMIN, MEMBER.
+- Only admins can add/remove members, edit group info.
+- Cannot remove the last admin.
+- Per-chat settings: mute (8h/1w/always), pin, archive.
+- Global prefs: read receipts, typing indicator.
+- Respect user preferences: if read_receipts_enabled is false, do
+  not write read_at.
+- Voice notes, voice-to-text, and voice/video calls are REMOVED for
+  now (deferred).
+- UI reference: WhatsApp (primary), iMessage (secondary). Do NOT
+  copy their source code — reproduce the visual design only.

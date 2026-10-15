@@ -143,7 +143,7 @@ Services live in `src/lib/server/services/`. All business logic goes here.
 | `email.service.ts` | sendOtpEmail, sendResetEmail, sendVerificationEmail, sendBulkOtpEmails, sendInvitationEmail, getOtpPurpose |
 | `feed.service.ts` | getHomeFeed, getUserPosts, getSavedPosts, getPostForViewer, countPostsByUser, countSavedPosts, countPostedPosts, countTaggedPosts |
 | `interaction.service.ts` | likePost, unlikePost, commentOnPost, deleteComment, likeComment, unlikeComment, sharePost, savePost, unsavePost, followUser, unfollowUser |
-| `messaging.service.ts` | mapMessage, listConversations, startConversation, getConversation, updateConversationSettings, listMessages, searchMessages, sendMessage, editMessage, deleteMessage, addReaction, removeReaction, forwardMessage, markConversationRead, setTyping, reportMessage, blockUser, unblockUser |
+| `messaging.service.ts` | mapMessage, listConversations, startConversation, getConversation, updateConversationSettings, listMessages, searchMessages, sendMessage, editMessage, deleteMessage, addReaction, removeReaction, forwardMessage, markConversationRead, setTyping, reportMessage, blockUser, unblockUser, createGroup, updateGroupInfo, addGroupMembers, removeGroupMember, makeGroupAdmin, leaveGroup, updateGlobalMessagingPrefs |
 | `post.service.ts` | createPost, updatePost, deletePost |
 | `profile.service.ts` | getOwnProfile, updateOwnProfile (`onboarding_completed: true` stamps the tour; anything else updates profile fields), getProfileData, getProfileByUsername, getProfileForViewer, getProfilePhotos |
 | `publicBusiness.service.ts` | getBySlug, listByCategory, listFeatured, countByCategory, getBusinessStats, profileTasks, profileCompletionPercent, getOwnerDashboardStats |
@@ -234,7 +234,7 @@ Notes:
 | `auth.repo.ts` | createUser, updateUser, deleteUser, findUserByEmail, findUserByPhone, findUserByOtp, createOtpRecord, getOtpRecord, updateOtpRecord, deleteOtpRecord, verifyOtp, getSession, createSession, revokeSession, revokeAllUserSessions, getActiveSessionCount, findActiveByTokenHash |
 | `business.repo.ts` | create, update, softDelete, getById, getBySlug, getByUser, listApprovedForCategory, listFeatured, countByCategory, getOwnerDashboardStats, listByBusiness |
 | `categories.repo.ts` | create, update, delete, getById, getBySlug, listAll, countBySlug, getGlobalCount |
-| `conversations.repo.ts` | create, update, getById, getByUserId, countByUserId, listByUser |
+| `conversations.repo.ts` | findOrCreatePair, findById, getMember, listForUser, updateMemberSettings, touchLastMessage, recomputeLastMessage, createGroup, updateGroupInfo, addGroupMembers, removeGroupMember, makeGroupAdmin, leaveGroup, findByIdByInviteCode, memberCount, countAdmins |
 | `messages.repo.ts` | create, update, delete, getById, getByConversation, listByConversation, countByConversation, search, addReaction, removeReaction, forward, getConversationStats |
 | `order.repo.ts` | create, update, softDelete, getById, getByBusiness, getByUser, countByBusiness, countByUser |
 | `payments.repo.ts` | create, getById, listByBusiness, listByUser, countByStatus, createTransaction, getTransaction, listTransactions, getBalance |
