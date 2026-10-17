@@ -79,91 +79,146 @@
   color: #fff;
 }
 
-.message-composer__toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  align-items: center;
-}
-
-.message-composer__toolbar-input {
+.message-composer__attach-input {
   display: none;
 }
 
-.message-composer__toolbar-button {
-  display: inline-flex;
+.message-composer__attach-wrap {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+}
+
+.message-composer__plus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.message-composer__plus:hover,
+.message-composer__plus[aria-expanded="true"] {
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
+}
+
+/* Attachment menu floats above the Plus button — the same surface language
+   as every other floating menu in the messaging UI. */
+.message-composer__attach-menu {
+  position: absolute;
+  bottom: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+  padding: var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-md);
+}
+
+.message-composer__attach-menu button {
+  display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  background: none;
   color: var(--color-text);
-  cursor: pointer;
   font: inherit;
-  font-weight: var(--weight-medium);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
 }
 
-.message-composer__toolbar-button:hover {
-  background: var(--color-border);
+.message-composer__attach-menu button:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
 }
 
-.message-composer__toolbar-button:disabled {
+.message-composer__attach-menu button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.message-composer__toolbar-label {
-  font-size: var(--text-sm);
-}
-
 .message-composer__input-row {
   display: flex;
-  align-items: stretch;
+  align-items: flex-end;
   gap: var(--space-2);
 }
 
-.message-composer__reply-banner {
-  flex: 0 0 auto;
+.message-composer__reply-bar {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
+  border-left: 4px solid var(--color-primary);
   border-radius: var(--radius-md);
-  background: var(--color-primary);
-  color: #fff;
+  background: var(--color-bg-subtle);
   font-size: var(--text-sm);
 }
 
-.message-composer__reply-banner__close {
+.message-composer__reply-bar__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.message-composer__reply-bar__name {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.message-composer__reply-bar__preview {
+  color: var(--color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.message-composer__reply-bar__close {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: 0;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: transparent;
+  color: var(--color-text-muted);
   cursor: pointer;
 }
 
-.message-composer__reply-banner__close:hover {
-  background: rgba(255, 255, 255, 0.35);
+.message-composer__reply-bar__close:hover {
+  background: var(--color-border);
+  color: var(--color-text);
 }
 
+/* WhatsApp-style pill input. 16px is load-bearing on iOS (Phase 8E). */
 .message-composer__textarea {
   flex: 1 1 0;
   min-width: 0;
-  min-height: var(--space-12);
+  min-height: 42px;
   max-height: 150px;
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-4);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   background: var(--color-bg);
   color: var(--color-text);
   font: inherit;
   font-size: var(--text-base);
+  line-height: 1.4;
   resize: none;
   outline: none;
 }
@@ -180,10 +235,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border: 0;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   background: var(--color-primary);
   color: #fff;
   cursor: pointer;
@@ -198,14 +253,7 @@
   cursor: not-allowed;
 }
 
-/* Voice recorder rendered inside the toolbar: button on the left, thin
-   recording surface beside it. */
-.message-composer__toolbar .voice-recorder {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
+/* Voice notes were removed in Phase 10.3 — no recorder surface remains. */
 
 @media (min-width: 768px) {
   .message-composer {
@@ -234,10 +282,6 @@
     min-height: var(--space-14);
     font-size: var(--text-lg);
   }
-
-  .message-composer__toolbar .voice-recorder {
-    flex: 0 0 96px;
-  }
 }
 
 @media (min-width: 1024px) {
@@ -245,15 +289,7 @@
     max-width: 860px;
   }
 
-  .message-composer__toolbar {
-    gap: var(--space-3);
-  }
-
-  .message-composer__toolbar-button {
-    padding: var(--space-2) var(--space-4);
-  }
-
-  .message-composer__toolbar-label {
+  .message-composer__attach-menu button {
     font-size: var(--text-base);
   }
 }

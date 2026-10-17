@@ -28,13 +28,14 @@
   padding: var(--space-3) 0;
 }
 
+/* Dark pill in both themes — the WhatsApp-style date marker that reads at a
+   glance against the thread, rather than a second surface-coloured chip. */
 .chat-window__divider span {
   font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  background: var(--color-bg);
+  color: #fff;
+  background: var(--color-navy);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
 }
 
 .chat-window__footer {

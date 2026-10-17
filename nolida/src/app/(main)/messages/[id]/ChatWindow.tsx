@@ -359,6 +359,24 @@ export function ChatWindow({
     }
   }
 
+  // In GROUP chats the first message of each sender-run carries the sender's
+  // name (WhatsApp convention). A run ends when the sender changes or the day
+  // rolls over — computed over the flat list, not per date group, so a run
+  // never leaks across a date divider.
+  const senderNameIds = new Set<string>();
+  if (conversation.type === "GROUP") {
+    let runSender: string | null = null;
+    let runDay: string | null = null;
+    for (const message of messages) {
+      const day = new Date(message.createdAt).toDateString();
+      if (message.sender.id !== runSender || day !== runDay) {
+        senderNameIds.add(message.id);
+      }
+      runSender = message.sender.id;
+      runDay = day;
+    }
+  }
+
   return (
     <div className="chat-window">
       <ChatHeader
@@ -369,6 +387,9 @@ export function ChatWindow({
           const q = prompt("Search in conversation:");
           if (q) window.location.href = `/messages/${conversation.id}?q=${encodeURIComponent(q)}`;
         }}
+        onOpenInfo={() => {
+          window.location.href = `/messages/${conversation.id}/info`;
+        }}
       />
 
       <div className="chat-window__body" ref={scrollRef}>
@@ -378,14 +399,20 @@ export function ChatWindow({
               <span>{group.date}</span>
             </div>
             {group.items.map((message, idx) => {
-              const prev = group.items[idx - 1];
               const isMine = message.sender.id === viewerId;
+              // The tail sits on the LAST bubble of a sent run; the run ends
+              // at the end of the day group or at the first reply from the
+              // other side.
+              const next = group.items[idx + 1];
+              const showTail = isMine && (!next || next.sender.id !== viewerId);
 
               return (
                 <MessageBubble
                   key={message.id}
                   message={message}
                   isMine={isMine}
+                  showSenderName={senderNameIds.has(message.id)}
+                  showTail={showTail}
                   onReply={handleReply}
                   onReact={handleReact}
                   onForward={handleForward}

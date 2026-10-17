@@ -109,6 +109,8 @@ export interface ConversationView {
   type: "DIRECT" | "GROUP";
   /** Members in the conversation (2 for a 1:1, 1+ for a group). */
   memberCount: number;
+  /** Group cover photo; null on 1:1 rows and groups without one. */
+  avatarUrl: string | null;
   otherUser: MessagingUser;
   lastMessage: ConversationPreview | null;
   unreadCount: number;
@@ -122,11 +124,29 @@ export interface ConversationView {
   /** The other person is typing right now (expiry handled server-side). */
   typing: boolean;
   createdAt: string;
+  /**
+   * Group description. Null on 1:1 rows, and on list views that do not
+   * select it — the conversation LIST never needs it, only the info page
+   * (through getConversation) reads it.
+   */
+  description: string | null;
+  /** Group invite code. Null except on a group detail view. */
+  inviteCode: string | null;
+  /** The viewer's group role. Null on 1:1 rows (roles do not exist there). */
+  viewerRole: "ADMIN" | "MEMBER" | null;
 }
 
 export interface ConversationPage {
   items: ConversationView[];
   nextCursor: string | null;
+}
+
+/** One member of a group, as the info page renders them. */
+export interface GroupMemberView {
+  user: MessagingUser;
+  role: "ADMIN" | "MEMBER";
+  /** True for the viewer's own row — the UI labels it "You". */
+  isSelf: boolean;
 }
 
 export interface ConversationDetailView {

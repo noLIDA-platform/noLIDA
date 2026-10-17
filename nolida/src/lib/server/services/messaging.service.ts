@@ -53,6 +53,7 @@ import type {
   SharedItem,
   SharedItemType,
   MessagingUser,
+  GroupMemberView,
 } from "@/lib/messaging/types";
 
 type Db = Pick<PoolClient, "query">;
@@ -337,6 +338,7 @@ async function conversationViewFor(
     name: conversation.name ?? null,
     type: conversation.type,
     memberCount: conversation.member_count,
+    avatarUrl: safeHttps(conversation.avatar_url),
     otherUser: {
       id: otherId,
       username: profile?.username ?? null,
@@ -352,6 +354,13 @@ async function conversationViewFor(
     blockedByOther: blocks.blocked_by_other,
     typing: typingUserIds.length > 0,
     createdAt: conversation.created_at,
+    // Group identity only. A 1:1 has none of these three: no description,
+    // no invite code, and roles do not exist outside groups.
+    description:
+      conversation.type === "GROUP" ? (conversation.description ?? null) : null,
+    inviteCode:
+      conversation.type === "GROUP" ? (conversation.invite_code ?? null) : null,
+    viewerRole: conversation.type === "GROUP" ? member.role : null,
   };
 }
 
@@ -484,6 +493,22 @@ async function buildSharedItem(input: {
 /* Conversations                                                        */
 /* ------------------------------------------------------------------ */
 
+/** Group threads label the preview with who sent it: "Ada: On my way". */
+function prefixGroupSender(
+  row: conversationsRepo.ConversationListRow,
+  preview: ConversationPreview | null
+): ConversationPreview | null {
+  if (
+    !preview ||
+    row.type !== "GROUP" ||
+    preview.fromMe ||
+    !row.last_sender_name
+  ) {
+    return preview;
+  }
+  return { ...preview, text: `${row.last_sender_name}: ${preview.text}` };
+}
+
 export async function listConversations(input: {
   userId: string;
   limit: number;
@@ -497,8 +522,9 @@ export async function listConversations(input: {
       name: row.name ?? null,
       type: row.type,
       memberCount: row.member_count,
+      avatarUrl: safeHttps(row.avatar_url),
       otherUser: rowToOtherUser(row),
-      lastMessage: previewFromListRow(row, input.userId),
+      lastMessage: prefixGroupSender(row, previewFromListRow(row, input.userId)),
       unreadCount: row.unread_count,
       pinned: row.pinned,
       muted: row.muted,
@@ -507,6 +533,12 @@ export async function listConversations(input: {
       blockedByOther: row.blocked_by_other,
       typing: row.other_typing,
       createdAt: row.created_at,
+      // The list query never selects group identity detail — the rows exist
+      // to be a list. description/inviteCode/viewerRole arrive only through
+      // getConversation (the thread page and the info page).
+      description: null,
+      inviteCode: null,
+      viewerRole: null,
     })),
     nextCursor: page.nextCursor,
   };
@@ -1463,5 +1495,73 @@ export async function updateGlobalMessagingPrefs(
     readReceiptsEnabled: updated.read_receipts_enabled ?? false,
     typingIndicatorEnabled: updated.typing_indicator_enabled ?? false,
   };
+}
+
+/**
+ * The read-only twin of updateGlobalMessagingPrefs: what `/settings/messaging`
+ * renders before any toggle is flipped. Same client-facing names, same shape.
+ */
+export async function getGlobalMessagingPrefs(userId: string): Promise<{
+  readReceiptsEnabled: boolean;
+  typingIndicatorEnabled: boolean;
+}> {
+  return getMessagingPrefs(userId);
+}
+
+/**
+ * Every member of a group, admins first. The membership gate runs first, so
+ * a non-member gets the same 404 the thread page gives them — the member list
+ * would otherwise confirm that a conversation id exists.
+ */
+export async function listGroupMembers(input: {
+  conversationId: string;
+  userId: string;
+}): Promise<GroupMemberView[]> {
+  await requireMember(input.conversationId, input.userId);
+  const rows = await conversationsRepo.listMembers(input.conversationId);
+  return rows.map((row) => ({
+    user: {
+      id: row.user_id,
+      username: row.username,
+      displayName: row.display_name ?? row.full_name,
+      avatarUrl: safeHttps(row.avatar_url),
+    },
+    role: row.role,
+    isSelf: row.user_id === input.userId,
+  }));
+}
+
+/**
+ * Report the conversation itself. For a 1:1 the other person is named as the
+ * reported user so the admin queue has an account to act on; a group report
+ * names no single person — the conversation id is the target. The response is
+ * identical whether or not a report already exists (never a verdict, never a
+ * hint).
+ */
+export async function reportConversation(input: {
+  userId: string;
+  conversationId: string;
+  reason: string;
+  details?: string;
+}): Promise<{ reported: true }> {
+  await requireMember(input.conversationId, input.userId);
+  const row = await conversationsRepo.findById(input.conversationId);
+  if (!row) {
+    throw new ServiceError("NOT_FOUND", "That conversation was not found.");
+  }
+  const reportedUserId =
+    row.type === "DIRECT"
+      ? row.user_a === input.userId
+        ? row.user_b
+        : row.user_a
+      : null;
+  await reportsRepo.create({
+    reporterId: input.userId,
+    reportedUserId,
+    conversationId: input.conversationId,
+    reason: input.reason,
+    details: input.details ?? null,
+  });
+  return { reported: true };
 }
 

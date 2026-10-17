@@ -766,6 +766,7 @@
 - Phase 9: complete (requests and responses — post, respond, accept; see "Requests and Responses (Phase 9)" below)
 - Phase 10: complete
 - Phase 10.3: complete (group-chat backend landing — `conversations.repo.ts` and `messaging.service.ts` repaired: brace nesting, duplicated read/typing/group blocks, SQL confined to the repository, prefs-aware types; see "Messaging (Phase 10, expanded)" below)
+- Phase 10.4: complete (group-chat UI — conversation info screen, `ChatInfo` island, global messaging prefs; see "Group Chat UI (Phase 10.4)" below)
 
 ## Messaging (Phase 10, expanded)
 - Conversations are DIRECT or GROUP (max 256 members).
@@ -784,3 +785,32 @@
   now (deferred).
 - UI reference: WhatsApp (primary), iMessage (secondary). Do NOT
   copy their source code — reproduce the visual design only.
+
+## Group Chat UI (Phase 10.4)
+- `/messages/[id]/info` is the conversation info screen (Server
+  Component, `force-dynamic`, session guard). DIRECT chats show the
+  member row plus mute/pin/archive, block/report and verification
+  badges; GROUP chats additionally show name, description, photo,
+  invite code with copy + regenerate (admin only), an add-members form
+  (admin only) and the member list with per-member promote/remove
+  (admin only).
+- `ChatInfo` (`src/components/messaging/ChatInfo/`) is the client
+  island the info page renders. Props: `conversationId`,
+  `conversation`, `members`, `isAdmin`, `prefillName`. All group
+  mutations go through `apiFetch` (`PUT/POST/DELETE …/group`,
+  `…/members`, `…/members/promote`, `…/leave`, `…/report`) and render
+  `error.message` — never a raw response.
+- `MessagingSettings` (`src/app/(main)/settings/messaging/`) owns the
+  two global prefs (read receipts, typing indicators) with optimistic
+  toggle + revert on failure. The page loads `getGlobalMessagingPrefs`
+  and is linked from `SettingsMenu` under Privacy & Security.
+- Search box in ChatInfo filters loaded members client-side; promote
+  and remove confirm via `window.confirm`; leave requires typing
+  LEAVE; report needs a non-empty reason (≤ 2000 chars).
+- Stale `state.conversation` closure values must never drive renders
+  after a group update — the island keeps a `liveConversation` state
+  that replaces it.
+- Group admin transitions use `POST …/members/promote` and
+  `DELETE …/members` with `confirm()` gates; the last admin cannot be
+  removed or demoted (server enforces, UI disables with a wrapper-span
+  `title` since tooltips on disabled buttons never show).

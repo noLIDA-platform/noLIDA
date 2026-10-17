@@ -115,20 +115,29 @@ export {
   BellOff as BellOffIcon,
   CheckCheck as CheckCheckIcon,
   ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
   Copy as CopyIcon,
   CornerUpLeft as CornerUpLeftIcon,
   EllipsisVertical as MoreVerticalIcon,
   FileText as FileTextIcon,
   Flag as FlagIcon,
   Image as ImageIcon,
+  Link as LinkIcon,
   Mic as MicIcon,
   Pause as PauseIcon,
+  Pencil as EditIcon,
+  Phone as PhoneIcon,
   Pin as PinIcon,
   Play as PlayIcon,
   Plus as PlusIcon,
   Send as SendIcon,
   Smile as SmileIcon,
   Square as StopIcon,
+  Trash2 as Trash2Icon,
+  UserPlus as UserPlusIcon,
+  Users as UsersIcon,
+  Video as VideoIcon,
+  X as XIcon,
 
 
 ## 5. Services and their exports
@@ -143,7 +152,7 @@ Services live in `src/lib/server/services/`. All business logic goes here.
 | `email.service.ts` | sendOtpEmail, sendResetEmail, sendVerificationEmail, sendBulkOtpEmails, sendInvitationEmail, getOtpPurpose |
 | `feed.service.ts` | getHomeFeed, getUserPosts, getSavedPosts, getPostForViewer, countPostsByUser, countSavedPosts, countPostedPosts, countTaggedPosts |
 | `interaction.service.ts` | likePost, unlikePost, commentOnPost, deleteComment, likeComment, unlikeComment, sharePost, savePost, unsavePost, followUser, unfollowUser |
-| `messaging.service.ts` | mapMessage, listConversations, startConversation, getConversation, updateConversationSettings, listMessages, searchMessages, sendMessage, editMessage, deleteMessage, addReaction, removeReaction, forwardMessage, markConversationRead, setTyping, reportMessage, blockUser, unblockUser, createGroup, updateGroupInfo, addGroupMembers, removeGroupMember, makeGroupAdmin, leaveGroup, updateGlobalMessagingPrefs |
+| `messaging.service.ts` | mapMessage, listConversations, startConversation, getConversation, updateConversationSettings, listMessages, searchMessages, sendMessage, editMessage, deleteMessage, addReaction, removeReaction, forwardMessage, markConversationRead, setTyping, reportMessage, blockUser, unblockUser, createGroup, updateGroupInfo, addGroupMembers, removeGroupMember, makeGroupAdmin, leaveGroup, updateGlobalMessagingPrefs, getGlobalMessagingPrefs, listGroupMembers, reportConversation |
 | `post.service.ts` | createPost, updatePost, deletePost |
 | `profile.service.ts` | getOwnProfile, updateOwnProfile (`onboarding_completed: true` stamps the tour; anything else updates profile fields), getProfileData, getProfileByUsername, getProfileForViewer, getProfilePhotos |
 | `publicBusiness.service.ts` | getBySlug, listByCategory, listFeatured, countByCategory, getBusinessStats, profileTasks, profileCompletionPercent, getOwnerDashboardStats |
@@ -208,6 +217,8 @@ These pages work. Use them as templates when building a new page.
 | `src/app/(main)/my-business/page.tsx` | Dashboard-style page; `getCurrentSessionUser`; checks business status and redirects accordingly (`/my-business/pending` for non-APPROVED, `/my-business/submit` for DRAFT/CHANGES_REQUESTED) |
 | `src/app/(main)/messages/page.tsx` | Messages list page; `getCurrentSessionUser`; `listConversations` from `messaging.service`; shows empty state when no conversations |
 | `src/app/(main)/messages/[id]/page.tsx` | Conversation detail; `getConversation`; `MessageComposer`, `MessageList`, `ChatHeader` from `components/messaging` |
+| `src/app/(main)/messages/[id]/info/page.tsx` | Conversation info screen; `getConversation` + `listGroupMembers`; renders the `ChatInfo` client island (`components/messaging/ChatInfo`) with description, invite code, member roles and leave/report actions |
+| `src/app/(main)/settings/messaging/page.tsx` | Messaging prefs page; `getGlobalMessagingPrefs` from `messaging.service`; renders `MessagingSettings` client island (read receipts, typing indicators) |
 | `src/app/(main)/search/page.tsx` | Search page with debounced input; uses `search.service` (`searchPosts`, `searchBusinesses`); paginates with offset |
 
 Notes:
@@ -234,7 +245,7 @@ Notes:
 | `auth.repo.ts` | createUser, updateUser, deleteUser, findUserByEmail, findUserByPhone, findUserByOtp, createOtpRecord, getOtpRecord, updateOtpRecord, deleteOtpRecord, verifyOtp, getSession, createSession, revokeSession, revokeAllUserSessions, getActiveSessionCount, findActiveByTokenHash |
 | `business.repo.ts` | create, update, softDelete, getById, getBySlug, getByUser, listApprovedForCategory, listFeatured, countByCategory, getOwnerDashboardStats, listByBusiness |
 | `categories.repo.ts` | create, update, delete, getById, getBySlug, listAll, countBySlug, getGlobalCount |
-| `conversations.repo.ts` | findOrCreatePair, findById, getMember, listForUser, updateMemberSettings, touchLastMessage, recomputeLastMessage, createGroup, updateGroupInfo, addGroupMembers, removeGroupMember, makeGroupAdmin, leaveGroup, findByIdByInviteCode, memberCount, countAdmins |
+| `conversations.repo.ts` | findOrCreatePair, ensureMembers, findById, getMember, listMembers, listForUser, updateMemberSettings, touchLastMessage, recomputeLastMessage, createGroup, updateGroupInfo, addGroupMembers, removeGroupMember, makeGroupAdmin, leaveGroup, findByIdByInviteCode, memberCount, countAdmins |
 | `messages.repo.ts` | create, update, delete, getById, getByConversation, listByConversation, countByConversation, search, addReaction, removeReaction, forward, getConversationStats |
 | `order.repo.ts` | create, update, softDelete, getById, getByBusiness, getByUser, countByBusiness, countByUser |
 | `payments.repo.ts` | create, getById, listByBusiness, listByUser, countByStatus, createTransaction, getTransaction, listTransactions, getBalance |

@@ -5,6 +5,7 @@ import {
   CreditCard,
   KeyRound,
   LifeBuoy,
+  MessageCircle,
   Palette,
   Settings,
   ShieldCheck,
@@ -30,10 +31,11 @@ interface SettingsGroup {
 }
 
 /**
- * Ten destinations, matching the settings spec. Three of them (`/profile`,
- * `/wallet`, `/my-business`) are top-level screens rather than `/settings/*`
- * because they are reached directly from the drawer, the sidebar and the bottom
- * nav — nesting them under `/settings` would give the same screen two homes.
+ * Eleven destinations, matching the settings spec plus Messaging (Phase 10).
+ * Three of them (`/profile`, `/wallet`, `/my-business`) are top-level screens
+ * rather than `/settings/*` because they are reached directly from the drawer,
+ * the sidebar and the bottom nav — nesting them under `/settings` would give
+ * the same screen two homes.
  *
  * There is deliberately no "Delete account" row. Deleting an account needs a
  * confirmation flow and a data-retention decision, and neither exists yet; a
@@ -97,6 +99,12 @@ const GROUPS: readonly SettingsGroup[] = [
         label: "Notifications",
         description: "What we message you about, and where",
         icon: Bell,
+      },
+      {
+        href: "/settings/messaging",
+        label: "Messaging",
+        description: "Read receipts and typing indicators",
+        icon: MessageCircle,
       },
       {
         href: "/settings/appearance",

@@ -8,6 +8,7 @@ import {
   ChevronLeftIcon,
   MoreVerticalIcon,
   PinIcon,
+  PlusCircleIcon,
   SearchIcon,
   Trash2Icon,
   XIcon,
@@ -15,6 +16,7 @@ import {
 import { Avatar } from "@/components/ui/Avatar/Avatar";
 import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
+import { NewGroupDialog } from "@/components/messaging/NewGroupDialog/NewGroupDialog";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ConversationView } from "@/lib/messaging/types";
@@ -69,12 +71,15 @@ function MenuIcon({ action }: { action: MenuAction }) {
 export function ConversationList({
   conversations,
   activeId,
+  userId,
   onSelect,
   onMenu,
 }: ConversationListProps): React.JSX.Element {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [newMenuOpen, setNewMenuOpen] = useState(false);
+  const [newGroupOpen, setNewGroupOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const filtered = search.trim()
@@ -115,7 +120,50 @@ export function ConversationList({
     <div className="conv-list">
       <div className="conv-list__header">
         <h1 className="conv-list__title">Messages</h1>
+        <div className="conv-list__header-actions">
+          <button
+            type="button"
+            className="conv-list__header-action"
+            onClick={() => setNewMenuOpen((open) => !open)}
+            aria-label="New chat"
+            aria-expanded={newMenuOpen}
+          >
+            <Icon as={PlusCircleIcon} size={22} />
+          </button>
+          {newMenuOpen ? (
+            <div className="conv-list__menu" role="menu">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setNewMenuOpen(false);
+                  router.push("/discover");
+                }}
+              >
+                New chat
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setNewMenuOpen(false);
+                  setNewGroupOpen(true);
+                }}
+              >
+                New group
+              </button>
+            </div>
+          ) : null}
+        </div>
       </div>
+
+      {newGroupOpen ? (
+        <NewGroupDialog
+          currentUserId={userId}
+          onClose={() => setNewGroupOpen(false)}
+          onCreated={(conversation) => router.push(`/messages/${conversation.id}`)}
+        />
+      ) : null}
 
       <div className="conv-list__search">
         <Icon as={SearchIcon} size={14} />
@@ -156,9 +204,15 @@ export function ConversationList({
           filtered.map((conversation) => {
             const isActive = conversation.id === activeId;
             const menuOpen = menuOpenId === conversation.id;
-            const displayName =
-              conversation.otherUser.displayName ?? conversation.otherUser.username ?? "Someone";
-            const avatarUrl = conversation.otherUser.avatarUrl ?? undefined;
+            const isGroup = conversation.type === "GROUP";
+            const displayName = isGroup
+              ? conversation.name ?? "Group"
+              : conversation.otherUser.displayName ??
+                conversation.otherUser.username ??
+                "Someone";
+            const avatarUrl = isGroup
+              ? conversation.avatarUrl ?? null
+              : conversation.otherUser.avatarUrl;
             const last = conversation.lastMessage;
             const previewText = last
               ? previewLabel(last, last.fromMe)

@@ -24,8 +24,13 @@ export interface ConversationRow {
   updated_at: string;
   /** Group identity (migration 013). Null name on a 1:1 row. */
   name: string | null;
+  avatar_url: string | null;
   type: "DIRECT" | "GROUP";
   created_by: string | null;
+  /** Group description (migration 013). Only selected by the detail reads. */
+  description?: string | null;
+  /** Group invite code (migration 013). Only selected by the detail reads. */
+  invite_code?: string | null;
   /** Not a column — always read through a count subquery cast to int. */
   member_count: number;
 }
@@ -52,8 +57,11 @@ export interface ConversationListRow {
   archived: boolean;
   /** Group identity (migration 013) — `name` is null for a 1:1 row. */
   name: string | null;
+  avatar_url: string | null;
   type: "DIRECT" | "GROUP";
   member_count: number;
+  /** Display name of whoever sent the preview message (groups label it). */
+  last_sender_name: string | null;
   other_id: string;
   other_username: string | null;
   other_display_name: string | null;
@@ -88,7 +96,7 @@ export interface ConversationListPage {
  */
 const SELECT_LIST = `
   SELECT
-    c.id, c.last_message_at, c.created_at, c.name, c.type, c.created_by,
+    c.id, c.last_message_at, c.created_at, c.name, c.avatar_url, c.type, c.created_by,
     cm.pinned, cm.muted, cm.archived,
     om.user_id AS other_id,
     pr.username AS other_username,
@@ -105,6 +113,10 @@ const SELECT_LIST = `
     lm.created_at AS last_created_at,
     (SELECT count(*)::int FROM conversation_members mc
      WHERE mc.conversation_id = c.id) AS member_count,
+    (SELECT COALESCE(pr2.display_name, pr2.full_name, pr2.username)
+     FROM messages m2
+     JOIN profiles pr2 ON pr2.user_id = m2.sender_id
+     WHERE m2.id = c.last_message_id) AS last_sender_name,
     COALESCE((
       SELECT count(*) FROM messages m
       WHERE m.conversation_id = c.id
@@ -195,7 +207,8 @@ export async function findById(
   db?: Db
 ): Promise<ConversationRow | null> {
   const text = `SELECT id, user_a, user_b, last_message_id, last_message_at,
-                       created_at, updated_at, name, type, created_by,
+                       created_at, updated_at, name, avatar_url, type, created_by,
+                       description, invite_code,
                        (SELECT count(*)::int FROM conversation_members cm
                         WHERE cm.conversation_id = c.id) AS member_count
                 FROM conversations c
@@ -211,7 +224,10 @@ export async function getMember(
   userId: string,
   db?: Db
 ): Promise<ConversationMemberRow | null> {
-  const text = `SELECT conversation_id, user_id, last_read_at,
+  // `role` is load-bearing: every admin gate in the service compares
+  // member.role !== "ADMIN". Without this column in the SELECT the field
+  // is undefined and EVERY admin action is refused.
+  const text = `SELECT conversation_id, user_id, role, last_read_at,
                        last_read_message_id, pinned, muted, archived
                 FROM conversation_members
                 WHERE conversation_id = $1 AND user_id = $2`;
@@ -219,6 +235,39 @@ export async function getMember(
     ? await db.query<ConversationMemberRow>(text, [conversationId, userId])
     : await query<ConversationMemberRow>(text, [conversationId, userId]);
   return result.rows[0] ?? null;
+}
+
+/** One member row joined to the profile fields the info page renders. */
+export interface GroupMemberListRow {
+  user_id: string;
+  role: "ADMIN" | "MEMBER";
+  username: string | null;
+  display_name: string | null;
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
+/**
+ * Every member of a group, admins first then by display name. Bounded by
+ * the 256-member cap the service enforces, so this list needs no cursor —
+ * a page of members the viewer may already see in full is not pagination.
+ */
+export async function listMembers(
+  conversationId: string,
+  db?: Db
+): Promise<GroupMemberListRow[]> {
+  const text = `SELECT cm.user_id, cm.role,
+                       p.username, p.display_name, p.full_name, p.avatar_url
+                FROM conversation_members cm
+                JOIN profiles p ON p.user_id = cm.user_id
+                WHERE cm.conversation_id = $1
+                ORDER BY (cm.role = 'ADMIN') DESC,
+                         COALESCE(p.display_name, p.full_name, p.username, '') ASC,
+                         cm.user_id ASC`;
+  const result = db
+    ? await db.query<GroupMemberListRow>(text, [conversationId])
+    : await query<GroupMemberListRow>(text, [conversationId]);
+  return result.rows;
 }
 
 /**
@@ -414,7 +463,7 @@ export async function createGroup(
         (type, name, description, avatar_url, created_by, user_a, user_b, invite_code)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING id, user_a, user_b, last_message_id, last_message_at,
-                 created_at, updated_at, name, type, created_by`,
+                 created_at, updated_at, name, avatar_url, type, created_by`,
       [
         "GROUP",
         name,
@@ -705,7 +754,8 @@ export async function findByIdByInviteCode(
   db?: Db
 ): Promise<ConversationRow | null> {
   const text = `SELECT id, user_a, user_b, last_message_id, last_message_at,
-                       created_at, updated_at, name, type, created_by,
+                       created_at, updated_at, name, avatar_url, type, created_by,
+                       description, invite_code,
                        (SELECT count(*)::int FROM conversation_members cm
                         WHERE cm.conversation_id = conversations.id) AS member_count
                 FROM conversations WHERE invite_code = $1`;

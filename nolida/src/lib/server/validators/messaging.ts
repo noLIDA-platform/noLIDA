@@ -143,3 +143,81 @@ export const blockUserSchema = z.object({
 });
 
 export const documentExtensionList: readonly string[] = DOCUMENT_EXTENSIONS;
+
+/**
+ * Group chats (Phase 10, Part 4/8). Bounds mirror the service and the
+ * migration: name 1–60, description ≤200, at most 255 picked members
+ * (the creator makes 256). Every bound comes from a literal the spec
+ * fixed, validated again by the service — the dialog only counters
+ * against these same numbers.
+ */
+export const createGroupSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name your group.")
+    .max(60, "Group names are capped at 60 characters."),
+  description: z
+    .string()
+    .trim()
+    .max(200, "Descriptions are capped at 200 characters.")
+    .optional(),
+  avatarUrl: httpsUrl.nullish(),
+  memberIds: z
+    .array(uuid)
+    .min(1, "Add at least one person.")
+    .max(255, "Groups are capped at 256 members in total."),
+});
+
+export const updateGroupInfoSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, "Name your group.")
+      .max(60, "Group names are capped at 60 characters.")
+      .optional(),
+    description: z
+      .string()
+      .trim()
+      .max(200, "Descriptions are capped at 200 characters.")
+      .optional(),
+    avatarUrl: httpsUrl.nullish(),
+  })
+  .refine(
+    (value) =>
+      value.name !== undefined ||
+      value.description !== undefined ||
+      value.avatarUrl !== undefined,
+    { message: "Nothing to update." }
+  );
+
+export const addGroupMembersSchema = z.object({
+  memberIds: z
+    .array(uuid)
+    .min(1, "Pick at least one person to add.")
+    .max(255, "Groups are capped at 256 members in total."),
+});
+
+export const reportConversationSchema = z.object({
+  reason: z.enum(REPORT_REASONS, { message: "Choose a reason." }),
+  details: z.string().trim().max(2000).optional(),
+});
+
+/** Body of `POST .../members/promote` — promote the named member. */
+export const promoteMemberSchema = z.object({ userId: uuid });
+
+/** Query of `DELETE .../members?userId=` — remove the named member. */
+export const removeMemberQuerySchema = z.object({ userId: uuid });
+
+export const messagingPrefsSchema = z
+  .object({
+    readReceipts: z.boolean().optional(),
+    typingIndicator: z.boolean().optional(),
+  })
+  .refine(
+    (value) =>
+      value.readReceipts !== undefined ||
+      value.typingIndicator !== undefined,
+    { message: "Nothing to update." }
+  );

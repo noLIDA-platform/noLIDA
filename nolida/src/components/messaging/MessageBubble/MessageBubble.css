@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  max-width: min(75%, 480px);
+  max-width: min(65%, 480px);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -14,11 +14,31 @@
   min-width: 0;
 }
 
+/* Sent bubbles are a soft indigo tint on the thread surface, not a solid
+   brand fill — the tint marks the side without shouting, and keeps dark
+   text readable in both themes. */
 .msg-bubble--mine {
+  --bubble-tint: color-mix(in srgb, var(--color-primary) 16%, var(--color-bg));
   align-self: flex-end;
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #fff;
+  background-color: var(--bubble-tint);
+  border-color: transparent;
+  color: var(--color-text);
+  border-bottom-right-radius: var(--radius-sm);
+}
+
+/* Tail on the last bubble of a sent run: a 45°-rotated square tucked into
+   the bottom-right corner, painted with the bubble's own tint so the two
+   read as one shape. */
+.msg-bubble--mine.msg-bubble--tail::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--bubble-tint);
+  transform: rotate(45deg);
+  border-radius: 0 0 3px 0;
 }
 
 .msg-bubble--theirs {
@@ -32,6 +52,12 @@
   white-space: pre-wrap;
   /* A long unbroken URL must wrap, not push the bubble past the column. */
   overflow-wrap: anywhere;
+}
+
+.msg-bubble__sender {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary);
 }
 
 .msg-bubble__forwarded {
@@ -53,7 +79,7 @@
 }
 
 .msg-bubble--mine .msg-bubble__reply {
-  background-color: rgba(255, 255, 255, 0.18);
+  background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 .msg-bubble__reply-name {
@@ -80,7 +106,7 @@
 }
 
 .msg-bubble--mine .msg-bubble__deleted {
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--color-text-muted);
 }
 
 .msg-bubble__meta {
@@ -125,7 +151,7 @@
 }
 
 .msg-bubble--mine .msg-bubble__file {
-  background-color: rgba(255, 255, 255, 0.18);
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
 .msg-bubble__file-text {
@@ -169,10 +195,8 @@
   cursor: pointer;
 }
 
-.msg-bubble--mine .msg-bubble__reaction {
-  background-color: rgba(255, 255, 255, 0.9);
-  border-color: transparent;
-}
+/* Mine inherits the neutral reaction chip — the tint behind it already marks
+   ownership. */
 
 .msg-bubble__reaction--mine {
   border-color: var(--color-primary);

@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   FileTextIcon,
   ImageIcon,
+  PlusIcon,
   SendIcon,
   XIcon,
 } from "@/components/ui/Icons";
+import { Icon } from "@/components/ui/Icon/Icon";
 
 import {
   DOCUMENT_EXTENSIONS,
@@ -109,6 +111,7 @@ export function MessageComposer({
 }: MessageComposerProps): React.JSX.Element {
   const [body, setBody] = useState("");
   const [attachments, setAttachments] = useState<StagedAttachment[]>([]);
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false);
 
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +119,7 @@ export function MessageComposer({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const attachWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -135,6 +139,29 @@ export function MessageComposer({
       });
     };
   }, []);
+
+  // The Plus menu closes on outside click or Escape, like every other
+  // floating menu in the messaging UI.
+  useEffect(() => {
+    if (!attachMenuOpen) return;
+    const onPointer = (event: MouseEvent): void => {
+      if (
+        attachWrapRef.current &&
+        !attachWrapRef.current.contains(event.target as Node)
+      ) {
+        setAttachMenuOpen(false);
+      }
+    };
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === "Escape") setAttachMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [attachMenuOpen]);
 
   function removeAttachment(index: number): void {
     setAttachments((current) => {
@@ -364,68 +391,97 @@ export function MessageComposer({
 
       {error ? <div className="message-composer__error">{error}</div> : null}
 
-      <div className="message-composer__toolbar">
-        <input
-          ref={imageInputRef}
-          className="message-composer__toolbar-input"
-          type="file"
-          accept="image/*"
-          multiple={false}
-          onChange={(event) => {
-            handleFilesSelected(event.target.files);
-            event.target.value = "";
-          }}
-        />
-        <input
-          ref={fileInputRef}
-          className="message-composer__toolbar-input"
-          type="file"
-          multiple={true}
-          onChange={(event) => {
-            handleFilesSelected(event.target.files);
-            event.target.value = "";
-          }}
-        />
+      {/* Hidden pickers: the Plus menu below triggers them by ref. */}
+      <input
+        ref={imageInputRef}
+        className="message-composer__attach-input"
+        type="file"
+        accept="image/*"
+        multiple={false}
+        onChange={(event) => {
+          handleFilesSelected(event.target.files);
+          event.target.value = "";
+        }}
+      />
+      <input
+        ref={fileInputRef}
+        className="message-composer__attach-input"
+        type="file"
+        multiple={true}
+        onChange={(event) => {
+          handleFilesSelected(event.target.files);
+          event.target.value = "";
+        }}
+      />
 
-        <button
-          type="button"
-          className="message-composer__toolbar-button"
-          onClick={() => imageInputRef.current?.click()}
-          disabled={sending || uploadingCount > 0 || attachments.length >= MAX_ATTACHMENTS}
-          aria-label="Add image"
-        >
-          <ImageIcon size={16} />
-          <span className="message-composer__toolbar-label">Photo</span>
-        </button>
-
-        <button
-          type="button"
-          className="message-composer__toolbar-button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={sending || uploadingCount > 0 || attachments.length >= MAX_ATTACHMENTS}
-          aria-label="Add file"
-        >
-          <FileTextIcon size={16} />
-          <span className="message-composer__toolbar-label">File</span>
-        </button>
-
-
-      </div>
-
-      <div className="message-composer__input-row">
-        {replyToId ? (
-          <div className="message-composer__reply-banner">
-            <span>Replying to {replyTo?.name ?? "this message"}</span>
-            <button
-              type="button"
-              className="message-composer__reply-banner__close"
-              onClick={() => onCancelReply?.()}
-              aria-label="Cancel reply"
-            >
-              <XIcon size={14} />
-            </button>
+      {/* Reply preview sits ABOVE the input, marked by a 4px brand accent —
+          never beside the field it describes. */}
+      {replyToId ? (
+        <div className="message-composer__reply-bar">
+          <div className="message-composer__reply-bar__text">
+            <span className="message-composer__reply-bar__name">
+              Replying to {replyTo?.name ?? "this message"}
+            </span>
+            {replyTo?.preview ? (
+              <span className="message-composer__reply-bar__preview">
+                {replyTo.preview}
+              </span>
+            ) : null}
           </div>
-        ) : null}
+          <button
+            type="button"
+            className="message-composer__reply-bar__close"
+            onClick={() => onCancelReply?.()}
+            aria-label="Cancel reply"
+          >
+            <XIcon size={14} />
+          </button>
+        </div>
+      ) : null}
+
+      {/* One row: Plus menu, pill field, circular send (only when there is
+          something to send). */}
+      <div className="message-composer__input-row">
+        <div className="message-composer__attach-wrap" ref={attachWrapRef}>
+          <button
+            type="button"
+            className="message-composer__plus"
+            onClick={() => setAttachMenuOpen((open) => !open)}
+            aria-label="Add attachment"
+            aria-haspopup="menu"
+            aria-expanded={attachMenuOpen}
+          >
+            <Icon as={PlusIcon} size={20} />
+          </button>
+          {attachMenuOpen ? (
+            <div className="message-composer__attach-menu" role="menu">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setAttachMenuOpen(false);
+                  imageInputRef.current?.click();
+                }}
+                disabled={sending || uploadingCount > 0 || attachments.length >= MAX_ATTACHMENTS}
+              >
+                <ImageIcon size={16} />
+                Photo
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setAttachMenuOpen(false);
+                  fileInputRef.current?.click();
+                }}
+                disabled={sending || uploadingCount > 0 || attachments.length >= MAX_ATTACHMENTS}
+              >
+                <FileTextIcon size={16} />
+                File
+              </button>
+            </div>
+          ) : null}
+        </div>
 
         <textarea
           className="message-composer__textarea"
@@ -439,17 +495,19 @@ export function MessageComposer({
           aria-label="Message"
         />
 
-        <button
-          type="button"
-          className="message-composer__send"
-          onClick={() => {
-            void handleSend();
-          }}
-          disabled={!canSubmit}
-          aria-label="Send message"
-        >
-          <SendIcon size={18} />
-        </button>
+        {trimmedBody.length > 0 || attachments.length > 0 ? (
+          <button
+            type="button"
+            className="message-composer__send"
+            onClick={() => {
+              void handleSend();
+            }}
+            disabled={!canSubmit}
+            aria-label="Send message"
+          >
+            <SendIcon size={18} />
+          </button>
+        ) : null}
       </div>
     </div>
   );

@@ -32,25 +32,10 @@ export default async function MessagesPage({
 
   return (
     <div className="messages-page">
-      <div className="messages-page__head">
-        <header className="messages-page__header">
-          <h1 className="messages-page__title">Messages</h1>
-        </header>
-      </div>
-
-      {conversations.items.length === 0 ? (
-        <div className="messages-page__empty">
-          <p className="messages-page__empty-text">
-            No conversations yet. Message a business or a person from the
-            feed to start a thread.
-          </p>
-        </div>
-      ) : (
-        <ConversationList
-          conversations={conversations.items}
-          userId={session.user.id}
-        />
-      )}
+      <ConversationList
+        conversations={conversations.items}
+        userId={session.user.id}
+      />
     </div>
   );
 }

@@ -23,6 +23,10 @@ import "./MessageBubble.css";
 export interface MessageBubbleProps {
   message: MessageView;
   isMine: boolean;
+  /** GROUP chats: label the first message of each sender-run with their name. */
+  showSenderName?: boolean;
+  /** Last bubble of a sent run — draws the WhatsApp-style tail. */
+  showTail?: boolean;
   onReply: (message: MessageView) => void;
   onReact: (message: MessageView, emoji: string) => void;
   onForward: (message: MessageView) => void;
@@ -56,6 +60,8 @@ function formatBytes(size: number): string {
 export function MessageBubble({
   message,
   isMine,
+  showSenderName,
+  showTail,
   onReply,
   onReact,
   onForward,
@@ -104,6 +110,7 @@ export function MessageBubble({
   const classes = [
     "msg-bubble",
     isMine ? "msg-bubble--mine" : "msg-bubble--theirs",
+    isMine && showTail ? "msg-bubble--tail" : "",
     className ?? "",
   ]
     .filter(Boolean)
@@ -111,6 +118,12 @@ export function MessageBubble({
 
   return (
     <article className={classes}>
+      {!isMine && showSenderName && !deleted ? (
+        <span className="msg-bubble__sender">
+          {message.sender.displayName ?? message.sender.username ?? "Someone"}
+        </span>
+      ) : null}
+
       {message.replyTo ? (
         <div className="msg-bubble__reply">
           <Icon as={CornerUpLeftIcon} size={12} />
