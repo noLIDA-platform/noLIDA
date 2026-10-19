@@ -80,9 +80,20 @@ export function MessageActionsMenu({
     <div
       className="msg-actions-menu__overlay"
       onMouseDown={(event) => {
+        // Left click dismisses. A right-button press is owned by
+        // onContextMenu below — closing here too would race the contextmenu
+        // that fires right after mousedown and could flash the browser's
+        // native menu over ours.
+        if (event.button !== 0) return;
         if (event.target === event.currentTarget) onClose();
       }}
       onTouchStart={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      onContextMenu={(event) => {
+        // Desktop right-click: never show the native menu over this one.
+        // Right-click on the overlay background (outside the card) dismisses.
+        event.preventDefault();
         if (event.target === event.currentTarget) onClose();
       }}
     >
