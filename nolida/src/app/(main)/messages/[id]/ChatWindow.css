@@ -43,3 +43,12 @@
   background: var(--color-bg);
   padding: var(--space-2) var(--space-3);
 }
+
+/* Each message row owns the long-press / right-click surface for the
+   floating MessageActionsMenu. The row stretches full width so the press
+   target is generous; the bubble inside keeps its own alignment. */
+.chat-window__row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ChatHeader } from "@/components/messaging/ChatHeader/ChatHeader";
+import { MessageActionsMenu } from "@/components/messaging/MessageActionsMenu/MessageActionsMenu";
 import { MessageBubble } from "@/components/messaging/MessageBubble/MessageBubble";
 import { MessageComposer, type ComposerReplyContext, type AttachmentInput } from "@/components/messaging/MessageComposer/MessageComposer";
 import { TypingIndicator } from "@/components/messaging/TypingIndicator/TypingIndicator";
@@ -29,7 +30,7 @@ function formatDateDivider(iso: string): string {
 
   if (isToday) return "Today";
   if (isYesterday) return "Yesterday";
-  return date.toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function sameDay(a: string, b: string): boolean {
@@ -51,12 +52,19 @@ export function ChatWindow({
   const [messages, setMessages] = useState<MessageView[]>(initialMessages);
   const [replyTo, setReplyTo] = useState<ComposerReplyContext | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  /** Long-press (touch) or right-click (desktop) menu anchor. */
+  const [menuState, setMenuState] = useState<{
+    message: MessageView;
+    x: number;
+    y: number;
+  } | null>(null);
   const [sending, setSending] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<number | null>(null);
   const typingRef = useRef<number | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const otherName =
     conversation.otherUser.displayName ??
@@ -346,6 +354,15 @@ export function ChatWindow({
     setMenuOpen(!menuOpen);
   };
 
+  // WhatsApp shows receipts only under the LAST message the viewer sent —
+  // one id, computed over the flat list, passed down as showReceipt.
+  const lastOwnMessageId = (() => {
+    for (let i = messages.length - 1; i >= 0; i -= 1) {
+      if (messages[i].sender.id === viewerId) return messages[i].id;
+    }
+    return null;
+  })();
+
   // Group messages by date.
   const groups: { date: string; items: MessageView[] }[] = [];
   let currentDate: string | null = null;
@@ -400,26 +417,53 @@ export function ChatWindow({
             </div>
             {group.items.map((message, idx) => {
               const isMine = message.sender.id === viewerId;
-              // The tail sits on the LAST bubble of a sent run; the run ends
-              // at the end of the day group or at the first reply from the
-              // other side.
+              // The tail sits on the LAST bubble of a run — mine or theirs.
+              // A run ends at the end of the day group or at the first
+              // message from the other side.
               const next = group.items[idx + 1];
-              const showTail = isMine && (!next || next.sender.id !== viewerId);
+              const showTail = !next || next.sender.id !== message.sender.id;
 
               return (
-                <MessageBubble
+                <div
                   key={message.id}
-                  message={message}
-                  isMine={isMine}
-                  showSenderName={senderNameIds.has(message.id)}
-                  showTail={showTail}
-                  onReply={handleReply}
-                  onReact={handleReact}
-                  onForward={handleForward}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  onReport={handleReport}
-                />
+                  className="chat-window__row"
+                  onTouchStart={(e) => {
+                    const touch = e.touches[0];
+                    longPressTimer.current = setTimeout(() => {
+                      setMenuState({ message: message, x: touch.clientX, y: touch.clientY });
+                    }, 500);
+                  }}
+                  onTouchEnd={() => {
+                    if (longPressTimer.current) {
+                      clearTimeout(longPressTimer.current);
+                      longPressTimer.current = null;
+                    }
+                  }}
+                  onTouchMove={() => {
+                    if (longPressTimer.current) {
+                      clearTimeout(longPressTimer.current);
+                      longPressTimer.current = null;
+                    }
+                  }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    setMenuState({ message: message, x: e.clientX, y: e.clientY });
+                  }}
+                >
+                  <MessageBubble
+                    message={message}
+                    isMine={isMine}
+                    showSenderName={senderNameIds.has(message.id)}
+                    showTail={showTail}
+                    showReceipt={message.id === lastOwnMessageId}
+                    onReply={handleReply}
+                    onReact={handleReact}
+                    onForward={handleForward}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onReport={handleReport}
+                  />
+                </div>
               );
             })}
           </div>
@@ -440,6 +484,38 @@ export function ChatWindow({
           onSend={handleSend}
         />
       </div>
+
+      {menuState ? (
+        <MessageActionsMenu
+          message={menuState.message}
+          isOwn={menuState.message.sender.id === viewerId}
+          x={menuState.x}
+          y={menuState.y}
+          onReact={(emoji) => {
+            handleReact(menuState.message, emoji);
+            setMenuState(null);
+          }}
+          onReply={() => {
+            handleReply(menuState.message);
+            setMenuState(null);
+          }}
+          onForward={() => {
+            handleForward(menuState.message);
+            setMenuState(null);
+          }}
+          onCopy={() => {
+            if (menuState.message.body) {
+              void navigator.clipboard?.writeText(menuState.message.body).catch(() => {});
+            }
+            setMenuState(null);
+          }}
+          onDelete={() => {
+            handleDelete(menuState.message, "me");
+            setMenuState(null);
+          }}
+          onClose={() => setMenuState(null)}
+        />
+      ) : null}
     </div>
   );
 }

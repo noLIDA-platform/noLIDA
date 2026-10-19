@@ -41,8 +41,25 @@
   border-radius: 0 0 3px 0;
 }
 
+/* Tail on the last bubble of a received run: a 45°-rotated square tucked into
+   the bottom-left corner, painted with the surface so the two read as one
+   shape. Mirrors .msg-bubble--mine above. */
+.msg-bubble--theirs.msg-bubble--tail::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: -4px;
+  width: 12px;
+  height: 12px;
+  background: var(--color-bg);
+  transform: rotate(45deg) translateY(-50%);
+  border-radius: 2px;
+  z-index: -1;
+}
+
 .msg-bubble--theirs {
   align-self: flex-start;
+  border-bottom-left-radius: var(--radius-sm);
 }
 
 .msg-bubble__body {
@@ -119,7 +136,7 @@
 }
 
 .msg-bubble__read {
-  color: var(--color-accent-cyan);
+  color: var(--color-primary);
   font-size: var(--text-xs);
   letter-spacing: -0.1em;
 }
@@ -203,136 +220,11 @@
   box-shadow: 0 0 0 1px var(--color-primary);
 }
 
-/* Action buttons: present but quiet, revealed on hover/focus. They stay in
-   the layout (not display:none) so keyboards can always reach them. */
-
-.msg-bubble__actions {
-  position: absolute;
-  top: 2px;
-  right: -34px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.msg-bubble--mine .msg-bubble__actions {
-  right: auto;
-  left: -34px;
-}
-
-.msg-bubble:hover .msg-bubble__actions,
-.msg-bubble__actions:focus-within {
-  opacity: 1;
-}
-
-.msg-bubble__action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border: 1px solid var(--color-border);
-  border-radius: 50%;
-  background-color: var(--color-bg);
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-
-.msg-bubble__action:hover {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-}
-
-/* Reaction picker and menu: absolutely positioned, hidden with a class (not
-   v-if) so the focus order does not jump when they open. */
-
-.msg-bubble__picker,
-.msg-bubble__menu {
-  position: absolute;
-  z-index: 5;
-  display: flex;
-  padding: var(--space-1);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background-color: var(--color-bg);
-  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.12));
-}
-
-.msg-bubble__picker {
-  top: 0;
-  right: 0;
-  gap: 2px;
-}
-
-.msg-bubble--mine .msg-bubble__picker {
-  right: auto;
-  left: 0;
-}
-
-.msg-bubble__picker button {
-  border: 0;
-  background: none;
-  font-size: 18px;
-  line-height: 1;
-  padding: var(--space-1);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.msg-bubble__picker button:hover {
-  background-color: var(--color-bg-subtle);
-  transform: scale(1.15);
-}
-
-.msg-bubble__menu {
-  top: 0;
-  right: 0;
-  flex-direction: column;
-  min-width: 180px;
-  border-radius: var(--radius-md);
-  padding: var(--space-1);
-}
-
-.msg-bubble--mine .msg-bubble__menu {
-  right: auto;
-  left: 0;
-}
-
-.msg-bubble__menu button {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: none;
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  font-family: inherit;
-  text-align: left;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.msg-bubble__menu button:hover {
-  background-color: var(--color-bg-subtle);
-}
-
-.msg-bubble__menu-danger {
-  color: var(--color-error) !important;
-}
-
-.msg-bubble__picker--hidden,
-.msg-bubble__menu--hidden {
-  display: none;
-}
-
-/* Touch devices never hover: reveal the affordances so a phone can reach
-   them. */
+/* Touch devices never hover: the long-press / right-click menu in ChatWindow
+   is the action surface, so no hover-revealed affordances remain here. */
 @media (hover: none) {
-  .msg-bubble__actions {
-    opacity: 1;
+  .msg-bubble {
+    /* Long-press still works — this keeps the rule as documentation. */
+    touch-action: pan-y;
   }
 }

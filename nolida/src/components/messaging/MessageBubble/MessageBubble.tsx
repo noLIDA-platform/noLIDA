@@ -1,20 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import {
   CornerUpLeftIcon,
   FileTextIcon,
-  FlagIcon,
-  MoreVerticalIcon,
-  PlusIcon,
-  SmileIcon,
   Trash2Icon,
 } from "@/components/ui/Icons";
 import { Icon } from "@/components/ui/Icon/Icon";
-import {
-  EDIT_WINDOW_MS,
-  REACTION_EMOJIS,
-} from "@/lib/messaging/constants";
 import type { MessageView } from "@/lib/messaging/types";
 import { SharedItemCard } from "@/components/messaging/SharedItemCard/SharedItemCard";
 
@@ -25,8 +16,13 @@ export interface MessageBubbleProps {
   isMine: boolean;
   /** GROUP chats: label the first message of each sender-run with their name. */
   showSenderName?: boolean;
-  /** Last bubble of a sent run — draws the WhatsApp-style tail. */
+  /** Last bubble of a run — draws the WhatsApp-style tail. */
   showTail?: boolean;
+  /**
+   * WhatsApp shows receipts only under the LAST message the viewer sent —
+   * every bubble knows its own read state, but only one may display it.
+   */
+  showReceipt?: boolean;
   onReply: (message: MessageView) => void;
   onReact: (message: MessageView, emoji: string) => void;
   onForward: (message: MessageView) => void;
@@ -62,6 +58,7 @@ export function MessageBubble({
   isMine,
   showSenderName,
   showTail,
+  showReceipt = false,
   onReply,
   onReact,
   onForward,
@@ -70,47 +67,12 @@ export function MessageBubble({
   onReport,
   className,
 }: MessageBubbleProps): React.JSX.Element {
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
-
-  useEffect(() => {
-    if (!menuOpen && !pickerOpen) return;
-    const onPointer = (event: MouseEvent): void => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-        setPickerOpen(false);
-      }
-    };
-    const onKey = (event: KeyboardEvent): void => {
-      if (event.key === "Escape") {
-        setMenuOpen(false);
-        setPickerOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onPointer);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onPointer);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [menuOpen, pickerOpen]);
-
   const deleted = message.status === "DELETED";
-  const canEdit =
-    isMine &&
-    !deleted &&
-    Date.now() - new Date(message.createdAt).getTime() < EDIT_WINDOW_MS &&
-    Boolean(message.body) &&
-    message.attachments.length === 0 &&
-
-    !message.sharedItem;
-  const canDeleteForEveryone = isMine && !deleted;
 
   const classes = [
     "msg-bubble",
     isMine ? "msg-bubble--mine" : "msg-bubble--theirs",
-    isMine && showTail ? "msg-bubble--tail" : "",
+    showTail ? "msg-bubble--tail" : "",
     className ?? "",
   ]
     .filter(Boolean)
@@ -197,7 +159,7 @@ export function MessageBubble({
         <div className="msg-bubble__meta">
           {message.editedAt ? <span>edited</span> : null}
           <time dateTime={message.createdAt}>{formatTime(message.createdAt)}</time>
-          {isMine && message.readByOther ? (
+          {isMine && showReceipt && message.readByOther ? (
             <span className="msg-bubble__read" title="Read">
               ✓✓
             </span>
@@ -229,145 +191,6 @@ export function MessageBubble({
               {reaction.count > 1 ? <span>{reaction.count}</span> : null}
             </button>
           ))}
-        </div>
-      ) : null}
-
-      {!deleted ? (
-        <div className="msg-bubble__actions" ref={menuRef}>
-          <div
-            className={[
-              "msg-bubble__picker",
-              pickerOpen ? "" : "msg-bubble__picker--hidden",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            role="menu"
-            aria-label="Pick a reaction"
-          >
-            {REACTION_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                type="button"
-                onClick={() => {
-                  onReact(message, emoji);
-                  setPickerOpen(false);
-                }}
-                aria-label={`React with ${emoji}`}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="msg-bubble__action"
-            onClick={() => {
-              setPickerOpen((open) => !open);
-              setMenuOpen(false);
-            }}
-            aria-label="React to this message"
-            aria-pressed={pickerOpen}
-          >
-            <Icon as={SmileIcon} size={14} />
-          </button>
-
-          <button
-            type="button"
-            className="msg-bubble__action"
-            onClick={() => {
-              setMenuOpen((open) => !open);
-              setPickerOpen(false);
-            }}
-            aria-label="Message actions"
-            aria-expanded={menuOpen}
-            aria-haspopup="menu"
-          >
-            <Icon as={MoreVerticalIcon} size={14} />
-          </button>
-
-          <div
-            className={[
-              "msg-bubble__menu",
-              menuOpen ? "" : "msg-bubble__menu--hidden",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            role="menu"
-          >
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                onReply(message);
-                setMenuOpen(false);
-              }}
-            >
-              <Icon as={CornerUpLeftIcon} size={14} />
-              Reply
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                onForward(message);
-                setMenuOpen(false);
-              }}
-            >
-              <Icon as={PlusIcon} size={14} />
-              Forward…
-            </button>
-            {canEdit ? (
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
-                  onEdit(message);
-                  setMenuOpen(false);
-                }}
-              >
-                Edit
-              </button>
-            ) : null}
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                onDelete(message, "me");
-                setMenuOpen(false);
-              }}
-            >
-              <Icon as={Trash2Icon} size={14} />
-              Delete for me
-            </button>
-            {canDeleteForEveryone ? (
-              <button
-                type="button"
-                role="menuitem"
-                className="msg-bubble__menu-danger"
-                onClick={() => {
-                  onDelete(message, "everyone");
-                  setMenuOpen(false);
-                }}
-              >
-                Delete for everyone
-              </button>
-            ) : null}
-            {!isMine ? (
-              <button
-                type="button"
-                role="menuitem"
-                className="msg-bubble__menu-danger"
-                onClick={() => {
-                  onReport(message);
-                  setMenuOpen(false);
-                }}
-              >
-                <Icon as={FlagIcon} size={14} />
-                Report
-              </button>
-            ) : null}
-          </div>
         </div>
       ) : null}
     </article>
