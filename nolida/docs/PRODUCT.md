@@ -66,11 +66,11 @@ requires an `Idempotency-Key`. These are locked rules, not preferences
 | 3 | auth backend: migrations, OTP, sessions | done | `docs/AUTH.md`, `docs/DATABASE.md` |
 | 4 | auth screens + API wiring + HTTP end-to-end | **done** | `docs/PHASE-4B.md` (screens), `docs/PHASE-4.md` (wiring), `docs/AUTH-UI.md` |
 | 5 | first session-gated screens: app shell, `/home`, `/profile`, settings index | **5A done**; 5B is the feed; 5C is profile editing | `docs/PHASE-5A.md`, `docs/FEED.md` |
-| 6 | fintail adapter, wallet funding, balance reads | not started | — |
-| 7 | publishing, posts and the activity that fills `/home` | **5B in progress** — posts, comments, follows; ranking stays chronological | `docs/FEED.md` |
-| 8 | plans, subscriptions, the eligibility rule, Termii OTP delivery | not started | — |
-| 9 | business dashboard and virtual-card issuance | not started | — |
-| 10 | hardening: Redis rate limits, observability, launch checks | not started | — |
+| 6 | search and discovery: full-text + trigram, `/discover` | **done** | `docs/SEARCH.md` |
+| 7 | business authorization and submissions flow, in-app request flow, OTP bypass | **done** (7B–7F.5) | `docs/BUSINESS.md`, `docs/BUSINESS-REQUEST.md` |
+| 8 | catalog, public business profile, My Business dashboard, mobile hardening | **done** (8A–8G) | `docs/CATALOG.md`, `docs/PUBLIC-BUSINESS.md`, `docs/MY-BUSINESS.md` |
+| 9 | requests and responses: request entity + REQUEST_POST, offers, accept | **done** | `docs/REQUESTS.md` |
+| 10 | messaging: direct + group chats, reactions, replies, read receipts, typing, mute/pin/archive, block/report | **done** (10–10.4); calls deferred to 10.5 | `docs/MESSAGING.md` |
 
 Phase 4 was carried out in two steps because the screens were built before the
 routes existed: the slice that shipped the frontend was tracked as **4B**, and

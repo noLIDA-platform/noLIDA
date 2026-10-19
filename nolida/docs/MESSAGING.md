@@ -98,7 +98,12 @@ row.
 
 - Voice calls
 - Video calls
-- Group chats
+
+Group chats shipped in Phase 10.3 (backend) and 10.4 (UI): DIRECT and
+GROUP conversations (max 256 members), ADMIN/MEMBER roles, invite codes,
+per-chat mute/pin/archive, global read-receipt and typing prefs —
+see `.clinerules` "Messaging (Phase 10, expanded)" and "Group Chat UI
+(Phase 10.4)".
 
 ## WhatsApp reference notes
 
