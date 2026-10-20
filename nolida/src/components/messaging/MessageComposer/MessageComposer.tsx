@@ -63,6 +63,12 @@ export interface MessageComposerProps {
     voiceNote?: { url: string; duration: number };
     replyToId?: string;
   }) => Promise<void>;
+  /**
+   * Fires on every keystroke in the textarea. The parent owns the typing
+   * throttle/debounce — the composer stays unaware of the typing endpoint,
+   * exactly as it is unaware of the send endpoint (onSend goes up too).
+   */
+  onType?: () => void;
   placeholder?: string;
 }
 
@@ -107,6 +113,7 @@ export function MessageComposer({
   replyToId,
   onCancelReply,
   onSend,
+  onType,
   placeholder,
 }: MessageComposerProps): React.JSX.Element {
   const [body, setBody] = useState("");
@@ -487,7 +494,10 @@ export function MessageComposer({
           className="message-composer__textarea"
           rows={1}
           value={body}
-          onChange={(event) => setBody(event.target.value)}
+          onChange={(event) => {
+            setBody(event.target.value);
+            onType?.();
+          }}
           placeholder={placeholder ?? "Message"}
           maxLength={MESSAGE_BODY_MAX}
           onKeyDown={handleKeyDown}

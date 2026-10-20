@@ -74,8 +74,27 @@ it.
 ## Typing indicators
 
 The `typing_status` table stores `(conversation_id, user_id, expires_at)`. The
-client re-arms the flag every few seconds while typing. Entries older than 5
-seconds are considered stale.
+client re-arms the flag while typing. Entries older than 5 seconds are
+considered stale.
+
+The full round trip:
+
+- The composer fires `onType` on every keystroke. `ChatWindow` throttles that
+  to one `POST /api/conversations/[id]/typing` per second (`TYPING_THROTTLE_MS`)
+  and debounce-clears with `DELETE` after 3s of silence (`TYPING_DEBOUNCE_MS`).
+  Both timers are refs, one-shot — no `setInterval` on the write side.
+- Sending a message clears the flag immediately (the message itself is the
+  signal), as does leaving the conversation.
+- The receiving chat polls `GET /api/conversations/[id]/typing` every 1.5s
+  (`TYPING_POLL_INTERVAL_MS`), paused via `document.visibilityState` while the
+  tab is hidden. The GET returns `{ typing, name }` where `name` is the first
+  typer's display name (group chats); the 1:1 UI falls back to the participant
+  it already knows.
+- A user with `typing_indicator_enabled = false` never writes the row, so they
+  never appear as typing to anyone.
+- The GET is deliberately its own endpoint rather than piggybacking on
+  `GET /api/conversations/[id]`, which fetches the whole conversation and is
+  far too heavy to poll every 1.5s.
 
 ## Mute / pin / archive
 

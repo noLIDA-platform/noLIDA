@@ -1160,6 +1160,38 @@ export async function setTyping(input: {
   return { typing: input.typing };
 }
 
+/**
+ * READ side of typing: is anyone else typing in this conversation right now?
+ *
+ * Polled by the open chat window every 1.5s. Membership is verified (a
+ * non-member could otherwise probe conversation activity), and the caller's
+ * own row is excluded — you are never "someone else" to yourself. Stale rows
+ * are pruned by the repo, so a crashed tab stops showing as typing within
+ * the 5s TTL without anyone having to clear it.
+ *
+ * Returns the first typer's display name so a group chat can say WHO is
+ * typing; `name` is null for 1:1 conversations, where the client already
+ * knows the other participant.
+ */
+export async function getTypingStatus(input: {
+  userId: string;
+  conversationId: string;
+}): Promise<{ typing: boolean; name: string | null }> {
+  await requireMember(input.conversationId, input.userId);
+  const typingUserIds = await typingRepo.listActiveUserIds({
+    conversationId: input.conversationId,
+    excludeUserId: input.userId,
+  });
+  if (typingUserIds.length === 0) {
+    return { typing: false, name: null };
+  }
+  const profile = await profilesRepo.findByUserId(typingUserIds[0]);
+  return {
+    typing: true,
+    name: profile?.display_name ?? profile?.full_name ?? profile?.username ?? null,
+  };
+}
+
 /* ------------------------------------------------------------------ */
 /* Safety: reports and blocks                                            */
 /* ------------------------------------------------------------------ */

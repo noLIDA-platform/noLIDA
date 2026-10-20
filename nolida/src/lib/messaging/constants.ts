@@ -35,8 +35,20 @@ export type ReactionEmoji = (typeof REACTION_EMOJIS)[number];
 /** The recorder auto-stops here; longer would be a hostage note. */
 export const VOICE_MAX_MS = 5 * 60 * 1000;
 
-/** A typing flag expires this fast; the client re-arms it while typing. */
-export const TYPING_TTL_MS = 10_000;
+/**
+ * A typing flag expires this fast; the client re-arms it while typing.
+ * Matches the documented staleness window in docs/MESSAGING.md (5s).
+ */
+export const TYPING_TTL_MS = 5_000;
+
+/** Keystroke throttle: at most one typing POST per second while typing. */
+export const TYPING_THROTTLE_MS = 1_000;
+
+/** Silence this long means the user stopped — clear the flag. */
+export const TYPING_DEBOUNCE_MS = 3_000;
+
+/** How often an open chat checks whether the other side is typing. */
+export const TYPING_POLL_INTERVAL_MS = 1_500;
 
 /**
  * Poll cadence when Supabase Realtime is not configured (or as the

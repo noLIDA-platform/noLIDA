@@ -11,6 +11,9 @@ import type { ConversationView, MessageView } from "@/lib/messaging/types";
 import {
   MESSAGE_PAGE_SIZE,
   POLL_INTERVAL_MS,
+  TYPING_DEBOUNCE_MS,
+  TYPING_POLL_INTERVAL_MS,
+  TYPING_THROTTLE_MS,
 } from "@/lib/messaging/constants";
 import "./ChatWindow.css";
 
@@ -59,11 +62,21 @@ export function ChatWindow({
     y: number;
   } | null>(null);
   const [sending, setSending] = useState(false);
+  /** Live "someone else is typing" flag, polled every 1.5s (see below). */
+  const [othersTyping, setOthersTyping] = useState(false);
+  /** First typer's name from the server — needed in group chats. */
+  const [typingName, setTypingName] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<number | null>(null);
   const typingRef = useRef<number | null>(null);
+  /** Throttle: while set, further typing POSTs are suppressed. */
+  const typingThrottleRef = useRef<number | null>(null);
+  /** Debounce: reset on every keystroke; fires the DELETE when it expires. */
+  const typingDebounceRef = useRef<number | null>(null);
+  /** True while the server holds an armed flag for US that we haven't cleared. */
+  const typingArmedRef = useRef(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const otherName =
@@ -112,32 +125,48 @@ export function ChatWindow({
     };
   }, [conversation.id]);
 
-  // Typing indicator refresh.
+  // Typing: poll the dedicated lightweight endpoint every 1.5s. The old
+  // approach polled GET /api/conversations/[id] — the FULL conversation
+  // fetch — at the 5s message cadence, which is why a typing start took
+  // 0–5s to appear (and burned a heavy query to do it). The poll pauses
+  // while the tab is hidden: no battery, no server load, no stale burst
+  // of catch-up requests when the user returns.
   useEffect(() => {
     let cancelled = false;
 
-    async function tick() {
+    async function checkTyping() {
       if (cancelled) return;
+      if (document.visibilityState !== "visible") return;
       try {
-        const result = await apiFetch<{ conversation: ConversationView }>(
-          `/api/conversations/${conversation.id}`
+        const result = await apiFetch<{ typing: boolean; name: string | null }>(
+          `/api/conversations/${conversation.id}/typing`
         );
-        if (!result.ok) return;
-        setConversation((prev) => ({
-          ...prev,
-          typing: result.data.conversation.typing,
-        }));
+        if (!result.ok || cancelled) return;
+        setOthersTyping(result.data.typing);
+        setTypingName(result.data.name);
+        // Keep conversation.typing in step so ChatHeader's "typing…" status
+        // shows the same truth as the bubble below the thread.
+        setConversation((prev) =>
+          prev.typing === result.data.typing
+            ? prev
+            : { ...prev, typing: result.data.typing }
+        );
       } catch {
-        // ignore
+        // silent — a dropped poll just retries next tick
       }
     }
 
-    tick();
-    typingRef.current = window.setInterval(tick, POLL_INTERVAL_MS);
+    void checkTyping();
+    typingRef.current = window.setInterval(checkTyping, TYPING_POLL_INTERVAL_MS);
 
     return () => {
       cancelled = true;
-      if (typingRef.current !== null) window.clearInterval(typingRef.current);
+      if (typingRef.current !== null) {
+        window.clearInterval(typingRef.current);
+        typingRef.current = null;
+      }
+      setOthersTyping(false);
+      setTypingName(null);
     };
   }, [conversation.id]);
 
@@ -161,6 +190,70 @@ export function ChatWindow({
     return () => observer.disconnect();
   }, [conversation.id]);
 
+  /**
+   * Typing signal from the composer. Two independent timers, both refs:
+   *
+   * - THROTTLE: the first keystroke arms the server flag immediately; after
+   *   that, further POSTs are suppressed for 1s while typing continues, and
+   *   re-armed on the next keystroke past the window. One POST per second
+   *   maximum — every keystroke would be ~8 POSTs/s of pure waste.
+   * - DEBOUNCE: reset on every keystroke; 3s of silence fires the DELETE so
+   *   the other side stops seeing "typing…" promptly instead of waiting out
+   *   the server TTL.
+   *
+   * No setInterval anywhere: typing is bursty, and both timers are
+   * one-shot, re-armed by the activity they measure.
+   */
+  const handleTyping = useCallback(() => {
+    if (typingThrottleRef.current === null) {
+      typingThrottleRef.current = window.setTimeout(() => {
+        typingThrottleRef.current = null;
+      }, TYPING_THROTTLE_MS);
+      typingArmedRef.current = true;
+      void apiFetch(`/api/conversations/${conversation.id}/typing`, {
+        method: "POST",
+        body: { typing: true },
+      });
+    }
+
+    if (typingDebounceRef.current !== null) {
+      window.clearTimeout(typingDebounceRef.current);
+    }
+    typingDebounceRef.current = window.setTimeout(() => {
+      typingDebounceRef.current = null;
+      if (!typingArmedRef.current) return;
+      typingArmedRef.current = false;
+      void apiFetch(`/api/conversations/${conversation.id}/typing`, {
+        method: "DELETE",
+      });
+    }, TYPING_DEBOUNCE_MS);
+  }, [conversation.id]);
+
+  /**
+   * Clear OUR typing flag now: on send (the message itself is the signal)
+   * and on unmount/conversation switch (don't leave a phantom "typing…"
+   * behind for the 5s TTL). No-op if we never armed or already cleared.
+   */
+  const stopTyping = useCallback(() => {
+    if (typingThrottleRef.current !== null) {
+      window.clearTimeout(typingThrottleRef.current);
+      typingThrottleRef.current = null;
+    }
+    if (typingDebounceRef.current !== null) {
+      window.clearTimeout(typingDebounceRef.current);
+      typingDebounceRef.current = null;
+    }
+    if (!typingArmedRef.current) return;
+    typingArmedRef.current = false;
+    void apiFetch(`/api/conversations/${conversation.id}/typing`, {
+      method: "DELETE",
+    });
+  }, [conversation.id]);
+
+  // Leaving the chat (switch conversation or unmount) must not leave the
+  // flag armed — stopTyping clears the timers and the server row.
+  useEffect(() => stopTyping, [conversation.id, stopTyping]);
+
   const handleSend = useCallback(
     async (payload: {
       body: string;
@@ -169,6 +262,7 @@ export function ChatWindow({
       replyToId?: string;
     }) => {
       setSending(true);
+      stopTyping();
       const optimistic: MessageView = {
         id: `optimistic-${Date.now()}`,
         conversationId: conversation.id,
@@ -221,7 +315,7 @@ export function ChatWindow({
         setSending(false);
       }
     },
-    [conversation.id, viewerId, replyTo, scrollToBottom]
+    [conversation.id, viewerId, replyTo, scrollToBottom, stopTyping]
   );
 
   const handleReply = (message: MessageView) => {
@@ -468,8 +562,10 @@ export function ChatWindow({
             })}
           </div>
         ))}
-        {conversation.typing ? (
-          <TypingIndicator label={`${otherName} is typing…`} />
+        {othersTyping ? (
+          <TypingIndicator
+            label={`${typingName ?? otherName} is typing…`}
+          />
         ) : null}
         <div ref={bottomRef} />
       </div>
@@ -482,6 +578,7 @@ export function ChatWindow({
           replyToId={replyTo?.id}
           onCancelReply={() => setReplyTo(null)}
           onSend={handleSend}
+          onType={handleTyping}
         />
       </div>
 
