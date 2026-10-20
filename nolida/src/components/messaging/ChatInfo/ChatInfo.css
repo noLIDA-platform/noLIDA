@@ -574,6 +574,148 @@
   color: var(--color-text-muted);
 }
 
+/* Quick actions --------------------------------------------------------- */
+
+.chat-info__quick {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.chat-info__quick-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 64px;
+  justify-content: center;
+  padding: var(--space-2) var(--space-1);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.chat-info__quick-item:hover {
+  background: var(--color-bg-subtle);
+}
+
+.chat-info__quick-item--danger {
+  color: var(--color-error);
+}
+
+/* Non-actions (calls): a span, never a disabled button — a tooltip on a
+   disabled button never fires, so the wrapper carries the title. */
+.chat-info__quick-item--soon {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* Shared-content tabs ---------------------------------------------------- */
+
+.chat-info__tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.chat-info__tab {
+  padding: var(--space-2) var(--space-3);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.chat-info__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* Per-chat preference rows ------------------------------------------------ */
+
+.chat-info__section--prefs {
+  padding: 0;
+}
+
+.chat-info__pref {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.chat-info__pref + .chat-info__pref {
+  border-top: 1px solid var(--color-border);
+}
+
+.chat-info__pref-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.chat-info__pref-label {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.chat-info__pref-hint {
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--color-text-muted);
+}
+
+.chat-info__switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-subtle);
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.chat-info__switch--on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.chat-info__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgb(0 0 0 / 0.2));
+  transition: transform 160ms ease;
+}
+
+.chat-info__switch--on .chat-info__knob {
+  transform: translateX(20px);
+}
+
 @media (max-width: 520px) {
   .chat-info__scroll {
     padding: var(--space-3) var(--space-2) var(--space-6);

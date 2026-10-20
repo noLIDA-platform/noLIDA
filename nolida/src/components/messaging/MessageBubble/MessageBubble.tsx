@@ -44,6 +44,22 @@ function formatBytes(size: number): string {
 }
 
 /**
+ * GROUP sender-name palette. The colour is a pure function of the sender id,
+ * so the same person is always the same colour in every group run — no state,
+ * no assignment pass, and two members cannot collide by coordination. The
+ * palette lives in CSS (`--msg-sender-1..6`); this only picks the index.
+ */
+const SENDER_COLOR_COUNT = 6;
+
+function senderColorIndex(senderId: string): number {
+  let hash = 0;
+  for (let i = 0; i < senderId.length; i += 1) {
+    hash = (hash * 31 + senderId.charCodeAt(i)) >>> 0;
+  }
+  return (hash % SENDER_COLOR_COUNT) + 1;
+}
+
+/**
  * One message in the thread.
  *
  * The action menu is the single surface for reply/react/forward/edit/delete/
@@ -81,7 +97,14 @@ export function MessageBubble({
   return (
     <article className={classes}>
       {!isMine && showSenderName && !deleted ? (
-        <span className="msg-bubble__sender">
+        <span
+          className="msg-bubble__sender"
+          style={{
+            // Deterministic per-sender colour (see senderColorIndex). Falls
+            // back to the token when the custom property is unavailable.
+            "--msg-sender-color": `var(--msg-sender-${senderColorIndex(message.sender.id)})`,
+          } as React.CSSProperties}
+        >
           {message.sender.displayName ?? message.sender.username ?? "Someone"}
         </span>
       ) : null}

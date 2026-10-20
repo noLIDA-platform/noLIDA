@@ -74,7 +74,21 @@
 .msg-bubble__sender {
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
-  color: var(--color-primary);
+  /* Deterministic per-sender palette for group runs; the inline style picks
+     one of these, falling back to the brand token. */
+  color: var(--msg-sender-color, var(--color-primary));
+}
+
+/* Phase 10 group sender palette. Fixed hues, not tokens: they identify
+   PEOPLE, not state — each must stay visually distinct at text size in both
+   themes. Order matches senderColorIndex's 1..6. */
+.msg-bubble {
+  --msg-sender-1: #6366f1; /* indigo (brand) */
+  --msg-sender-2: #ec4899; /* pink */
+  --msg-sender-3: #f59e0b; /* amber */
+  --msg-sender-4: #10b981; /* emerald */
+  --msg-sender-5: #3b82f6; /* blue */
+  --msg-sender-6: #8b5cf6; /* violet */
 }
 
 .msg-bubble__forwarded {

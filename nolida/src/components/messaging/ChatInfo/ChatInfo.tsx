@@ -8,18 +8,25 @@ import { Button } from "@/components/ui/Button/Button";
 import { Icon } from "@/components/ui/Icon/Icon";
 import {
   ArrowLeftIcon,
+  BanIcon,
+  BellOffIcon,
   CheckIcon,
   CopyIcon,
   EditIcon,
   FlagIcon,
   LinkIcon,
   LogoutIcon,
+  MessageIcon,
   MoreVerticalIcon,
+  PhoneIcon,
   SearchIcon,
+  Trash2Icon,
   UserPlusIcon,
   UsersIcon,
+  VideoIcon,
   XIcon,
 } from "@/components/ui/Icons";
+import { EmptyState } from "@/components/ui/EmptyState/EmptyState";
 import { Input } from "@/components/ui/Input/Input";
 import { Textarea } from "@/components/ui/Textarea/Textarea";
 import { apiFetch } from "@/lib/client/api";
@@ -42,6 +49,8 @@ export interface ChatInfoProps {
   members: GroupMemberView[];
   /** The viewer — excluded from the add-members picker. */
   viewerId: string;
+  /** The viewer's global read-receipt pref (drives the 1:1 settings row). */
+  readReceiptsEnabled?: boolean;
   className?: string;
 }
 
@@ -118,6 +127,7 @@ export function ChatInfo({
   conversation: initialConversation,
   members,
   viewerId,
+  readReceiptsEnabled,
   className,
 }: ChatInfoProps): React.JSX.Element {
   const router = useRouter();
@@ -146,6 +156,11 @@ export function ChatInfo({
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const addDebounceRef = useRef<number | null>(null);
+  const [sharedTab, setSharedTab] = useState<"media" | "links" | "docs">("media");
+  const [readReceipts, setReadReceipts] = useState(
+    readReceiptsEnabled ?? true
+  );
+  const [note, setNote] = useState<string | null>(null);
 
   const isGroup = conversation.type === "GROUP";
   const isAdmin = isGroup && conversation.viewerRole === "ADMIN";
@@ -428,6 +443,99 @@ export function ChatInfo({
     closeAdd();
   };
 
+  /* Per-chat settings (mute / pin / archive) — one PATCH, the server owns
+     the row. Only member settings change; the conversation row itself is
+     untouched, so the response is re-fetched state, not a guess. */
+  const updateSettings = async (fields: {
+    pinned?: boolean;
+    muted?: boolean;
+    archived?: boolean;
+  }): Promise<void> => {
+    setActionError(null);
+    const result = await apiFetch<{ conversation: ConversationView }>(
+      `/api/conversations/${conversation.id}`,
+      { method: "PATCH", body: fields }
+    );
+    if (!result.ok) {
+      setActionError(result.error.message);
+      return;
+    }
+    setConversation(result.data.conversation);
+    router.refresh();
+  };
+
+  /* Read receipts are a GLOBAL profile pref, not a per-chat one — the same
+     switch on /settings/messaging drives both. Toggling here PATCHes the
+     profile endpoint so there is exactly one source of truth. */
+  const toggleReadReceipts = async (): Promise<void> => {
+    const next = !readReceipts;
+    setReadReceipts(next); // optimistic; reverted below on failure
+    setActionError(null);
+    const result = await apiFetch<{ prefs: { readReceiptsEnabled: boolean } }>(
+      "/api/profiles/me/messaging-prefs",
+      { method: "PATCH", body: { readReceipts: next } }
+    );
+    if (!result.ok) {
+      setReadReceipts(!next);
+      setActionError(result.error.message);
+      return;
+    }
+    setReadReceipts(result.data.prefs.readReceiptsEnabled);
+  };
+
+  /* Block uses the existing /api/users/[id]/block. There is no delete-chat
+     endpoint yet, so that button only confirms and says so — it must never
+     pretend a conversation was removed. */
+  const blockContact = async (): Promise<void> => {
+    setActionError(null);
+    const result = await apiFetch<{ blocked: true }>(
+      `/api/users/${conversation.otherUser.id}/block`,
+      { method: "POST" }
+    );
+    if (!result.ok) {
+      setActionError(result.error.message);
+      return;
+    }
+    setConversation({ ...conversation, blocked: true });
+    setNote("Contact blocked. They can no longer message you.");
+  };
+
+  const openBlockConfirm = (): void => {
+    setConfirm({
+      title: "Block contact?",
+      body: `${title} will no longer be able to message you. Messaging resumes if you unblock them from settings.`,
+      confirmLabel: "Block",
+      run: blockContact,
+    });
+  };
+
+  const openDeleteChatConfirm = (): void => {
+    setConfirm({
+      title: "Delete chat?",
+      body: "Deleting a chat from your account is coming soon. For now you can archive it instead.",
+      confirmLabel: "Got it",
+      run: async () => {
+        setNote("Chat deletion is coming soon.");
+      },
+    });
+  };
+
+  /* Member row → "Message": find or create the direct conversation through
+     the same endpoint the DM flow uses, then full-load the thread so it
+     renders server-side with the current cookie. */
+  const messageMember = async (targetId: string): Promise<void> => {
+    setActionError(null);
+    const result = await apiFetch<{ conversation: ConversationView }>(
+      "/api/conversations",
+      { method: "POST", body: { otherUserId: targetId } }
+    );
+    if (!result.ok) {
+      setActionError(result.error.message);
+      return;
+    }
+    window.location.href = `/messages/${result.data.conversation.id}`;
+  };
+
   // Selection stays on screen even as the underlying search list changes.
   const selectedCandidates = addCandidates.filter((candidate) =>
     addSelectedIds.includes(candidate.id)
@@ -473,6 +581,80 @@ export function ChatInfo({
               ? `${conversation.memberCount} member${conversation.memberCount === 1 ? "" : "s"}`
               : (handle ?? "")}
           </p>
+        </section>
+
+        {/* Quick actions — four across, icon over label. Calls are visible
+            but disabled (Phase 10.5), matching the thread header. */}
+        <section className="chat-info__quick" aria-label="Quick actions">
+          {isGroup ? (
+            <>
+              {isAdmin ? (
+                <button
+                  type="button"
+                  className="chat-info__quick-item"
+                  onClick={() => setAddOpen(true)}
+                >
+                  <Icon as={UserPlusIcon} size={18} />
+                  <span>Add members</span>
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="chat-info__quick-item"
+                onClick={() => void updateSettings({ muted: !conversation.muted })}
+              >
+                <Icon as={BellOffIcon} size={18} />
+                <span>{conversation.muted ? "Unmute" : "Mute"}</span>
+              </button>
+              <Link
+                href={`/messages/${conversation.id}`}
+                className="chat-info__quick-item"
+              >
+                <Icon as={SearchIcon} size={18} />
+                <span>Search</span>
+              </Link>
+              <button
+                type="button"
+                className="chat-info__quick-item chat-info__quick-item--danger"
+                onClick={openLeaveConfirm}
+              >
+                <Icon as={LogoutIcon} size={18} />
+                <span>Leave group</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href={`/messages/${conversation.id}`}
+                className="chat-info__quick-item"
+              >
+                <Icon as={MessageIcon} size={18} />
+                <span>Message</span>
+              </Link>
+              <span
+                className="chat-info__quick-item chat-info__quick-item--soon"
+                title="Calls coming soon"
+              >
+                <Icon as={PhoneIcon} size={18} />
+                <span>Call</span>
+              </span>
+              <span
+                className="chat-info__quick-item chat-info__quick-item--soon"
+                title="Calls coming soon"
+              >
+                <Icon as={VideoIcon} size={18} />
+                <span>Video</span>
+              </span>
+              <button
+                type="button"
+                className="chat-info__quick-item"
+                onClick={() => void updateSettings({ muted: !conversation.muted })}
+              >
+                <Icon as={BellOffIcon} size={18} />
+                <span>{conversation.muted ? "Unmute" : "Mute"}</span>
+              </button>
+            </>
+          )}
         </section>
 
         {editing ? (
@@ -559,6 +741,138 @@ export function ChatInfo({
           </section>
         ) : null}
 
+        {/* Shared media tabs — placeholders until shared-item indexing lands.
+            The tab strip is real state so the empty state can name what it is
+            waiting for; nothing here pretends to have content. */}
+        <section className="chat-info__section">
+          <div className="chat-info__tabs" role="tablist" aria-label="Shared content">
+            {([["media", "Media"], ["links", "Links"], ["docs", "Docs"]] as const).map(
+              ([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={sharedTab === id}
+                  className={[
+                    "chat-info__tab",
+                    sharedTab === id ? "chat-info__tab--active" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onClick={() => setSharedTab(id)}
+                >
+                  {label}
+                </button>
+              )
+            )}
+          </div>
+          <EmptyState title="Nothing shared yet." />
+        </section>
+
+        {/* Per-chat settings. Mute/pin/archive are per-side rows owned by this
+            member; read receipts are the GLOBAL profile pref (1:1 only) — the
+            same switch /settings/messaging drives. */}
+        <section className="chat-info__section chat-info__section--prefs">
+          <div className="chat-info__pref">
+            <span className="chat-info__pref-text">
+              <span className="chat-info__pref-label">Mute notifications</span>
+              <span className="chat-info__pref-hint">
+                {conversation.muted ? "Muted" : "Notifications on"}
+              </span>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={conversation.muted}
+              aria-label="Mute notifications"
+              className={[
+                "chat-info__switch",
+                conversation.muted ? "chat-info__switch--on" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => void updateSettings({ muted: !conversation.muted })}
+            >
+              <span className="chat-info__knob" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="chat-info__pref">
+            <span className="chat-info__pref-text">
+              <span className="chat-info__pref-label">Pin chat</span>
+              <span className="chat-info__pref-hint">
+                {conversation.pinned ? "Pinned to top" : "Off"}
+              </span>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={conversation.pinned}
+              aria-label="Pin chat"
+              className={[
+                "chat-info__switch",
+                conversation.pinned ? "chat-info__switch--on" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() => void updateSettings({ pinned: !conversation.pinned })}
+            >
+              <span className="chat-info__knob" aria-hidden="true" />
+            </button>
+          </div>
+          <div className="chat-info__pref">
+            <span className="chat-info__pref-text">
+              <span className="chat-info__pref-label">Archive chat</span>
+              <span className="chat-info__pref-hint">
+                {conversation.archived
+                  ? "Hidden from your chat list"
+                  : "Visible in your chat list"}
+              </span>
+            </span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={conversation.archived}
+              aria-label="Archive chat"
+              className={[
+                "chat-info__switch",
+                conversation.archived ? "chat-info__switch--on" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onClick={() =>
+                void updateSettings({ archived: !conversation.archived })
+              }
+            >
+              <span className="chat-info__knob" aria-hidden="true" />
+            </button>
+          </div>
+          {!isGroup ? (
+            <div className="chat-info__pref">
+              <span className="chat-info__pref-text">
+                <span className="chat-info__pref-label">Read receipts</span>
+                <span className="chat-info__pref-hint">
+                  Applies to all your chats. Manage it in Settings → Messaging.
+                </span>
+              </span>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={readReceipts}
+                aria-label="Read receipts"
+                className={[
+                  "chat-info__switch",
+                  readReceipts ? "chat-info__switch--on" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() => void toggleReadReceipts()}
+              >
+                <span className="chat-info__knob" aria-hidden="true" />
+              </button>
+            </div>
+          ) : null}
+        </section>
+
         {isGroup ? (
           <section className="chat-info__section chat-info__section--members">
             <div className="chat-info__section-head">
@@ -606,7 +920,7 @@ export function ChatInfo({
                     {member.role === "ADMIN" ? (
                       <span className="chat-info__admin-badge">Admin</span>
                     ) : null}
-                    {canManage ? (
+                    {!member.isSelf ? (
                       <>
                         <div className="chat-info__row-menu-wrap">
                           <button
@@ -622,7 +936,17 @@ export function ChatInfo({
                           </button>
                           {menuOpen ? (
                             <div className="chat-info__row-menu" role="menu">
-                              {member.role === "MEMBER" ? (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => {
+                                  setMenuOpenFor(null);
+                                  void messageMember(member.user.id);
+                                }}
+                              >
+                                Message
+                              </button>
+                              {canManage && member.role === "MEMBER" ? (
                                 <button
                                   type="button"
                                   role="menuitem"
@@ -634,17 +958,19 @@ export function ChatInfo({
                                   Make admin
                                 </button>
                               ) : null}
-                              <button
-                                type="button"
-                                role="menuitem"
-                                className="chat-info__row-menu-danger"
-                                onClick={() => {
-                                  setMenuOpenFor(null);
-                                  openRemoveConfirm(member);
-                                }}
-                              >
-                                Remove member
-                              </button>
+                              {canManage ? (
+                                <button
+                                  type="button"
+                                  role="menuitem"
+                                  className="chat-info__row-menu-danger"
+                                  onClick={() => {
+                                    setMenuOpenFor(null);
+                                    openRemoveConfirm(member);
+                                  }}
+                                >
+                                  Remove member
+                                </button>
+                              ) : null}
                             </div>
                           ) : null}
                         </div>
@@ -668,6 +994,11 @@ export function ChatInfo({
         {reported ? (
           <p className="chat-info__note" role="status">
             Report received. Our team will review it.
+          </p>
+        ) : null}
+        {note ? (
+          <p className="chat-info__note" role="status">
+            {note}
           </p>
         ) : null}
         {actionError ? (
@@ -696,15 +1027,46 @@ export function ChatInfo({
               <Icon as={LogoutIcon} size={18} />
               <span>Leave group</span>
             </button>
+          ) : (
+            <>
+              {!conversation.blocked ? (
+                <button
+                  type="button"
+                  className="chat-info__action chat-info__action--danger"
+                  onClick={openBlockConfirm}
+                >
+                  <Icon as={BanIcon} size={18} />
+                  <span>Block contact</span>
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="chat-info__action chat-info__action--danger"
+                onClick={() => setReportOpen(true)}
+              >
+                <Icon as={FlagIcon} size={18} />
+                <span>Report contact</span>
+              </button>
+              <button
+                type="button"
+                className="chat-info__action chat-info__action--danger"
+                onClick={openDeleteChatConfirm}
+              >
+                <Icon as={Trash2Icon} size={18} />
+                <span>Delete chat</span>
+              </button>
+            </>
+          )}
+          {isGroup ? (
+            <button
+              type="button"
+              className="chat-info__action chat-info__action--danger"
+              onClick={() => setReportOpen(true)}
+            >
+              <Icon as={FlagIcon} size={18} />
+              <span>Report conversation</span>
+            </button>
           ) : null}
-          <button
-            type="button"
-            className="chat-info__action chat-info__action--danger"
-            onClick={() => setReportOpen(true)}
-          >
-            <Icon as={FlagIcon} size={18} />
-            <span>Report conversation</span>
-          </button>
         </section>
       </div>
 

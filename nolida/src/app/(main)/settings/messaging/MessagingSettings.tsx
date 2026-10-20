@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiFetch } from "@/lib/client/api";
 import "./MessagingSettings.css";
 
@@ -150,6 +151,68 @@ export function MessagingSettings({
           ""
         )}
       </p>
+
+      {/* Media and storage rows are PLACEHOLDERS — no backend yet, so they
+          render as static "Coming soon" rows rather than controls that would
+          silently do nothing. The blocked row points at the real settings
+          screen. */}
+      <section className="ms__card">
+        <div className="ms__row">
+          <span className="ms__text">
+            <span className="ms__label">Auto-download photos</span>
+            <span className="ms__hint">When to download photos automatically.</span>
+          </span>
+          <span className="ms__soon">Coming soon</span>
+        </div>
+        <div className="ms__row">
+          <span className="ms__text">
+            <span className="ms__label">Auto-download videos</span>
+            <span className="ms__hint">When to download videos automatically.</span>
+          </span>
+          <span className="ms__soon">Coming soon</span>
+        </div>
+        <div className="ms__row">
+          <span className="ms__text">
+            <span className="ms__label">Save to camera roll</span>
+            <span className="ms__hint">
+              Save downloaded media to your device gallery.
+            </span>
+          </span>
+          <span className="ms__soon">Coming soon</span>
+        </div>
+      </section>
+
+      <section className="ms__card">
+        <div className="ms__row">
+          <span className="ms__text">
+            <span className="ms__label">Storage usage</span>
+            <span className="ms__hint">
+              How much space chats and media use on this device.
+            </span>
+          </span>
+          <span className="ms__soon">Coming soon</span>
+        </div>
+        <div className="ms__row">
+          <span className="ms__text">
+            <span className="ms__label">Blocked contacts</span>
+            <span className="ms__hint">
+              Manage who can no longer message you.
+            </span>
+          </span>
+          <Link href="/settings/privacy-security" className="ms__link">
+            Open
+          </Link>
+        </div>
+        <div className="ms__row">
+          <span className="ms__text">
+            <span className="ms__label">Clear all chats</span>
+            <span className="ms__hint">
+              Remove every conversation from this account.
+            </span>
+          </span>
+          <span className="ms__soon">Coming soon</span>
+        </div>
+      </section>
     </div>
   );
 }

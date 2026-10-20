@@ -42,11 +42,18 @@ export default async function ConversationInfoPage({
         })
       : [];
 
+  // Read receipts are a global profile pref; the info page shows the same
+  // switch for 1:1 chats so it can be flipped without leaving the chat.
+  const prefs = await messagingService
+    .getGlobalMessagingPrefs(session.user.id)
+    .catch(() => null);
+
   return (
     <ChatInfo
       conversation={conversation}
       members={members}
       viewerId={session.user.id}
+      readReceiptsEnabled={prefs?.readReceiptsEnabled}
     />
   );
 }

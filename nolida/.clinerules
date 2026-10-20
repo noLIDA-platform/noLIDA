@@ -781,6 +781,8 @@
 - Global prefs: read receipts, typing indicator.
 - Respect user preferences: if read_receipts_enabled is false, do
   not write read_at.
+- If typing_indicator_enabled is false, do not write to typing_status
+  for that user.
 - Voice notes, voice-to-text, and voice/video calls are REMOVED for
   now (deferred).
 - UI reference: WhatsApp (primary), iMessage (secondary). Do NOT
