@@ -229,6 +229,54 @@ Notes:
 - Every API returns `{ ok: true, data }` or `{ ok: false, error }`.
 - Every API endpoint that performs a financial mutation requires an `Idempotency-Key` header.
 
+- Every API endpoint that performs a financial mutation requires an `Idempotency-Key` header.
+
+---
+
+## 8. Bookings (Phase 11)
+
+### Service — `src/lib/server/services/booking.service.ts`
+
+| Function | Purpose |
+|---|---|
+| `createFromResponse({ userId, responseId, scheduledAt?, notes? })` | Customer books an accepted request response → PENDING booking. Price from `response.price_estimate` (major) converted to minor units. One booking per response. |
+| `confirmBooking({ userId, bookingId })` | Business confirms PENDING → CONFIRMED. |
+| `completeBooking({ userId, bookingId })` | Business completes CONFIRMED → COMPLETED. |
+| `cancelBooking({ userId, bookingId })` | Customer or business owner cancels PENDING/CONFIRMED → CANCELLED. |
+| `listBookingsForCustomer({ userId, limit?, cursor? })` | Customer's bookings, cursor-paginated, newest first. |
+| `listBookingsForBusiness({ userId, limit?, cursor? })` | Business's bookings, cursor-paginated, newest first. |
+| `getBookingForViewer(userId, bookingId)` | One booking if the viewer is the customer or the business owner, else null. |
+
+### Validator — `src/lib/server/validators/booking.ts`
+
+| Schema | Fields |
+|---|---|
+| `bookingCreateSchema` | `responseId` (uuid), `scheduledAt` (datetime, optional), `notes` (string, max 1000, optional) |
+
+### API routes (all `runtime = "nodejs"`)
+
+| Route | Methods | Purpose |
+|---|---|---|
+| `/api/bookings` | GET, POST | GET lists bookings (`?role=customer\|business`, `?cursor`, `?limit`); POST creates a booking from an accepted response |
+| `/api/bookings/[id]` | GET | One booking, viewer-authorized |
+| `/api/bookings/[id]/confirm` | POST | Business confirms a booking |
+| `/api/bookings/[id]/complete` | POST | Business completes a booking |
+| `/api/bookings/[id]/cancel` | POST | Customer or business owner cancels a booking |
+
+### Pages
+
+| Page | Purpose |
+|---|---|
+| `/bookings` | Customer's bookings list (replaced placeholder) |
+| `/my-business/bookings` | Business's bookings list, dashboard tab (replaced placeholder) |
+
+### Nav
+
+`MY_BUSINESS_TABS` bookings entry no longer has `placeholder: true`.
+
+---
+
+## 9. Golden rules
 ---
 
 ## 9. Golden rules
